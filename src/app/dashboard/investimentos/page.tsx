@@ -1,0 +1,144 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { api } from '@/lib/api';
+import { useMonthStore } from '@/hooks/use-month';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { FormCurrencyInput } from '@/components/ui/currency-input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { formatCurrency } from '@/lib/utils';
+import type { InvestmentEntry } from '@/types';
+import { Plus, Trash2 } from 'lucide-react';
+
+const goalSchema = z.object({ targetAmount: z.coerce.number().nonnegative() });
+const entrySchema = z.object({
+  name: z.string().min(1),
+  amount: z.coerce.number().positive(),
+  notes: z.string().optional(),
+});
+
+export default function InvestimentosPage() {
+  const { selectedMonthId } = useMonthStore();
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: goal } = useQuery({
+    queryKey: ['investment-goal', selectedMonthId],
+    queryFn: () => api.get<{ targetAmount: string | number } | null>(`/months/${selectedMonthId}/investments/goal`),
+    enabled: !!selectedMonthId,
+  });
+
+  const { data: entries } = useQuery({
+    queryKey: ['investments', selectedMonthId],
+    queryFn: () => api.get<InvestmentEntry[]>(`/months/${selectedMonthId}/investments`),
+    enabled: !!selectedMonthId,
+  });
+
+  const goalForm = useForm({ resolver: zodResolver(goalSchema) });
+  const entryForm = useForm({ resolver: zodResolver(entrySchema) });
+
+  useEffect(() => {
+    if (goal) {
+      goalForm.reset({ targetAmount: Number(goal.targetAmount) });
+    }
+  }, [goal, goalForm]);
+
+  const totalInvested = entries?.reduce((sum, e) => sum + Number(e.amount), 0) ?? 0;
+  const target = goal ? Number(goal.targetAmount) : 0;
+  const progress = target > 0 ? Math.min(100, (totalInvested / target) * 100) : 0;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Investimentos</h1>
+        <p className="text-slate-500">Meta mensal e aportes realizados</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Meta do mês</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form
+            onSubmit={goalForm.handleSubmit(async (data) => {
+              await api.put(`/months/${selectedMonthId}/investments/goal`, data);
+              await queryClient.invalidateQueries({ queryKey: ['investment-goal', selectedMonthId] });
+              await queryClient.invalidateQueries({ queryKey: ['months'] });
+            })}
+            className="flex gap-2"
+          >
+            <FormCurrencyInput
+              control={goalForm.control}
+              name="targetAmount"
+              placeholder="Quanto quer guardar este mês?"
+            />
+            <Button type="submit">Salvar meta</Button>
+          </form>
+          <div>
+            <div className="mb-2 flex justify-between text-sm">
+              <span>{formatCurrency(totalInvested)} investidos</span>
+              <span className="text-slate-500">Meta: {formatCurrency(target)}</span>
+            </div>
+            <Progress value={progress} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Aportes do mês</h2>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button><Plus className="h-4 w-4" /> Novo aporte</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Novo investimento</DialogTitle></DialogHeader>
+            <form
+              onSubmit={entryForm.handleSubmit(async (data) => {
+                await api.post(`/months/${selectedMonthId}/investments`, data);
+                await queryClient.invalidateQueries();
+                entryForm.reset();
+                setOpen(false);
+              })}
+              className="space-y-4"
+            >
+              <div className="space-y-2"><Label>Nome</Label><Input placeholder="Ex: Tesouro Direto" {...entryForm.register('name')} /></div>
+              <div className="space-y-2"><Label>Valor</Label><FormCurrencyInput control={entryForm.control} name="amount" placeholder="0,00" /></div>
+              <div className="space-y-2"><Label>Notas (opcional)</Label><Input {...entryForm.register('notes')} /></div>
+              <Button type="submit" className="w-full">Salvar</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid gap-3">
+        {entries?.map((entry) => (
+          <Card key={entry.id}>
+            <CardContent className="flex justify-between p-4">
+              <div>
+                <p className="font-medium">{entry.name}</p>
+                {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-emerald-600">{formatCurrency(Number(entry.amount))}</span>
+                <Button variant="ghost" size="icon" onClick={async () => {
+                  await api.delete(`/months/${selectedMonthId}/investments/${entry.id}`);
+                  await queryClient.invalidateQueries();
+                }}>
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
