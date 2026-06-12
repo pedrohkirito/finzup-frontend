@@ -17,7 +17,14 @@ export default function RegisterPage() {
         onSubmit={async (data) => {
           const email = String(data.email);
           const password = String(data.password);
-          await api.post('/auth/register', { email, password });
+          const result = await api.post<{ emailVerified?: boolean }>('/auth/register', {
+            email,
+            password,
+          });
+          if (result.emailVerified) {
+            router.push('/dashboard');
+            return;
+          }
           router.push('/verify-email?email=' + encodeURIComponent(email));
         }}
         fields={[
