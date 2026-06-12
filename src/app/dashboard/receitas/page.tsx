@@ -23,8 +23,8 @@ import { Plus, TrendingUp, RefreshCw } from 'lucide-react';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatório'),
-  amount: z.coerce.number().positive('Valor deve ser positivo'),
-  carryForward: z.boolean().default(false),
+  amount: z.number().positive('Valor deve ser positivo'),
+  carryForward: z.boolean(),
 });
 
 type IncomeFormValues = z.infer<typeof schema>;
