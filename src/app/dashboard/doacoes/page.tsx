@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/api';
@@ -22,12 +22,14 @@ import { Plus } from 'lucide-react';
 
 const entrySchema = z.object({
   name: z.string().min(1),
-  amount: z.coerce.number().positive(),
+  amount: z.number().positive(),
   paymentMethodId: z.string().optional(),
   budgetTemplateId: z.string().uuid().optional().nullable(),
   notes: z.string().optional(),
-  carryForward: z.boolean().default(false),
+  carryForward: z.boolean(),
 });
+
+type EntryFormValues = z.infer<typeof entrySchema>;
 
 function BudgetSelect({
   budgets,
@@ -61,10 +63,10 @@ function DonationForm({
   onSubmit,
   submitLabel,
 }: {
-  form: ReturnType<typeof useForm<z.infer<typeof entrySchema>>>;
+  form: UseFormReturn<EntryFormValues>;
   paymentMethods?: PaymentMethod[];
   budgets?: BudgetTemplate[];
-  onSubmit: (data: z.infer<typeof entrySchema>) => Promise<void>;
+  onSubmit: (data: EntryFormValues) => Promise<void>;
   submitLabel: string;
 }) {
   return (
@@ -139,12 +141,12 @@ export default function DoacoesPage() {
     queryFn: () => api.get<BudgetTemplate[]>('/budget-templates'),
   });
 
-  const entryForm = useForm({
+  const entryForm = useForm<EntryFormValues>({
     resolver: zodResolver(entrySchema),
     defaultValues: { name: '', amount: 0, carryForward: false, budgetTemplateId: null },
   });
 
-  const editForm = useForm({
+  const editForm = useForm<EntryFormValues>({
     resolver: zodResolver(entrySchema),
     defaultValues: { name: '', amount: 0, carryForward: false, budgetTemplateId: null },
   });
