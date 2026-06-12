@@ -6,7 +6,8 @@ import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/api';
-import { useMonthStore } from '@/hooks/use-month';
+import { useMonthStore, useMonths } from '@/hooks/use-month';
+import { useReorder } from '@/hooks/use-reorder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormCurrencyInput } from '@/components/ui/currency-input';
@@ -16,9 +17,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ItemActions } from '@/components/despesas/item-actions';
+import { SortableList } from '@/components/despesas/sortable-list';
 import { formatCurrency } from '@/lib/utils';
 import type { DonationEntry, PaymentMethod, BudgetTemplate } from '@/types';
-import { Plus } from 'lucide-react';
+import { Heart, Plus, RefreshCw } from 'lucide-react';
 
 const entrySchema = z.object({
   name: z.string().min(1),
@@ -121,9 +123,13 @@ function DonationForm({
 
 export default function DoacoesPage() {
   const { selectedMonthId } = useMonthStore();
+  const { data: months } = useMonths();
+  const selectedMonth = months?.find((m) => m.id === selectedMonthId);
+  const isMonthOpen = selectedMonth?.status === 'open';
   const [open, setOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<DonationEntry | null>(null);
   const queryClient = useQueryClient();
+  const reorder = useReorder();
 
   const { data: entries } = useQuery({
     queryKey: ['donations', selectedMonthId],
@@ -168,23 +174,34 @@ export default function DoacoesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Doações</h1>
-        <p className="text-slate-500">Registre suas contribuições e doações do mês</p>
+        <h1 className="text-xl font-bold sm:text-2xl">Doações</h1>
+        <p className="text-sm text-slate-500">Registre suas contribuições e doações do mês</p>
       </div>
 
-      <Card>
-        <CardContent className="flex items-center justify-between p-4">
-          <span className="text-sm text-slate-500">Total doado este mês</span>
-          <span className="text-xl font-bold text-rose-600">{formatCurrency(totalDonated)}</span>
+      <Card className="border-sky-100 bg-sky-50 dark:border-sky-900/40 dark:bg-sky-950/30">
+        <CardContent className="flex items-center gap-4 p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/60 dark:text-sky-400">
+            <Heart className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-sky-600 dark:text-sky-400">
+              Total doado este mês
+            </p>
+            <p className="text-2xl font-bold text-sky-700 dark:text-sky-300">
+              {formatCurrency(totalDonated)}
+            </p>
+          </div>
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">Doações do mês</h2>
         <Dialog open={open} onOpenChange={setOpen}>
+          {isMonthOpen && (
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4" /> Nova doação</Button>
+            <Button className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Nova doação</Button>
           </DialogTrigger>
+          )}
           <DialogContent>
             <DialogHeader><DialogTitle>Nova doação</DialogTitle></DialogHeader>
             <DonationForm
@@ -210,33 +227,58 @@ export default function DoacoesPage() {
         {entries?.length === 0 && (
           <p className="text-center text-sm text-slate-500">Nenhuma doação registrada este mês.</p>
         )}
-        {entries?.map((entry) => (
-          <Card key={entry.id}>
-            <CardContent className="flex justify-between p-4">
-              <div>
-                <p className="font-medium">{entry.name}</p>
-                {entry.carryForward && <p className="text-xs text-rose-600">Repete todo mês</p>}
-                {entry.paymentMethod && (
-                  <p className="text-xs text-slate-500">{entry.paymentMethod.name}</p>
-                )}
-                {entry.budgetTemplate && (
-                  <p className="text-xs text-slate-500">Orçamento: {entry.budgetTemplate.name}</p>
-                )}
-                {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-rose-600">{formatCurrency(Number(entry.amount))}</span>
-                <ItemActions
-                  onEdit={() => openEdit(entry)}
-                  onDelete={async () => {
-                    await api.delete(`/months/${selectedMonthId}/donations/${entry.id}`);
-                    await queryClient.invalidateQueries();
-                  }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {entries && entries.length > 0 && (
+          <SortableList
+            items={entries}
+            sortable={!!isMonthOpen}
+            onReorder={(items) =>
+              reorder(['donations', selectedMonthId!], `/months/${selectedMonthId}/donations/reorder`, items)
+            }
+          >
+            {(entry, dragHandle) => (
+              <Card
+                key={entry.id}
+                className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800"
+              >
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    {dragHandle}
+                    <div className="h-8 w-1 shrink-0 rounded-full bg-sky-500" />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-slate-900 dark:text-white">{entry.name}</p>
+                      {entry.carryForward && (
+                        <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
+                          <RefreshCw className="h-3 w-3" />
+                          Repete todo mês
+                        </div>
+                      )}
+                      {entry.paymentMethod && (
+                        <p className="text-xs text-slate-500">{entry.paymentMethod.name}</p>
+                      )}
+                      {entry.budgetTemplate && (
+                        <p className="text-xs text-slate-500">Orçamento: {entry.budgetTemplate.name}</p>
+                      )}
+                      {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="font-semibold text-sky-600 dark:text-sky-400">
+                      {formatCurrency(Number(entry.amount))}
+                    </span>
+                    <ItemActions
+                      readOnly={!isMonthOpen}
+                      onEdit={() => openEdit(entry)}
+                      onDelete={async () => {
+                        await api.delete(`/months/${selectedMonthId}/donations/${entry.id}`);
+                        await queryClient.invalidateQueries();
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </SortableList>
+        )}
       </div>
 
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>

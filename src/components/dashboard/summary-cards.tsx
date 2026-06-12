@@ -28,6 +28,8 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
 
   const items = summary.items ?? { incomes: [], expenses: [], donations: [], investments: [] };
   const creditCardItems = summary.creditCardBill.items ?? [];
+  const hasBudgets = (summary.budgets?.length ?? 0) > 0;
+  const investmentProgress = Math.min(summary.investment.progress, 100);
 
   const cards = [
     {
@@ -35,8 +37,8 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       title: 'Receitas',
       value: summary.totalIncome,
       icon: TrendingUp,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50 dark:bg-emerald-950',
+      accent: 'text-emerald-600',
+      bg: 'bg-emerald-50 dark:bg-emerald-950/60',
       itemCount: items.incomes.length,
     },
     {
@@ -44,8 +46,8 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       title: 'Despesas',
       value: summary.totalExpenses,
       icon: TrendingDown,
-      color: 'text-red-500',
-      bg: 'bg-red-50 dark:bg-red-950',
+      accent: 'text-orange-600',
+      bg: 'bg-orange-50 dark:bg-orange-950/60',
       itemCount: items.expenses.length,
     },
     {
@@ -53,8 +55,8 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       title: 'Doações',
       value: summary.totalDonations,
       icon: Heart,
-      color: 'text-rose-600',
-      bg: 'bg-rose-50 dark:bg-rose-950',
+      accent: 'text-sky-600',
+      bg: 'bg-sky-50 dark:bg-sky-950/60',
       itemCount: items.donations.length,
     },
     {
@@ -62,8 +64,8 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       title: 'Saldo',
       value: summary.balance,
       icon: Wallet,
-      color: summary.balance >= 0 ? 'text-emerald-600' : 'text-red-500',
-      bg: 'bg-slate-50 dark:bg-slate-900',
+      accent: summary.balance >= 0 ? 'text-emerald-600' : 'text-red-500',
+      bg: summary.balance >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/60' : 'bg-red-50 dark:bg-red-950/60',
       itemCount: null,
     },
     {
@@ -71,8 +73,8 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       title: 'Fatura Cartão',
       value: summary.creditCardBill.total,
       icon: CreditCard,
-      color: 'text-violet-600',
-      bg: 'bg-violet-50 dark:bg-violet-950',
+      accent: 'text-violet-600',
+      bg: 'bg-violet-50 dark:bg-violet-950/60',
       itemCount: creditCardItems.length,
     },
   ];
@@ -80,28 +82,28 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        {cards.map(({ key, title, value, icon: Icon, color, bg, itemCount }) => (
+        {cards.map(({ key, title, value, icon: Icon, accent, bg, itemCount }) => (
           <Card
             key={key}
-            className="cursor-pointer transition-shadow hover:shadow-md"
+            className="cursor-pointer transition-all hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700"
             onClick={() => setOpenDialog(key)}
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
               <CardTitle className="text-sm font-medium text-slate-500">{title}</CardTitle>
-              <div className={`rounded-lg p-2 ${bg}`}>
-                <Icon className={`h-4 w-4 ${color}`} />
+              <div className={cn('rounded-lg p-2', bg)}>
+                <Icon className={cn('h-4 w-4', accent)} />
               </div>
             </CardHeader>
-            <CardContent>
-              <p className={`text-2xl font-bold ${color}`}>{formatCurrency(value)}</p>
+            <CardContent className="p-4 pt-0">
+              <p className={cn('text-2xl font-bold tracking-tight', accent)}>{formatCurrency(value)}</p>
               {itemCount !== null && (
-                <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
+                <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                   {itemCount === 0 ? 'Nenhum item' : `${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`}
                   <ChevronRight className="h-3 w-3" />
                 </p>
               )}
               {key === 'saldo' && (
-                <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
+                <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                   Ver composição
                   <ChevronRight className="h-3 w-3" />
                 </p>
@@ -111,59 +113,84 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         ))}
 
         <Card
-          className="cursor-pointer transition-shadow hover:shadow-md sm:col-span-2 xl:col-span-5"
+          className="cursor-pointer transition-all hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700 sm:col-span-2 xl:col-span-5"
           onClick={() => setOpenDialog('investimentos')}
         >
-          <CardHeader className="flex flex-row items-center gap-2 pb-2">
-            <PiggyBank className="h-4 w-4 text-emerald-600" />
-            <CardTitle className="text-sm font-medium">Meta de Investimento</CardTitle>
-            <ChevronRight className="ml-auto h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="mb-2 flex justify-between text-sm">
-              <span>{formatCurrency(summary.investment.totalInvested)} investidos</span>
-              <span className="text-slate-500">Meta: {formatCurrency(summary.investment.targetAmount)}</span>
+          <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
+            <div className="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-950/60">
+              <PiggyBank className="h-4 w-4 text-emerald-600" />
             </div>
-            <Progress value={summary.investment.progress} />
-            {items.investments.length > 0 && (
-              <p className="mt-2 text-xs text-slate-400">
-                {items.investments.length} {items.investments.length === 1 ? 'aporte' : 'aportes'} — clique para ver
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-sm font-medium">Meta de Investimento</CardTitle>
+              <p className="text-xs text-slate-400">
+                {items.investments.length > 0
+                  ? `${items.investments.length} ${items.investments.length === 1 ? 'aporte' : 'aportes'} este mês`
+                  : 'Nenhum aporte registrado'}
               </p>
-            )}
+            </div>
+            <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
+              {investmentProgress.toFixed(0)}%
+            </span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+          </CardHeader>
+          <CardContent className="space-y-3 p-4 pt-0">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">
+                  {formatCurrency(summary.investment.totalInvested)}
+                </p>
+                <p className="text-xs text-slate-400">investidos</p>
+              </div>
+              <p className="text-sm text-slate-500">
+                Meta:{' '}
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  {formatCurrency(summary.investment.targetAmount)}
+                </span>
+              </p>
+            </div>
+            <Progress value={investmentProgress} />
           </CardContent>
         </Card>
 
-        {summary.budgets?.length > 0 && (
+        {hasBudgets && (
           <Card className="sm:col-span-2 xl:col-span-5">
-            <CardHeader className="flex flex-row items-center gap-2 pb-2">
-              <Target className="h-4 w-4 text-amber-600" />
+            <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
+              <div className="rounded-lg bg-amber-50 p-2 dark:bg-amber-950/60">
+                <Target className="h-4 w-4 text-amber-600" />
+              </div>
               <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {summary.budgets.map((budget) => (
+            <CardContent className="space-y-3 p-4 pt-0">
+              {summary.budgets!.map((budget) => (
                 <div
                   key={budget.id}
-                  className="cursor-pointer rounded-lg transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  className="cursor-pointer rounded-lg border border-slate-100 p-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
                   onClick={() => setOpenBudget(budget)}
                 >
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
-                    <span className="flex items-center gap-1 font-medium">
+                  <div className="mb-2.5 flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                    <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-200">
                       {budget.name}
                       <ChevronRight className="h-3 w-3 text-slate-400" />
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {budget.overBudget && <Badge variant="destructive">Estourado</Badge>}
-                      <span className={cn(budget.remaining < 0 ? 'text-red-500' : 'text-slate-500')}>
-                        {formatCurrency(budget.spent)} / {formatCurrency(budget.limit)}
+                      <span className="text-slate-500">
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(budget.spent)}</span>
+                        {' / '}
+                        {formatCurrency(budget.limit)}
                       </span>
                     </div>
                   </div>
                   <Progress
                     value={budget.progress}
-                    className={cn(budget.overBudget && '[&>div]:bg-red-500')}
+                    className={cn(
+                      budget.overBudget
+                        ? '[&>div]:bg-red-500'
+                        : '[&>div]:bg-amber-500',
+                    )}
                   />
                   {(budget.entries?.length ?? 0) > 0 && (
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1.5 text-xs text-slate-400">
                       {budget.entries!.length} {budget.entries!.length === 1 ? 'gasto' : 'gastos'}
                     </p>
                   )}
@@ -190,8 +217,9 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         title="Despesas do mês"
         items={items.expenses}
         total={summary.totalExpenses}
-        valueColor="text-red-500"
+        valueColor="text-orange-600"
         href="/dashboard/despesas"
+        groupByCategory
       />
 
       <SummaryDetailDialog
@@ -200,7 +228,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         title="Doações do mês"
         items={items.donations}
         total={summary.totalDonations}
-        valueColor="text-rose-600"
+        valueColor="text-sky-600"
         href="/dashboard/doacoes"
       />
 

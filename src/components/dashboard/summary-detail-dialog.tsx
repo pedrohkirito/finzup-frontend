@@ -9,14 +9,41 @@ import type { SummaryItem } from '@/types';
 import { ExternalLink } from 'lucide-react';
 
 const categoryLabels: Record<string, string> = {
-  avulsa: 'Avulsa',
-  fixa: 'Fixa',
-  parcelamento: 'Parcelamento',
-  assinatura: 'Assinatura',
-  financiamento: 'Financiamento',
+  avulsa: 'Avulsas',
+  fixa: 'Fixas',
+  parcelamento: 'Parceladas',
+  assinatura: 'Assinaturas',
+  financiamento: 'Financiamentos',
   despesa: 'Despesa',
   doação: 'Doação',
 };
+
+const expenseCategoryOrder = ['avulsa', 'fixa', 'parcelamento', 'assinatura', 'financiamento'] as const;
+
+function groupItemsByCategory(items: SummaryItem[]) {
+  const groups = new Map<string, SummaryItem[]>();
+
+  for (const item of items) {
+    const category = item.category ?? 'outros';
+    const group = groups.get(category) ?? [];
+    group.push(item);
+    groups.set(category, group);
+  }
+
+  const orderedCategories = [
+    ...expenseCategoryOrder.filter((category) => groups.has(category)),
+    ...[...groups.keys()].filter((category) => !expenseCategoryOrder.includes(category as (typeof expenseCategoryOrder)[number])),
+  ];
+
+  return orderedCategories.map((category) => {
+    const groupItems = groups.get(category) ?? [];
+    return {
+      category,
+      items: groupItems,
+      total: groupItems.reduce((sum, item) => sum + item.amount, 0),
+    };
+  });
+}
 
 export function SummaryDetailDialog({
   open,
@@ -27,6 +54,7 @@ export function SummaryDetailDialog({
   valueColor,
   href,
   emptyMessage = 'Nenhum item registrado',
+  groupByCategory = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,7 +64,10 @@ export function SummaryDetailDialog({
   valueColor?: string;
   href?: string;
   emptyMessage?: string;
+  groupByCategory?: boolean;
 }) {
+  const groupedItems = groupByCategory ? groupItemsByCategory(items) : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] overflow-hidden sm:max-w-md">
@@ -50,6 +81,28 @@ export function SummaryDetailDialog({
         <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
           {items.length === 0 ? (
             <p className="py-6 text-center text-sm text-slate-500">{emptyMessage}</p>
+          ) : groupedItems ? (
+            <div className="space-y-4">
+              {groupedItems.map((group) => (
+                <div key={group.category} className="space-y-2">
+                  <div className="flex items-center justify-between gap-3 px-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      {categoryLabels[group.category] ?? group.category}
+                    </p>
+                    <span className={cn('text-xs font-semibold', valueColor)}>{formatCurrency(group.total)}</span>
+                  </div>
+                  {group.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50"
+                    >
+                      <p className="min-w-0 flex-1 truncate text-sm font-medium">{item.name}</p>
+                      <span className={cn('shrink-0 text-sm font-semibold', valueColor)}>{formatCurrency(item.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           ) : (
             items.map((item) => (
               <div
@@ -98,9 +151,9 @@ export function BalanceDetailDialog({
   balance: number;
 }) {
   const rows = [
-    { label: 'Receitas', value: totalIncome, color: 'text-emerald-600' },
-    { label: 'Despesas', value: -totalExpenses, color: 'text-red-500' },
-    { label: 'Doações', value: -totalDonations, color: 'text-rose-600' },
+    { label: 'Receitas', value: totalIncome, color: 'text-emerald-600', prefix: '+' },
+    { label: 'Despesas', value: totalExpenses, color: 'text-orange-600', prefix: '−' },
+    { label: 'Doações', value: totalDonations, color: 'text-sky-600', prefix: '−' },
   ];
 
   return (
@@ -114,7 +167,7 @@ export function BalanceDetailDialog({
             <div key={row.label} className="flex items-center justify-between text-sm">
               <span className="text-slate-500">{row.label}</span>
               <span className={cn('font-semibold', row.color)}>
-                {row.value >= 0 ? formatCurrency(row.value) : `− ${formatCurrency(Math.abs(row.value))}`}
+                {row.prefix} {formatCurrency(row.value)}
               </span>
             </div>
           ))}

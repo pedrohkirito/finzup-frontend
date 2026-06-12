@@ -14,7 +14,7 @@ import {
   Sun,
   Target,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
@@ -54,7 +54,7 @@ export function Sidebar() {
             href={href}
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-              pathname === href || pathname.startsWith(href + '/')
+              isNavLinkActive(pathname, href)
                 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
                 : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-900',
             )}

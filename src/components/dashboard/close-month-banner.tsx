@@ -9,12 +9,12 @@ import { formatCurrency } from '@/lib/utils';
 import type { FinancialMonth } from '@/types';
 
 interface ClosePreview {
-  incomesToCarry: { name: string; amount: string | number }[];
-  donationsToCarry: { name: string; amount: string | number }[];
-  fixedExpensesToCreate: { name: string; defaultAmount: string | number }[];
-  installmentsToAdvance: { name: string; installmentAmount: string | number }[];
-  subscriptionsToCarry: { name: string; amount: string | number }[];
-  financingsToAdvance: { name: string; installmentAmount: string | number }[];
+  incomesToCarry: { id: string; name: string; amount: string | number }[];
+  donationsToCarry: { id: string; name: string; amount: string | number }[];
+  fixedExpensesToCreate: { id: string; name: string; defaultAmount: string | number }[];
+  installmentsToAdvance: { id: string; name: string; installmentAmount: string | number }[];
+  subscriptionsToCarry: { id: string; name: string; amount: string | number }[];
+  financingsToAdvance: { id: string; name: string; installmentAmount: string | number }[];
 }
 
 export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
@@ -28,8 +28,6 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
     enabled: open && month.status === 'open',
   });
 
-  if (month.status === 'closed') return null;
-
   const handleClose = async () => {
     setLoading(true);
     try {
@@ -41,6 +39,47 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
     }
   };
 
+  const handleReopen = async () => {
+    setLoading(true);
+    try {
+      await api.post(`/months/${month.id}/reopen`);
+      await queryClient.invalidateQueries();
+      setOpen(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (month.status === 'closed') {
+    return (
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900/50">
+        <div>
+          <p className="font-medium text-slate-900 dark:text-slate-100">Este mês está fechado</p>
+          <p className="text-sm text-slate-500">
+            Os lançamentos estão em modo leitura. Você pode reabrir para editar novamente.
+          </p>
+        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full sm:w-auto">Reabrir mês</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reabrir mês</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-slate-500">
+              O mês voltará a ficar editável. Alterações feitas no fechamento — como parcelas avançadas e
+              lançamentos criados no próximo mês — não serão desfeitas automaticamente.
+            </p>
+            <Button onClick={handleReopen} disabled={loading} className="w-full sm:w-auto">
+              {loading ? 'Reabrindo...' : 'Confirmar reabertura'}
+            </Button>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-amber-900 dark:bg-amber-950">
       <div>
@@ -51,7 +90,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="border-amber-300">Fechar mês</Button>
+          <Button variant="outline" className="w-full border-amber-300 sm:w-auto">Fechar mês</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
@@ -63,7 +102,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
                 <div>
                   <p className="font-medium">Receitas a repetir:</p>
                   {preview.incomesToCarry.map((i) => (
-                    <p key={i.name} className="text-slate-500">{i.name} — {formatCurrency(Number(i.amount))}</p>
+                    <p key={i.id} className="text-slate-500">{i.name} — {formatCurrency(Number(i.amount))}</p>
                   ))}
                 </div>
               )}
@@ -71,7 +110,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
                 <div>
                   <p className="font-medium">Doações a repetir:</p>
                   {preview.donationsToCarry.map((d) => (
-                    <p key={d.name} className="text-slate-500">{d.name} — {formatCurrency(Number(d.amount))}</p>
+                    <p key={d.id} className="text-slate-500">{d.name} — {formatCurrency(Number(d.amount))}</p>
                   ))}
                 </div>
               )}
@@ -79,13 +118,13 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
                 <div>
                   <p className="font-medium">Despesas fixas:</p>
                   {preview.fixedExpensesToCreate.map((e) => (
-                    <p key={e.name} className="text-slate-500">{e.name} — {formatCurrency(Number(e.defaultAmount))}</p>
+                    <p key={e.id} className="text-slate-500">{e.name} — {formatCurrency(Number(e.defaultAmount))}</p>
                   ))}
                 </div>
               )}
             </div>
           )}
-          <Button onClick={handleClose} disabled={loading}>
+          <Button onClick={handleClose} disabled={loading} className="w-full sm:w-auto">
             {loading ? 'Fechando...' : 'Confirmar fechamento'}
           </Button>
         </DialogContent>

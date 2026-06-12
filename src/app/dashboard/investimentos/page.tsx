@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/api';
-import { useMonthStore } from '@/hooks/use-month';
+import { useMonthStore, useMonths } from '@/hooks/use-month';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormCurrencyInput } from '@/components/ui/currency-input';
@@ -27,6 +27,9 @@ const entrySchema = z.object({
 
 export default function InvestimentosPage() {
   const { selectedMonthId } = useMonthStore();
+  const { data: months } = useMonths();
+  const selectedMonth = months?.find((m) => m.id === selectedMonthId);
+  const isMonthOpen = selectedMonth?.status === 'open';
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -58,8 +61,8 @@ export default function InvestimentosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Investimentos</h1>
-        <p className="text-slate-500">Meta mensal e aportes realizados</p>
+        <h1 className="text-xl font-bold sm:text-2xl">Investimentos</h1>
+        <p className="text-sm text-slate-500">Meta mensal e aportes realizados</p>
       </div>
 
       <Card>
@@ -67,21 +70,25 @@ export default function InvestimentosPage() {
           <CardTitle className="text-base">Meta do mês</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {isMonthOpen ? (
           <form
             onSubmit={goalForm.handleSubmit(async (data) => {
               await api.put(`/months/${selectedMonthId}/investments/goal`, data);
               await queryClient.invalidateQueries({ queryKey: ['investment-goal', selectedMonthId] });
               await queryClient.invalidateQueries({ queryKey: ['months'] });
             })}
-            className="flex gap-2"
+            className="flex flex-col gap-2 sm:flex-row"
           >
             <FormCurrencyInput
               control={goalForm.control}
               name="targetAmount"
               placeholder="Quanto quer guardar este mês?"
             />
-            <Button type="submit">Salvar meta</Button>
+            <Button type="submit" className="w-full sm:w-auto sm:shrink-0">Salvar meta</Button>
           </form>
+          ) : (
+            <p className="text-sm text-slate-500">Meta: {formatCurrency(target)}</p>
+          )}
           <div>
             <div className="mb-2 flex justify-between text-sm">
               <span>{formatCurrency(totalInvested)} investidos</span>
@@ -92,12 +99,14 @@ export default function InvestimentosPage() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">Aportes do mês</h2>
         <Dialog open={open} onOpenChange={setOpen}>
+          {isMonthOpen && (
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4" /> Novo aporte</Button>
+            <Button className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Novo aporte</Button>
           </DialogTrigger>
+          )}
           <DialogContent>
             <DialogHeader><DialogTitle>Novo investimento</DialogTitle></DialogHeader>
             <form
@@ -121,19 +130,21 @@ export default function InvestimentosPage() {
       <div className="grid gap-3">
         {entries?.map((entry) => (
           <Card key={entry.id}>
-            <CardContent className="flex justify-between p-4">
-              <div>
+            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-medium">{entry.name}</p>
                 {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-end gap-2">
                 <span className="font-semibold text-emerald-600">{formatCurrency(Number(entry.amount))}</span>
+                {isMonthOpen && (
                 <Button variant="ghost" size="icon" onClick={async () => {
                   await api.delete(`/months/${selectedMonthId}/investments/${entry.id}`);
                   await queryClient.invalidateQueries();
                 }}>
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
+                )}
               </div>
             </CardContent>
           </Card>

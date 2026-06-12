@@ -24,7 +24,7 @@ export function CreditPaymentToggle({
           type="button"
           onClick={() => onChange(false)}
           className={cn(
-            'flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors',
+            'flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors sm:gap-1.5 sm:px-2.5 sm:text-xs',
             !isPaid
               ? 'bg-violet-600 text-white shadow-sm'
               : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
@@ -37,7 +37,7 @@ export function CreditPaymentToggle({
           type="button"
           onClick={() => onChange(true)}
           className={cn(
-            'flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors',
+            'flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors sm:gap-1.5 sm:px-2.5 sm:text-xs',
             isPaid
               ? 'bg-emerald-600 text-white shadow-sm'
               : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',

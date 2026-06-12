@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/api';
 import { useMonthStore, useMonths } from '@/hooks/use-month';
+import { useReorder } from '@/hooks/use-reorder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormCurrencyInput } from '@/components/ui/currency-input';
@@ -30,8 +31,13 @@ import type {
   FinancingEntry,
   PaymentMethod,
   BudgetTemplate,
+  MonthSummary,
 } from '@/types';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw, TrendingDown } from 'lucide-react';
+
+function getExpenseAmountColor(isCredit: boolean, isPaid: boolean) {
+  return isCredit && !isPaid ? 'text-violet-600' : 'text-orange-600 dark:text-orange-400';
+}
 
 const expenseSchema = z.object({
   name: z.string().min(1),
@@ -135,6 +141,7 @@ export default function DespesasPage() {
   const selectedMonth = months?.find((m) => m.id === selectedMonthId);
   const isMonthOpen = selectedMonth?.status === 'open';
   const queryClient = useQueryClient();
+  const reorder = useReorder();
   const [dialog, setDialog] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<{ type: EditType; id: string } | null>(null);
 
@@ -154,6 +161,12 @@ export default function DespesasPage() {
   const { data: fixed } = useQuery({
     queryKey: ['fixed-templates'],
     queryFn: () => api.get<FixedExpenseTemplate[]>('/fixed-expense-templates'),
+  });
+
+  const { data: fixedEntries } = useQuery({
+    queryKey: ['expenses', selectedMonthId, 'fixed'],
+    queryFn: () => api.get<ExpenseEntry[]>(`/months/${selectedMonthId}/expenses?type=fixed`),
+    enabled: !!selectedMonthId,
   });
 
   const { data: installments } = useQuery({
@@ -176,6 +189,12 @@ export default function DespesasPage() {
     queryFn: () => api.get<BudgetTemplate[]>('/budget-templates'),
   });
 
+  const { data: summary } = useQuery({
+    queryKey: ['months', selectedMonthId, 'summary'],
+    queryFn: () => api.get<MonthSummary>(`/months/${selectedMonthId}/summary`),
+    enabled: !!selectedMonthId,
+  });
+
   const expenseForm = useForm({ resolver: zodResolver(expenseSchema) });
   const fixedTemplateForm = useForm({ resolver: zodResolver(fixedTemplateSchema) });
   const installmentForm = useForm({ resolver: zodResolver(installmentSchema), defaultValues: { installmentsPaid: 0 } });
@@ -183,11 +202,6 @@ export default function DespesasPage() {
   const financingForm = useForm({ resolver: zodResolver(financingSchema), defaultValues: { installmentsPaid: 0, earlyPaymentAmount: 0 } });
 
   const defaultMethod = methods?.find((m) => m.isDefault)?.id;
-
-  const saveOrder = async (endpoint: string, items: { id: string }[]) => {
-    await api.post(endpoint, { ids: items.map((item) => item.id) });
-    invalidate();
-  };
 
   const openEdit = (type: EditType, item: ExpenseEntry | FixedExpenseTemplate | InstallmentPlan | Subscription | Financing) => {
     if (type === 'one_off') {
@@ -241,12 +255,28 @@ export default function DespesasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Despesas</h1>
-        <p className="text-slate-500">Avulsas, fixas, parceladas, assinaturas e financiamentos</p>
+        <h1 className="text-xl font-bold sm:text-2xl">Despesas</h1>
+        <p className="text-sm text-slate-500">Avulsas, fixas, parceladas, assinaturas e financiamentos</p>
       </div>
 
+      <Card className="border-orange-100 bg-orange-50 dark:border-orange-900/40 dark:bg-orange-950/30">
+        <CardContent className="flex items-center gap-4 p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/60 dark:text-orange-400">
+            <TrendingDown className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-orange-600 dark:text-orange-400">
+              Total de despesas do mês
+            </p>
+            <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+              {formatCurrency(summary?.totalExpenses ?? 0)}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="avulsas">
-        <TabsList className="flex-wrap h-auto">
+        <TabsList>
           <TabsTrigger value="avulsas">Avulsas</TabsTrigger>
           <TabsTrigger value="fixas">Fixas</TabsTrigger>
           <TabsTrigger value="parceladas">Parceladas</TabsTrigger>
@@ -255,6 +285,7 @@ export default function DespesasPage() {
         </TabsList>
 
         <TabsContent value="avulsas" className="space-y-4">
+          {isMonthOpen && (
           <Dialog open={dialog === 'expense'} onOpenChange={(o) => setDialog(o ? 'expense' : null)}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4" /> Nova despesa avulsa</Button>
@@ -297,11 +328,15 @@ export default function DespesasPage() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
 
           {oneOff && (
             <SortableList
               items={oneOff}
-              onReorder={(items) => saveOrder(`/months/${selectedMonthId}/expenses/reorder`, items)}
+              sortable={!!isMonthOpen}
+              onReorder={(items) =>
+                reorder(['expenses', selectedMonthId, 'one_off'], `/months/${selectedMonthId}/expenses/reorder`, items)
+              }
             >
               {(e, dragHandle) => {
                 const isCredit = e.paymentMethod?.type === 'credit';
@@ -314,41 +349,42 @@ export default function DespesasPage() {
                 };
 
                 return (
-                  <Card>
-                    <CardContent className="flex items-center gap-3 p-4">
-                      {dragHandle}
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium">{e.name}</p>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                          <span>{e.paymentMethod?.name}</span>
-                          {e.budgetTemplate && (
-                            <Badge variant="secondary">{e.budgetTemplate.name}</Badge>
-                          )}
+                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
+                    <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        {dragHandle}
+                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium text-slate-900 dark:text-white">{e.name}</p>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                            <span>{e.paymentMethod?.name}</span>
+                            {e.budgetTemplate && (
+                              <Badge variant="secondary">{e.budgetTemplate.name}</Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      {isCredit && (
-                        <CreditPaymentToggle
-                          isPaid={isPaid}
-                          isMonthOpen={!!isMonthOpen}
-                          onChange={setPaid}
-                        />
-                      )}
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            'font-semibold',
-                            isCredit && !isPaid ? 'text-violet-600' : 'text-red-500',
-                          )}
-                        >
-                          {formatCurrency(Number(e.amount))}
-                        </span>
-                        <ItemActions
-                          onEdit={() => openEdit('one_off', e)}
-                          onDelete={async () => {
-                            await api.delete(`/months/${selectedMonthId}/expenses/${e.id}`);
-                            invalidate();
-                          }}
-                        />
+                      <div className="flex items-center justify-between gap-2 sm:justify-end">
+                        {isCredit && (
+                          <CreditPaymentToggle
+                            isPaid={isPaid}
+                            isMonthOpen={!!isMonthOpen}
+                            onChange={setPaid}
+                          />
+                        )}
+                        <div className="ml-auto flex items-center gap-2 sm:ml-0">
+                          <span className={cn('font-semibold', getExpenseAmountColor(isCredit, isPaid))}>
+                            {formatCurrency(Number(e.amount))}
+                          </span>
+                          <ItemActions
+                            readOnly={!isMonthOpen}
+                            onEdit={() => openEdit('one_off', e)}
+                            onDelete={async () => {
+                              await api.delete(`/months/${selectedMonthId}/expenses/${e.id}`);
+                              invalidate();
+                            }}
+                          />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -359,11 +395,10 @@ export default function DespesasPage() {
         </TabsContent>
 
         <TabsContent value="fixas" className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Dialog open={dialog === 'fixed'} onOpenChange={(o) => setDialog(o ? 'fixed' : null)}>
-              <DialogTrigger asChild>
-                <Button><Plus className="h-4 w-4" /> Nova despesa fixa</Button>
-              </DialogTrigger>
+          <Dialog open={dialog === 'fixed'} onOpenChange={(o) => setDialog(o ? 'fixed' : null)}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4" /> Nova despesa fixa</Button>
+            </DialogTrigger>
               <DialogContent>
                 <DialogHeader><DialogTitle>Nova despesa fixa</DialogTitle></DialogHeader>
                 <form
@@ -402,43 +437,77 @@ export default function DespesasPage() {
                 </form>
               </DialogContent>
             </Dialog>
-            <Button variant="outline" onClick={async () => {
-              await api.post(`/months/${selectedMonthId}/expenses/sync-fixed`);
-              invalidate();
-            }}>
-              Sincronizar com o mês atual
-            </Button>
-          </div>
           {fixed && (
             <SortableList
               items={fixed}
-              onReorder={(items) => saveOrder('/fixed-expense-templates/reorder', items)}
+              onReorder={(items) => reorder(['fixed-templates'], '/fixed-expense-templates/reorder', items)}
             >
-              {(t, dragHandle) => (
-                <Card>
-                  <CardContent className="flex items-center gap-3 p-4">
-                    {dragHandle}
-                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-                      <p className="font-medium">{t.name}</p>
-                      {t.isSystemSeeded && <Badge variant="secondary">Sugerida</Badge>}
-                      {t.budgetTemplate && <Badge variant="secondary">{t.budgetTemplate.name}</Badge>}
-                      <p className="text-sm text-red-500">{formatCurrency(Number(t.defaultAmount))}</p>
-                    </div>
-                    <ItemActions
-                      onEdit={() => openEdit('fixed', t)}
-                      onDelete={async () => {
-                        await api.delete(`/fixed-expense-templates/${t.id}`);
-                        invalidate();
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-              )}
+              {(t, dragHandle) => {
+                const monthEntry = fixedEntries?.find((e) => e.templateId === t.id);
+                const isCredit = (monthEntry?.paymentMethod ?? t.paymentMethod)?.type === 'credit';
+                const isPaid = !!monthEntry?.paidAt;
+
+                const setPaid = async (paid: boolean) => {
+                  if (!monthEntry || !selectedMonthId || paid === isPaid) return;
+                  await api.patch(`/months/${selectedMonthId}/expenses/${monthEntry.id}/paid`, { paid });
+                  invalidate();
+                };
+
+                return (
+                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
+                    <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        {dragHandle}
+                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="truncate font-medium text-slate-900 dark:text-white">{t.name}</p>
+                            {t.isSystemSeeded && <Badge variant="secondary">Sugerida</Badge>}
+                            {t.budgetTemplate && <Badge variant="secondary">{t.budgetTemplate.name}</Badge>}
+                          </div>
+                          <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
+                            <RefreshCw className="h-3 w-3" />
+                            Repete todo mês
+                          </div>
+                          <p className="text-xs text-slate-500">{t.paymentMethod?.name ?? monthEntry?.paymentMethod?.name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 sm:justify-end">
+                        {monthEntry && isCredit && (
+                          <CreditPaymentToggle
+                            isPaid={isPaid}
+                            isMonthOpen={!!isMonthOpen}
+                            onChange={setPaid}
+                          />
+                        )}
+                        <div className="ml-auto flex items-center gap-2 sm:ml-0">
+                        <span
+                          className={cn(
+                            'font-semibold',
+                            getExpenseAmountColor(!!monthEntry && isCredit, isPaid),
+                          )}
+                        >
+                          {formatCurrency(Number(monthEntry?.amount ?? t.defaultAmount))}
+                        </span>
+                        <ItemActions
+                          onEdit={() => openEdit('fixed', t)}
+                          onDelete={async () => {
+                            await api.delete(`/fixed-expense-templates/${t.id}`);
+                            invalidate();
+                          }}
+                        />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }}
             </SortableList>
           )}
         </TabsContent>
 
         <TabsContent value="parceladas" className="space-y-4">
+          {isMonthOpen && (
           <Dialog open={dialog === 'installment'} onOpenChange={(o) => setDialog(o ? 'installment' : null)}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4" /> Novo parcelamento</Button>
@@ -483,11 +552,12 @@ export default function DespesasPage() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
 
           {installments && (
             <SortableList
               items={installments}
-              onReorder={(items) => saveOrder('/installment-plans/reorder', items)}
+              onReorder={(items) => reorder(['installments'], '/installment-plans/reorder', items)}
             >
               {(p, dragHandle) => {
                 const monthEntry = p.installmentEntries?.find((e) => e.financialMonthId === selectedMonthId);
@@ -501,20 +571,21 @@ export default function DespesasPage() {
                 };
 
                 return (
-                  <Card>
+                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
                     <CardContent className="space-y-2 p-4">
                       <div className="flex items-start gap-3">
                         {dragHandle}
+                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
                         <div className="min-w-0 flex-1 space-y-2">
                           <div className="flex justify-between gap-4">
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="font-medium">{p.name}</p>
+                              <p className="truncate font-medium text-slate-900 dark:text-white">{p.name}</p>
                               {p.budgetTemplate && <Badge variant="secondary">{p.budgetTemplate.name}</Badge>}
                             </div>
                             <span
                               className={cn(
                                 'shrink-0 font-semibold',
-                                monthEntry && isCredit && !isPaid ? 'text-violet-600' : 'text-red-500',
+                                getExpenseAmountColor(!!monthEntry && isCredit, isPaid),
                               )}
                             >
                               {formatCurrency(Number(monthEntry?.amount ?? p.installmentAmount))}
@@ -597,32 +668,63 @@ export default function DespesasPage() {
           {subscriptions && (
             <SortableList
               items={subscriptions}
-              onReorder={(items) => saveOrder('/subscriptions/reorder', items)}
+              onReorder={(items) => reorder(['subscriptions'], '/subscriptions/reorder', items)}
             >
-              {(s, dragHandle) => (
-                <Card>
-                  <CardContent className="flex items-center gap-3 p-4">
-                    {dragHandle}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">{s.name}</p>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span>{s.paymentMethod.name} · Mensal</span>
-                        {s.budgetTemplate && <Badge variant="secondary">{s.budgetTemplate.name}</Badge>}
+              {(s, dragHandle) => {
+                const monthEntry = s.subscriptionEntries?.find((e) => e.financialMonthId === selectedMonthId);
+                const isCredit = s.paymentMethod?.type === 'credit';
+                const isPaid = !!monthEntry?.paidAt;
+
+                const setPaid = async (paid: boolean) => {
+                  if (!monthEntry || paid === isPaid) return;
+                  await api.patch(`/subscriptions/entries/${monthEntry.id}/paid`, { paid });
+                  invalidate();
+                };
+
+                return (
+                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
+                    <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        {dragHandle}
+                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium text-slate-900 dark:text-white">{s.name}</p>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                            <span>{s.paymentMethod.name} · Mensal</span>
+                            {s.budgetTemplate && <Badge variant="secondary">{s.budgetTemplate.name}</Badge>}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-red-500">{formatCurrency(Number(s.amount))}</span>
-                      <ItemActions
-                        onEdit={() => openEdit('subscription', s)}
-                        onDelete={async () => {
-                          await api.delete(`/subscriptions/${s.id}`);
-                          invalidate();
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                      <div className="flex items-center justify-between gap-2 sm:justify-end">
+                        {monthEntry && isCredit && (
+                          <CreditPaymentToggle
+                            isPaid={isPaid}
+                            isMonthOpen={!!isMonthOpen}
+                            onChange={setPaid}
+                          />
+                        )}
+                        <div className="ml-auto flex items-center gap-2 sm:ml-0">
+                        <span
+                          className={cn(
+                            'font-semibold',
+                            getExpenseAmountColor(!!monthEntry && isCredit, isPaid),
+                          )}
+                        >
+                          {formatCurrency(Number(monthEntry?.amount ?? s.amount))}
+                        </span>
+                        <ItemActions
+                          onEdit={() => openEdit('subscription', s)}
+                          onDelete={async () => {
+                            await api.delete(`/subscriptions/${s.id}`);
+                            invalidate();
+                          }}
+                        />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }}
             </SortableList>
           )}
         </TabsContent>
@@ -663,7 +765,7 @@ export default function DespesasPage() {
           {financings && (
             <SortableList
               items={financings}
-              onReorder={(items) => saveOrder('/financings/reorder', items)}
+              onReorder={(items) => reorder(['financings'], '/financings/reorder', items)}
             >
               {(f, dragHandle) => {
                 const monthEntries = [...(f.financingEntries?.filter((e) => e.financialMonthId === selectedMonthId) ?? [])]
@@ -671,17 +773,20 @@ export default function DespesasPage() {
                 const monthTotal = monthEntries.reduce((sum, e) => sum + Number(e.amount), 0);
 
                 return (
-                <Card>
+                <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
                   <CardContent className="space-y-3 p-4">
                     <div className="flex items-start gap-3">
                       {dragHandle}
+                      <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
                       <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex justify-between gap-4">
-                          <p className="font-medium">{f.name}</p>
-                          <span className="shrink-0 text-red-500">{formatCurrency(Number(f.installmentAmount))}/mês</span>
+                          <p className="truncate font-medium text-slate-900 dark:text-white">{f.name}</p>
+                          <span className="shrink-0 font-semibold text-orange-600 dark:text-orange-400">
+                            {formatCurrency(Number(f.installmentAmount))}/mês
+                          </span>
                         </div>
                         <Progress value={(f.installmentsPaid / f.totalInstallments) * 100} />
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-slate-500">{f.installmentsPaid}/{f.totalInstallments} parcelas</p>
                             {monthEntries.length > 0 && (
@@ -694,6 +799,7 @@ export default function DespesasPage() {
                             <Button
                               size="sm"
                               variant="outline"
+                              className="w-full sm:w-auto"
                               onClick={async () => {
                                 await api.post(`/financings/${f.id}/pay-ahead`, { installmentsToPay: 1, monthId: selectedMonthId });
                                 invalidate();

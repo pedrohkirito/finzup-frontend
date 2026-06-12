@@ -29,3 +29,10 @@ export function formatMonth(year: number, month: number): string {
   const date = new Date(year, month - 1, 1);
   return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 }
+
+export function isNavLinkActive(pathname: string, href: string): boolean {
+  if (href === '/dashboard') {
+    return pathname === '/dashboard';
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}

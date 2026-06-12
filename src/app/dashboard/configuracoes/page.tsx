@@ -46,8 +46,8 @@ export default function ConfiguracoesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Configurações</h1>
-        <p className="text-slate-500">Senha e métodos de pagamento</p>
+        <h1 className="text-xl font-bold sm:text-2xl">Configurações</h1>
+        <p className="text-sm text-slate-500">Senha e métodos de pagamento</p>
       </div>
 
       <Card>
@@ -74,11 +74,11 @@ export default function ConfiguracoesPage() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">Métodos de pagamento</CardTitle>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="sm"><Plus className="h-4 w-4" /> Adicionar</Button>
+              <Button size="sm" className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Adicionar</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Novo método</DialogTitle></DialogHeader>
@@ -110,12 +110,12 @@ export default function ConfiguracoesPage() {
         </CardHeader>
         <CardContent className="space-y-2">
           {methods?.map((m) => (
-            <div key={m.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3 dark:border-slate-800">
-              <div>
+            <div key={m.id} className="flex flex-col gap-3 rounded-lg border border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+              <div className="min-w-0">
                 <p className="font-medium">{m.name}</p>
                 <p className="text-xs text-slate-500">{typeLabels[m.type]}</p>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center justify-end gap-1">
                 {m.isDefault ? (
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                 ) : (

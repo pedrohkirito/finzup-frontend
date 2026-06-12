@@ -1,38 +1,148 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, TrendingUp, Receipt, PiggyBank, Heart, Settings, Target } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  LayoutDashboard,
+  TrendingUp,
+  Receipt,
+  Target,
+  MoreHorizontal,
+  PiggyBank,
+  Heart,
+  Settings,
+  LogOut,
+  Moon,
+  Sun,
+} from 'lucide-react';
+import { cn, isNavLinkActive } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { api } from '@/lib/api';
+import { useTheme } from '@/providers/theme-provider';
 
-const links = [
+const primaryLinks = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Resumo' },
   { href: '/dashboard/receitas', icon: TrendingUp, label: 'Receitas' },
   { href: '/dashboard/despesas', icon: Receipt, label: 'Despesas' },
-  { href: '/dashboard/orcamentos', icon: Target, label: 'Orçam.' },
-  { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Invest.' },
+  { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
+];
+
+const moreLinks = [
+  { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },
   { href: '/dashboard/doacoes', icon: Heart, label: 'Doações' },
-  { href: '/dashboard/configuracoes', icon: Settings, label: 'Config.' },
+  { href: '/dashboard/configuracoes', icon: Settings, label: 'Configurações' },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { theme, toggle } = useTheme();
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));
+
+  const logout = async () => {
+    await api.post('/auth/logout');
+    router.push('/login');
+  };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-slate-200 bg-white px-2 py-2 md:hidden dark:border-slate-800 dark:bg-slate-950">
-      {links.map(({ href, icon: Icon, label }) => (
-        <Link
-          key={href}
-          href={href}
-          className={cn(
-            'flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1 text-[10px]',
-            pathname.startsWith(href) ? 'text-emerald-600' : 'text-slate-500',
-          )}
-        >
-          <Icon className="h-5 w-5" />
-          {label}
-        </Link>
-      ))}
-    </nav>
+    <>
+      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-40 min-h-[var(--mobile-nav-height)] border-t border-slate-200 bg-white/95 px-1 py-1.5 backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95">
+        <div className="mx-auto flex max-w-lg items-stretch justify-around">
+          {primaryLinks.map(({ href, icon: Icon, label }) => {
+            const active = isNavLinkActive(pathname, href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors',
+                  active
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-xl transition-colors',
+                    active && 'bg-emerald-50 dark:bg-emerald-950/60',
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="truncate">{label}</span>
+              </Link>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
+            className={cn(
+              'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors',
+              isMoreActive || moreOpen
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
+            )}
+          >
+            <span
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-xl transition-colors',
+                (isMoreActive || moreOpen) && 'bg-emerald-50 dark:bg-emerald-950/60',
+              )}
+            >
+              <MoreHorizontal className="h-5 w-5" />
+            </span>
+            <span>Mais</span>
+          </button>
+        </div>
+      </nav>
+
+      <Dialog open={moreOpen} onOpenChange={setMoreOpen}>
+        <DialogContent className="fixed bottom-0 left-0 right-0 top-auto max-h-[85dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-b-none rounded-t-2xl sm:bottom-auto sm:left-[50%] sm:right-auto sm:top-[50%] sm:w-[calc(100%-2rem)] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl">
+          <DialogHeader>
+            <DialogTitle>Mais opções</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1">
+            {moreLinks.map(({ href, icon: Icon, label }) => {
+              const active = isNavLinkActive(pathname, href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMoreOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors',
+                    active
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                      : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50',
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+          <div className="space-y-1 border-t border-slate-200 pt-3 dark:border-slate-800">
+            <Button variant="ghost" className="h-11 w-full justify-start gap-3 px-3" onClick={toggle}>
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-11 w-full justify-start gap-3 px-3 text-red-600 hover:text-red-700"
+              onClick={logout}
+            >
+              <LogOut className="h-5 w-5" />
+              Sair
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   DndContext,
   type DragEndEvent,
@@ -41,11 +41,14 @@ export function SortableItem({
   id: string;
   children: (props: { dragHandle: ReactNode }) => ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    animateLayoutChanges: () => false,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? transition : undefined,
   };
 
   const dragHandle = (
@@ -69,11 +72,30 @@ export function SortableList<T extends { id: string }>({
   items,
   onReorder,
   children,
+  sortable = true,
 }: {
   items: T[];
   onReorder: (items: T[]) => void | Promise<void>;
   children: (item: T, dragHandle: ReactNode) => ReactNode;
+  sortable?: boolean;
 }) {
+  const [localItems, setLocalItems] = useState(items);
+
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
+
+  if (!sortable) {
+    if (items.length === 0) return null;
+    return (
+      <div className="space-y-4">
+        {items.map((item) => (
+          <div key={item.id}>{children(item, null)}</div>
+        ))}
+      </div>
+    );
+  }
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
@@ -82,20 +104,22 @@ export function SortableList<T extends { id: string }>({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = items.findIndex((item) => item.id === active.id);
-    const newIndex = items.findIndex((item) => item.id === over.id);
+    const oldIndex = localItems.findIndex((item) => item.id === active.id);
+    const newIndex = localItems.findIndex((item) => item.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
 
-    void onReorder(arrayMove(items, oldIndex, newIndex));
+    const reordered = arrayMove(localItems, oldIndex, newIndex);
+    setLocalItems(reordered);
+    void onReorder(reordered);
   };
 
-  if (items.length === 0) return null;
+  if (localItems.length === 0) return null;
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={localItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-4">
-          {items.map((item) => (
+          {localItems.map((item) => (
             <SortableItem key={item.id} id={item.id}>
               {({ dragHandle }) => children(item, dragHandle)}
             </SortableItem>

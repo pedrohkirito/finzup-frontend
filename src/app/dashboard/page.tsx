@@ -30,8 +30,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Resumo do mês</h1>
-        <p className="text-slate-500">Visão geral das suas finanças</p>
+        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Resumo do mês</h1>
+        <p className="mt-1 text-sm text-slate-500">Visão geral das suas finanças</p>
       </div>
       <OnboardingTour />
       <CloseMonthBanner month={summary.month} />

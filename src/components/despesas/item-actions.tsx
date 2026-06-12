@@ -4,10 +4,14 @@ import { Pencil, Trash2 } from 'lucide-react';
 export function ItemActions({
   onEdit,
   onDelete,
+  readOnly = false,
 }: {
   onEdit: () => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }) {
+  if (readOnly) return null;
+
   return (
     <div className="flex items-center gap-1">
       <Button variant="ghost" size="icon" onClick={onEdit} aria-label="Editar">

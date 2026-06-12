@@ -112,6 +112,13 @@ export interface InstallmentPlan {
   installmentEntries?: InstallmentEntry[];
 }
 
+export interface SubscriptionEntry {
+  id: string;
+  financialMonthId: string;
+  amount: string | number;
+  paidAt?: string | null;
+}
+
 export interface Subscription {
   id: string;
   name: string;
@@ -120,6 +127,7 @@ export interface Subscription {
   budgetTemplateId?: string | null;
   budgetTemplate?: BudgetTemplate | null;
   paymentMethod: PaymentMethod;
+  subscriptionEntries?: SubscriptionEntry[];
 }
 
 export interface FinancingEntry {
