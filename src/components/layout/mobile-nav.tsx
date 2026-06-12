@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, TrendingUp, Receipt, PiggyBank, Heart, Settings } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Receipt, PiggyBank, Heart, Settings, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const links = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Resumo' },
   { href: '/dashboard/receitas', icon: TrendingUp, label: 'Receitas' },
   { href: '/dashboard/despesas', icon: Receipt, label: 'Despesas' },
+  { href: '/dashboard/orcamentos', icon: Target, label: 'Orçam.' },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Invest.' },
   { href: '/dashboard/doacoes', icon: Heart, label: 'Doações' },
   { href: '/dashboard/configuracoes', icon: Settings, label: 'Config.' },

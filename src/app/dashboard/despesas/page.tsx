@@ -17,9 +17,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { CreditPaymentToggle } from '@/components/despesas/credit-payment-toggle';
 import { ItemActions } from '@/components/despesas/item-actions';
 import { SortableList } from '@/components/despesas/sortable-list';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import type {
   ExpenseEntry,
   FixedExpenseTemplate,
@@ -28,6 +29,7 @@ import type {
   Financing,
   FinancingEntry,
   PaymentMethod,
+  BudgetTemplate,
 } from '@/types';
 import { Plus } from 'lucide-react';
 
@@ -35,6 +37,7 @@ const expenseSchema = z.object({
   name: z.string().min(1),
   amount: z.coerce.number().positive(),
   paymentMethodId: z.string().optional(),
+  budgetTemplateId: z.string().uuid().optional().nullable(),
 });
 
 const installmentSchema = z
@@ -45,6 +48,7 @@ const installmentSchema = z
     totalAmount: z.coerce.number().positive().optional(),
     installmentsPaid: z.coerce.number().int().min(0).default(0),
     paymentMethodId: z.string().uuid(),
+    budgetTemplateId: z.string().uuid().optional().nullable(),
   })
   .refine((d) => d.installmentsPaid <= d.totalInstallments, {
     message: 'Parcelas pagas não pode ser maior que o total',
@@ -54,12 +58,14 @@ const fixedTemplateSchema = z.object({
   name: z.string().min(1),
   defaultAmount: z.coerce.number().nonnegative(),
   paymentMethodId: z.string().optional(),
+  budgetTemplateId: z.string().uuid().optional().nullable(),
 });
 
 const subscriptionSchema = z.object({
   name: z.string().min(1),
   amount: z.coerce.number().positive(),
   paymentMethodId: z.string().uuid(),
+  budgetTemplateId: z.string().uuid().optional().nullable(),
 });
 
 const financingSchema = z.object({
@@ -92,6 +98,31 @@ function PaymentMethodSelect({
       <SelectContent>
         {methods.map((m) => (
           <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function BudgetSelect({
+  budgets,
+  value,
+  onChange,
+}: {
+  budgets: BudgetTemplate[];
+  value?: string | null;
+  onChange: (v: string | null) => void;
+}) {
+  return (
+    <Select
+      value={value ?? 'none'}
+      onValueChange={(v) => onChange(v === 'none' ? null : v)}
+    >
+      <SelectTrigger><SelectValue placeholder="Orçamento (opcional)" /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none">Nenhum</SelectItem>
+        {budgets.map((b) => (
+          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
         ))}
       </SelectContent>
     </Select>
@@ -140,6 +171,11 @@ export default function DespesasPage() {
     queryFn: () => api.get<Financing[]>('/financings'),
   });
 
+  const { data: budgetTemplates } = useQuery({
+    queryKey: ['budget-templates'],
+    queryFn: () => api.get<BudgetTemplate[]>('/budget-templates'),
+  });
+
   const expenseForm = useForm({ resolver: zodResolver(expenseSchema) });
   const fixedTemplateForm = useForm({ resolver: zodResolver(fixedTemplateSchema) });
   const installmentForm = useForm({ resolver: zodResolver(installmentSchema), defaultValues: { installmentsPaid: 0 } });
@@ -160,6 +196,7 @@ export default function DespesasPage() {
         name: e.name,
         amount: Number(e.amount),
         paymentMethodId: e.paymentMethodId ?? defaultMethod,
+        budgetTemplateId: e.budgetTemplateId ?? null,
       });
     } else if (type === 'fixed') {
       const t = item as FixedExpenseTemplate;
@@ -167,6 +204,7 @@ export default function DespesasPage() {
         name: t.name,
         defaultAmount: Number(t.defaultAmount),
         paymentMethodId: t.paymentMethodId ?? defaultMethod,
+        budgetTemplateId: t.budgetTemplateId ?? null,
       });
     } else if (type === 'installment') {
       const p = item as InstallmentPlan;
@@ -176,6 +214,7 @@ export default function DespesasPage() {
         installmentAmount: Number(p.installmentAmount),
         installmentsPaid: p.installmentsPaid,
         paymentMethodId: p.paymentMethod.id,
+        budgetTemplateId: p.budgetTemplateId ?? null,
       });
     } else if (type === 'subscription') {
       const s = item as Subscription;
@@ -183,6 +222,7 @@ export default function DespesasPage() {
         name: s.name,
         amount: Number(s.amount),
         paymentMethodId: s.paymentMethod.id,
+        budgetTemplateId: s.budgetTemplateId ?? null,
       });
     } else {
       const f = item as Financing;
@@ -226,6 +266,7 @@ export default function DespesasPage() {
                   await api.post(`/months/${selectedMonthId}/expenses`, {
                     ...data,
                     paymentMethodId: data.paymentMethodId || defaultMethod,
+                    budgetTemplateId: data.budgetTemplateId ?? null,
                   });
                   invalidate();
                   expenseForm.reset();
@@ -242,6 +283,16 @@ export default function DespesasPage() {
                     onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
                   />
                 )}
+                {budgetTemplates && budgetTemplates.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Orçamento</Label>
+                    <BudgetSelect
+                      budgets={budgetTemplates}
+                      value={expenseForm.watch('budgetTemplateId')}
+                      onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
+                    />
+                  </div>
+                )}
                 <Button type="submit" className="w-full">Salvar</Button>
               </form>
             </DialogContent>
@@ -252,27 +303,57 @@ export default function DespesasPage() {
               items={oneOff}
               onReorder={(items) => saveOrder(`/months/${selectedMonthId}/expenses/reorder`, items)}
             >
-              {(e, dragHandle) => (
-                <Card>
-                  <CardContent className="flex items-center gap-3 p-4">
-                    {dragHandle}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">{e.name}</p>
-                      <p className="text-xs text-slate-500">{e.paymentMethod?.name}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-red-500">{formatCurrency(Number(e.amount))}</span>
-                      <ItemActions
-                        onEdit={() => openEdit('one_off', e)}
-                        onDelete={async () => {
-                          await api.delete(`/months/${selectedMonthId}/expenses/${e.id}`);
-                          invalidate();
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {(e, dragHandle) => {
+                const isCredit = e.paymentMethod?.type === 'credit';
+                const isPaid = !!e.paidAt;
+
+                const setPaid = async (paid: boolean) => {
+                  if (paid === isPaid) return;
+                  await api.patch(`/months/${selectedMonthId}/expenses/${e.id}/paid`, { paid });
+                  invalidate();
+                };
+
+                return (
+                  <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                      {dragHandle}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium">{e.name}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          <span>{e.paymentMethod?.name}</span>
+                          {e.budgetTemplate && (
+                            <Badge variant="secondary">{e.budgetTemplate.name}</Badge>
+                          )}
+                        </div>
+                      </div>
+                      {isCredit && (
+                        <CreditPaymentToggle
+                          isPaid={isPaid}
+                          isMonthOpen={!!isMonthOpen}
+                          onChange={setPaid}
+                        />
+                      )}
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            'font-semibold',
+                            isCredit && !isPaid ? 'text-violet-600' : 'text-red-500',
+                          )}
+                        >
+                          {formatCurrency(Number(e.amount))}
+                        </span>
+                        <ItemActions
+                          onEdit={() => openEdit('one_off', e)}
+                          onDelete={async () => {
+                            await api.delete(`/months/${selectedMonthId}/expenses/${e.id}`);
+                            invalidate();
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }}
             </SortableList>
           )}
         </TabsContent>
@@ -290,6 +371,7 @@ export default function DespesasPage() {
                     await api.post('/fixed-expense-templates', {
                       ...data,
                       paymentMethodId: data.paymentMethodId || defaultMethod,
+                      budgetTemplateId: data.budgetTemplateId ?? null,
                     });
                     invalidate();
                     fixedTemplateForm.reset();
@@ -305,6 +387,16 @@ export default function DespesasPage() {
                       value={fixedTemplateForm.watch('paymentMethodId') || defaultMethod}
                       onChange={(v) => fixedTemplateForm.setValue('paymentMethodId', v)}
                     />
+                  )}
+                  {budgetTemplates && budgetTemplates.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Orçamento</Label>
+                      <BudgetSelect
+                        budgets={budgetTemplates}
+                        value={fixedTemplateForm.watch('budgetTemplateId')}
+                        onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
+                      />
+                    </div>
                   )}
                   <Button type="submit" className="w-full">Salvar</Button>
                 </form>
@@ -329,6 +421,7 @@ export default function DespesasPage() {
                     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                       <p className="font-medium">{t.name}</p>
                       {t.isSystemSeeded && <Badge variant="secondary">Sugerida</Badge>}
+                      {t.budgetTemplate && <Badge variant="secondary">{t.budgetTemplate.name}</Badge>}
                       <p className="text-sm text-red-500">{formatCurrency(Number(t.defaultAmount))}</p>
                     </div>
                     <ItemActions
@@ -354,7 +447,11 @@ export default function DespesasPage() {
               <DialogHeader><DialogTitle>Parcelamento no cartão</DialogTitle></DialogHeader>
               <form
                 onSubmit={installmentForm.handleSubmit(async (data) => {
-                  await api.post('/installment-plans', { ...data, startMonthId: selectedMonthId });
+                  await api.post('/installment-plans', {
+                    ...data,
+                    startMonthId: selectedMonthId,
+                    budgetTemplateId: data.budgetTemplateId ?? null,
+                  });
                   invalidate();
                   installmentForm.reset();
                   setDialog(null);
@@ -372,6 +469,16 @@ export default function DespesasPage() {
                     onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
                   />
                 )}
+                {budgetTemplates && budgetTemplates.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Orçamento</Label>
+                    <BudgetSelect
+                      budgets={budgetTemplates}
+                      value={installmentForm.watch('budgetTemplateId')}
+                      onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
+                    />
+                  </div>
+                )}
                 <Button type="submit" className="w-full">Salvar</Button>
               </form>
             </DialogContent>
@@ -382,30 +489,64 @@ export default function DespesasPage() {
               items={installments}
               onReorder={(items) => saveOrder('/installment-plans/reorder', items)}
             >
-              {(p, dragHandle) => (
-                <Card>
-                  <CardContent className="space-y-2 p-4">
-                    <div className="flex items-start gap-3">
-                      {dragHandle}
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <div className="flex justify-between gap-4">
-                          <p className="font-medium">{p.name}</p>
-                          <span className="shrink-0 text-red-500">{formatCurrency(Number(p.installmentAmount))}/mês</span>
+              {(p, dragHandle) => {
+                const monthEntry = p.installmentEntries?.find((e) => e.financialMonthId === selectedMonthId);
+                const isCredit = p.paymentMethod?.type === 'credit';
+                const isPaid = !!monthEntry?.paidAt;
+
+                const setPaid = async (paid: boolean) => {
+                  if (!monthEntry || paid === isPaid) return;
+                  await api.patch(`/installment-plans/entries/${monthEntry.id}/paid`, { paid });
+                  invalidate();
+                };
+
+                return (
+                  <Card>
+                    <CardContent className="space-y-2 p-4">
+                      <div className="flex items-start gap-3">
+                        {dragHandle}
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div className="flex justify-between gap-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-medium">{p.name}</p>
+                              {p.budgetTemplate && <Badge variant="secondary">{p.budgetTemplate.name}</Badge>}
+                            </div>
+                            <span
+                              className={cn(
+                                'shrink-0 font-semibold',
+                                monthEntry && isCredit && !isPaid ? 'text-violet-600' : 'text-red-500',
+                              )}
+                            >
+                              {formatCurrency(Number(monthEntry?.amount ?? p.installmentAmount))}
+                              {monthEntry ? '' : '/mês'}
+                            </span>
+                          </div>
+                          <Progress value={(p.installmentsPaid / p.totalInstallments) * 100} />
+                          <p className="text-xs text-slate-500">
+                            {monthEntry
+                              ? `Parcela ${monthEntry.installmentNumber} deste mês`
+                              : `${p.installmentsPaid}/${p.totalInstallments} parcelas pagas`}
+                          </p>
                         </div>
-                        <Progress value={(p.installmentsPaid / p.totalInstallments) * 100} />
-                        <p className="text-xs text-slate-500">{p.installmentsPaid}/{p.totalInstallments} parcelas pagas</p>
+                        {monthEntry && isCredit && (
+                          <CreditPaymentToggle
+                            isPaid={isPaid}
+                            isMonthOpen={!!isMonthOpen}
+                            onChange={setPaid}
+                          />
+                        )}
+                        <ItemActions
+                          onEdit={() => openEdit('installment', p)}
+                          onDelete={async () => {
+                            await api.delete(`/installment-plans/${p.id}`);
+                            invalidate();
+                          }}
+                        />
                       </div>
-                      <ItemActions
-                        onEdit={() => openEdit('installment', p)}
-                        onDelete={async () => {
-                          await api.delete(`/installment-plans/${p.id}`);
-                          invalidate();
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </CardContent>
+                  </Card>
+                );
+              }}
             </SortableList>
           )}
         </TabsContent>
@@ -419,7 +560,10 @@ export default function DespesasPage() {
               <DialogHeader><DialogTitle>Nova assinatura</DialogTitle></DialogHeader>
               <form
                 onSubmit={subscriptionForm.handleSubmit(async (data) => {
-                  await api.post('/subscriptions', data);
+                  await api.post('/subscriptions', {
+                    ...data,
+                    budgetTemplateId: data.budgetTemplateId ?? null,
+                  });
                   invalidate();
                   subscriptionForm.reset();
                   setDialog(null);
@@ -434,6 +578,16 @@ export default function DespesasPage() {
                     value={subscriptionForm.watch('paymentMethodId')}
                     onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
                   />
+                )}
+                {budgetTemplates && budgetTemplates.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Orçamento</Label>
+                    <BudgetSelect
+                      budgets={budgetTemplates}
+                      value={subscriptionForm.watch('budgetTemplateId')}
+                      onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
+                    />
+                  </div>
                 )}
                 <Button type="submit" className="w-full">Salvar</Button>
               </form>
@@ -451,7 +605,10 @@ export default function DespesasPage() {
                     {dragHandle}
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">{s.name}</p>
-                      <p className="text-xs text-slate-500">{s.paymentMethod.name} · Mensal</p>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                        <span>{s.paymentMethod.name} · Mensal</span>
+                        {s.budgetTemplate && <Badge variant="secondary">{s.budgetTemplate.name}</Badge>}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-red-500">{formatCurrency(Number(s.amount))}</span>
@@ -604,6 +761,7 @@ export default function DespesasPage() {
                 await api.patch(`/months/${selectedMonthId}/expenses/${editTarget.id}`, {
                   ...data,
                   paymentMethodId: data.paymentMethodId || defaultMethod,
+                  budgetTemplateId: data.budgetTemplateId ?? null,
                 });
                 invalidate();
                 setEditTarget(null);
@@ -619,6 +777,16 @@ export default function DespesasPage() {
                   onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
                 />
               )}
+              {budgetTemplates && budgetTemplates.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Orçamento</Label>
+                  <BudgetSelect
+                    budgets={budgetTemplates}
+                    value={expenseForm.watch('budgetTemplateId')}
+                    onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
+                  />
+                </div>
+              )}
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>
           )}
@@ -629,6 +797,7 @@ export default function DespesasPage() {
                 await api.patch(`/fixed-expense-templates/${editTarget.id}`, {
                   ...data,
                   paymentMethodId: data.paymentMethodId || defaultMethod,
+                  budgetTemplateId: data.budgetTemplateId ?? null,
                 });
                 invalidate();
                 setEditTarget(null);
@@ -644,6 +813,16 @@ export default function DespesasPage() {
                   onChange={(v) => fixedTemplateForm.setValue('paymentMethodId', v)}
                 />
               )}
+              {budgetTemplates && budgetTemplates.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Orçamento</Label>
+                  <BudgetSelect
+                    budgets={budgetTemplates}
+                    value={fixedTemplateForm.watch('budgetTemplateId')}
+                    onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
+                  />
+                </div>
+              )}
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>
           )}
@@ -651,7 +830,10 @@ export default function DespesasPage() {
           {editTarget?.type === 'installment' && (
             <form
               onSubmit={installmentForm.handleSubmit(async (data) => {
-                await api.patch(`/installment-plans/${editTarget.id}`, data);
+                await api.patch(`/installment-plans/${editTarget.id}`, {
+                  ...data,
+                  budgetTemplateId: data.budgetTemplateId ?? null,
+                });
                 invalidate();
                 setEditTarget(null);
               })}
@@ -668,6 +850,16 @@ export default function DespesasPage() {
                   onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
                 />
               )}
+              {budgetTemplates && budgetTemplates.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Orçamento</Label>
+                  <BudgetSelect
+                    budgets={budgetTemplates}
+                    value={installmentForm.watch('budgetTemplateId')}
+                    onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
+                  />
+                </div>
+              )}
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>
           )}
@@ -675,7 +867,10 @@ export default function DespesasPage() {
           {editTarget?.type === 'subscription' && (
             <form
               onSubmit={subscriptionForm.handleSubmit(async (data) => {
-                await api.patch(`/subscriptions/${editTarget.id}`, data);
+                await api.patch(`/subscriptions/${editTarget.id}`, {
+                  ...data,
+                  budgetTemplateId: data.budgetTemplateId ?? null,
+                });
                 invalidate();
                 setEditTarget(null);
               })}
@@ -689,6 +884,16 @@ export default function DespesasPage() {
                   value={subscriptionForm.watch('paymentMethodId')}
                   onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
                 />
+              )}
+              {budgetTemplates && budgetTemplates.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Orçamento</Label>
+                  <BudgetSelect
+                    budgets={budgetTemplates}
+                    value={subscriptionForm.watch('budgetTemplateId')}
+                    onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
+                  />
+                </div>
               )}
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>

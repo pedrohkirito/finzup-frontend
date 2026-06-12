@@ -37,7 +37,46 @@ export interface ExpenseEntry {
   paymentMethod?: PaymentMethod | null;
   templateId?: string | null;
   template?: { isSystemSeeded: boolean } | null;
+  budgetTemplateId?: string | null;
+  budgetTemplate?: BudgetTemplate | null;
+  paidAt?: string | null;
   notes?: string | null;
+}
+
+export interface BudgetTemplate {
+  id: string;
+  name: string;
+  defaultLimit: string | number;
+}
+
+export interface MonthBudget {
+  templateId: string;
+  name: string;
+  defaultLimit: number;
+  limit: number;
+  spent: number;
+  remaining: number;
+  progress: number;
+  overBudget: boolean;
+  entries: { id: string; name: string; amount: number }[];
+}
+
+export interface SummaryItem {
+  id: string;
+  name: string;
+  amount: number;
+  category?: string;
+}
+
+export interface BudgetSummary {
+  id: string;
+  name: string;
+  limit: number;
+  spent: number;
+  remaining: number;
+  progress: number;
+  overBudget: boolean;
+  entries?: { id: string; name: string; amount: number }[];
 }
 
 export interface FixedExpenseTemplate {
@@ -46,7 +85,17 @@ export interface FixedExpenseTemplate {
   defaultAmount: string | number;
   paymentMethodId: string | null;
   paymentMethod?: PaymentMethod | null;
+  budgetTemplateId?: string | null;
+  budgetTemplate?: BudgetTemplate | null;
   isSystemSeeded: boolean;
+}
+
+export interface InstallmentEntry {
+  id: string;
+  financialMonthId: string;
+  installmentNumber: number;
+  amount: string | number;
+  paidAt?: string | null;
 }
 
 export interface InstallmentPlan {
@@ -57,7 +106,10 @@ export interface InstallmentPlan {
   totalAmount: string | number;
   installmentsPaid: number;
   active: boolean;
+  budgetTemplateId?: string | null;
+  budgetTemplate?: BudgetTemplate | null;
   paymentMethod: PaymentMethod;
+  installmentEntries?: InstallmentEntry[];
 }
 
 export interface Subscription {
@@ -65,6 +117,8 @@ export interface Subscription {
   name: string;
   amount: string | number;
   active: boolean;
+  budgetTemplateId?: string | null;
+  budgetTemplate?: BudgetTemplate | null;
   paymentMethod: PaymentMethod;
 }
 
@@ -102,6 +156,8 @@ export interface DonationEntry {
   amount: string | number;
   paymentMethodId: string | null;
   paymentMethod?: PaymentMethod | null;
+  budgetTemplateId?: string | null;
+  budgetTemplate?: BudgetTemplate | null;
   notes?: string | null;
   carryForward: boolean;
 }
@@ -115,6 +171,14 @@ export interface MonthSummary {
   creditCardBill: {
     total: number;
     breakdown: { expenses: number; installments: number; subscriptions: number; financings: number; donations: number };
+    items: SummaryItem[];
   };
   investment: { targetAmount: number; totalInvested: number; progress: number };
+  budgets: BudgetSummary[];
+  items: {
+    incomes: SummaryItem[];
+    expenses: SummaryItem[];
+    donations: SummaryItem[];
+    investments: SummaryItem[];
+  };
 }

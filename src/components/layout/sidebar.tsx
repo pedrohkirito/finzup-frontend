@@ -12,6 +12,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const links = [
   { href: '/dashboard', label: 'Resumo', icon: LayoutDashboard },
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
+  { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
   { href: '/dashboard/investimentos', label: 'Investimentos', icon: PiggyBank },
   { href: '/dashboard/doacoes', label: 'Doações', icon: Heart },
   { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },

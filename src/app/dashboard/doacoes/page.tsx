@@ -15,21 +15,112 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ItemActions } from '@/components/despesas/item-actions';
 import { formatCurrency } from '@/lib/utils';
-import type { DonationEntry, PaymentMethod } from '@/types';
-import { Plus, Trash2 } from 'lucide-react';
+import type { DonationEntry, PaymentMethod, BudgetTemplate } from '@/types';
+import { Plus } from 'lucide-react';
 
 const entrySchema = z.object({
   name: z.string().min(1),
   amount: z.coerce.number().positive(),
   paymentMethodId: z.string().optional(),
+  budgetTemplateId: z.string().uuid().optional().nullable(),
   notes: z.string().optional(),
   carryForward: z.boolean().default(false),
 });
 
+function BudgetSelect({
+  budgets,
+  value,
+  onChange,
+}: {
+  budgets: BudgetTemplate[];
+  value?: string | null;
+  onChange: (v: string | null) => void;
+}) {
+  return (
+    <Select
+      value={value ?? 'none'}
+      onValueChange={(v) => onChange(v === 'none' ? null : v)}
+    >
+      <SelectTrigger><SelectValue placeholder="Orçamento (opcional)" /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none">Nenhum</SelectItem>
+        {budgets.map((b) => (
+          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function DonationForm({
+  form,
+  paymentMethods,
+  budgets,
+  onSubmit,
+  submitLabel,
+}: {
+  form: ReturnType<typeof useForm<z.infer<typeof entrySchema>>>;
+  paymentMethods?: PaymentMethod[];
+  budgets?: BudgetTemplate[];
+  onSubmit: (data: z.infer<typeof entrySchema>) => Promise<void>;
+  submitLabel: string;
+}) {
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Label>Instituição / destinatário</Label>
+        <Input placeholder="Ex: Instituto X, Igreja Y" {...form.register('name')} />
+      </div>
+      <div className="space-y-2">
+        <Label>Valor</Label>
+        <FormCurrencyInput control={form.control} name="amount" placeholder="0,00" />
+      </div>
+      <div className="space-y-2">
+        <Label>Forma de pagamento</Label>
+        <Select
+          value={form.watch('paymentMethodId') ?? ''}
+          onValueChange={(v) => form.setValue('paymentMethodId', v)}
+        >
+          <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+          <SelectContent>
+            {paymentMethods?.map((m) => (
+              <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Orçamento</Label>
+        <BudgetSelect
+          budgets={budgets ?? []}
+          value={form.watch('budgetTemplateId')}
+          onChange={(v) => form.setValue('budgetTemplateId', v)}
+        />
+        <p className="text-xs text-slate-500">O valor será abatido do orçamento selecionado.</p>
+      </div>
+      <div className="space-y-2">
+        <Label>Notas (opcional)</Label>
+        <Input placeholder="Ex: Dízimo, campanha de natal" {...form.register('notes')} />
+      </div>
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="carryForward"
+          checked={form.watch('carryForward')}
+          onCheckedChange={(v) => form.setValue('carryForward', !!v)}
+        />
+        <Label htmlFor="carryForward">Repetir todo mês</Label>
+      </div>
+      <Button type="submit" className="w-full">{submitLabel}</Button>
+    </form>
+  );
+}
+
 export default function DoacoesPage() {
   const { selectedMonthId } = useMonthStore();
   const [open, setOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<DonationEntry | null>(null);
   const queryClient = useQueryClient();
 
   const { data: entries } = useQuery({
@@ -43,12 +134,34 @@ export default function DoacoesPage() {
     queryFn: () => api.get<PaymentMethod[]>('/payment-methods'),
   });
 
+  const { data: budgets } = useQuery({
+    queryKey: ['budget-templates'],
+    queryFn: () => api.get<BudgetTemplate[]>('/budget-templates'),
+  });
+
   const entryForm = useForm({
     resolver: zodResolver(entrySchema),
-    defaultValues: { name: '', amount: 0, carryForward: false },
+    defaultValues: { name: '', amount: 0, carryForward: false, budgetTemplateId: null },
+  });
+
+  const editForm = useForm({
+    resolver: zodResolver(entrySchema),
+    defaultValues: { name: '', amount: 0, carryForward: false, budgetTemplateId: null },
   });
 
   const totalDonated = entries?.reduce((sum, e) => sum + Number(e.amount), 0) ?? 0;
+
+  const openEdit = (entry: DonationEntry) => {
+    editForm.reset({
+      name: entry.name,
+      amount: Number(entry.amount),
+      paymentMethodId: entry.paymentMethodId ?? undefined,
+      budgetTemplateId: entry.budgetTemplateId ?? null,
+      notes: entry.notes ?? undefined,
+      carryForward: entry.carryForward,
+    });
+    setEditTarget(entry);
+  };
 
   return (
     <div className="space-y-6">
@@ -72,51 +185,21 @@ export default function DoacoesPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nova doação</DialogTitle></DialogHeader>
-            <form
-              onSubmit={entryForm.handleSubmit(async (data) => {
-                await api.post(`/months/${selectedMonthId}/donations`, data);
+            <DonationForm
+              form={entryForm}
+              paymentMethods={paymentMethods}
+              budgets={budgets}
+              submitLabel="Salvar"
+              onSubmit={async (data) => {
+                await api.post(`/months/${selectedMonthId}/donations`, {
+                  ...data,
+                  budgetTemplateId: data.budgetTemplateId ?? null,
+                });
                 await queryClient.invalidateQueries();
                 entryForm.reset();
                 setOpen(false);
-              })}
-              className="space-y-4"
-            >
-              <div className="space-y-2">
-                <Label>Instituição / destinatário</Label>
-                <Input placeholder="Ex: Instituto X, Igreja Y" {...entryForm.register('name')} />
-              </div>
-              <div className="space-y-2">
-                <Label>Valor</Label>
-                <FormCurrencyInput control={entryForm.control} name="amount" placeholder="0,00" />
-              </div>
-              <div className="space-y-2">
-                <Label>Forma de pagamento</Label>
-                <Select
-                  value={entryForm.watch('paymentMethodId') ?? ''}
-                  onValueChange={(v) => entryForm.setValue('paymentMethodId', v)}
-                >
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {paymentMethods?.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Notas (opcional)</Label>
-                <Input placeholder="Ex: Dízimo, campanha de natal" {...entryForm.register('notes')} />
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="carryForward"
-                  checked={entryForm.watch('carryForward')}
-                  onCheckedChange={(v) => entryForm.setValue('carryForward', !!v)}
-                />
-                <Label htmlFor="carryForward">Repetir todo mês</Label>
-              </div>
-              <Button type="submit" className="w-full">Salvar</Button>
-            </form>
+              }}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -134,21 +217,47 @@ export default function DoacoesPage() {
                 {entry.paymentMethod && (
                   <p className="text-xs text-slate-500">{entry.paymentMethod.name}</p>
                 )}
+                {entry.budgetTemplate && (
+                  <p className="text-xs text-slate-500">Orçamento: {entry.budgetTemplate.name}</p>
+                )}
                 {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-rose-600">{formatCurrency(Number(entry.amount))}</span>
-                <Button variant="ghost" size="icon" onClick={async () => {
-                  await api.delete(`/months/${selectedMonthId}/donations/${entry.id}`);
-                  await queryClient.invalidateQueries();
-                }}>
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
+                <ItemActions
+                  onEdit={() => openEdit(entry)}
+                  onDelete={async () => {
+                    await api.delete(`/months/${selectedMonthId}/donations/${entry.id}`);
+                    await queryClient.invalidateQueries();
+                  }}
+                />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar doação</DialogTitle></DialogHeader>
+          {editTarget && (
+            <DonationForm
+              form={editForm}
+              paymentMethods={paymentMethods}
+              budgets={budgets}
+              submitLabel="Salvar alterações"
+              onSubmit={async (data) => {
+                await api.patch(`/months/${selectedMonthId}/donations/${editTarget.id}`, {
+                  ...data,
+                  budgetTemplateId: data.budgetTemplateId ?? null,
+                });
+                await queryClient.invalidateQueries();
+                setEditTarget(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
