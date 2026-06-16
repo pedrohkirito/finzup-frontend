@@ -2,6 +2,15 @@ export type BillingPlanId = 'monthly' | 'semester' | 'annual';
 
 export const BILLING_PLAN_ORDER: BillingPlanId[] = ['monthly', 'semester', 'annual'];
 
+/** Ordem de exibição no mobile: anual → semestral → mensal */
+export const BILLING_PLAN_ORDER_MOBILE: BillingPlanId[] = ['annual', 'semester', 'monthly'];
+
+export const BILLING_PLAN_GRID_ORDER: Record<BillingPlanId, string> = {
+  annual: 'order-1 lg:order-2',
+  semester: 'order-2 lg:order-3',
+  monthly: 'order-3 lg:order-1',
+};
+
 export interface BillingPlanConfig {
   id: BillingPlanId;
   label: string;

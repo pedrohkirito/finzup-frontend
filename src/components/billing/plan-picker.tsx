@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { TRIAL_DAYS } from '@/constants/billing';
 import {
   BILLING_FEATURES,
+  BILLING_PLAN_GRID_ORDER,
   BILLING_PLAN_ORDER,
   BILLING_PLANS,
   type BillingPlanId,
@@ -54,10 +55,23 @@ export function PlanPicker({
       ? 'bg-brand-500 text-white shadow-md shadow-brand-200/70 hover:bg-brand-600 hover:shadow-lg dark:shadow-brand-900/50'
       : 'border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900';
 
-  const cardClass = (plan: BillingPlanId) =>
-    isSelected(plan)
-      ? 'border-brand-300 shadow-xl shadow-brand-100/60 ring-2 ring-brand-500 dark:border-brand-700 dark:shadow-brand-950 dark:ring-brand-700'
-      : 'border-slate-200 shadow-sm dark:border-slate-800';
+  const cardClass = (plan: BillingPlanId) => {
+    if (isSelected(plan)) {
+      return 'border-brand-300 shadow-xl shadow-brand-100/60 ring-2 ring-brand-500 dark:border-brand-700 dark:shadow-brand-950 dark:ring-brand-700';
+    }
+
+    if (plan === 'annual') {
+      return 'border-brand-200 shadow-md dark:border-brand-800';
+    }
+
+    return 'border-slate-200 shadow-sm dark:border-slate-800';
+  };
+
+  const cardLayoutClass = (planId: BillingPlanId) => {
+    if (planId !== 'annual') return '';
+
+    return 'lg:-my-6 lg:z-10 lg:scale-[1.06] lg:p-9 lg:shadow-2xl lg:shadow-brand-100/60 dark:lg:shadow-brand-950/40';
+  };
 
   const renderPrice = (planId: BillingPlanId) => {
     const plan = BILLING_PLANS[planId];
@@ -68,13 +82,13 @@ export function PlanPicker({
         <>
           <div className="flex items-end gap-1">
             <span className="text-sm font-medium text-slate-500 dark:text-slate-400">R$</span>
-            <span className="text-5xl font-extrabold leading-none text-slate-900 dark:text-white">
-              {int}<span className="text-3xl">,{dec}</span>
+            <span className="text-4xl font-extrabold leading-none text-slate-900 sm:text-5xl dark:text-white">
+              {int}<span className="text-2xl sm:text-3xl">,{dec}</span>
             </span>
             <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">/mês</span>
           </div>
-          <p className="mt-1 text-xs text-transparent select-none" aria-hidden="true">
-            &nbsp;
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            Cobrado mensalmente
           </p>
         </>
       );
@@ -87,13 +101,13 @@ export function PlanPicker({
       <>
         <div className="flex items-end gap-1">
           <span className="text-sm font-medium text-slate-500 dark:text-slate-400">R$</span>
-          <span className="text-5xl font-extrabold leading-none text-slate-900 dark:text-white">
-            {int}<span className="text-3xl">,{dec}</span>
+          <span className="text-4xl font-extrabold leading-none text-slate-900 sm:text-5xl dark:text-white">
+            {int}<span className="text-2xl sm:text-3xl">,{dec}</span>
           </span>
           <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">/mês</span>
         </div>
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          Cobrado R${formatBRL(plan.total)} a cada {plan.intervalMonths === 6 ? '6 meses' : 'ano'}
+          Cobrado a cada {plan.intervalMonths === 6 ? '6 meses' : '12 meses'}
         </p>
       </>
     );
@@ -102,7 +116,7 @@ export function PlanPicker({
   const renderCta = (planId: BillingPlanId) => {
     const label =
       mode === 'landing'
-        ? `${TRIAL_DAYS} dias grátis`
+        ? `Começar ${TRIAL_DAYS} dias grátis`
         : loadingPlan === planId
           ? 'Redirecionando...'
           : 'Iniciar teste grátis';
@@ -134,26 +148,26 @@ export function PlanPicker({
   return (
     <div>
       {!compactHeader && (
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-12">
+          <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:mb-4 sm:text-4xl dark:text-white">
             {mode === 'subscribe' ? 'Escolha seu plano' : 'Planos simples e transparentes'}
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-400">
+          <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
             {mode === 'subscribe'
-              ? `Escolha um plano e informe o cartão. Você só será cobrado após ${TRIAL_DAYS} dias de teste.`
-              : `${TRIAL_DAYS} dias grátis com cartão. Cancele quando quiser antes do fim do teste.`}
+              ? `Escolha um plano e inicie os ${TRIAL_DAYS} dias grátis. A cobrança só começa após o período de teste.`
+              : `Comece com ${TRIAL_DAYS} dias grátis. Cancele quando quiser sem burocracia.`}
           </p>
         </div>
       )}
 
-      <div className="mb-12 flex justify-center">
-        <div className="inline-flex items-center rounded-full border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div className="mb-8 flex justify-center sm:mb-12">
+        <div className="inline-flex max-w-full items-center overflow-x-auto rounded-full border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800">
           {tabs.map(({ id, label, badge }) => (
             <button
               key={id}
               type="button"
               onClick={() => setSelected(id)}
-              className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+              className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all sm:gap-2 sm:px-5 sm:py-2 sm:text-sm ${BILLING_PLAN_GRID_ORDER[id]} ${
                 isSelected(id)
                   ? 'bg-brand-500 text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -176,7 +190,7 @@ export function PlanPicker({
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl gap-4 overflow-visible sm:gap-6 lg:grid-cols-3 lg:items-center lg:py-6">
         {BILLING_PLAN_ORDER.map((planId) => {
           const plan = BILLING_PLANS[planId];
           const Icon = ICONS[plan.icon];
@@ -186,14 +200,18 @@ export function PlanPicker({
           return (
             <div
               key={planId}
-              className={`relative rounded-3xl border bg-white p-7 transition-all dark:bg-slate-950 ${cardClass(planId)}`}
+              className={`relative flex h-full flex-col rounded-3xl border bg-white p-5 transition-all sm:p-7 dark:bg-slate-950 ${BILLING_PLAN_GRID_ORDER[planId]} ${cardClass(planId)} ${cardLayoutClass(planId)} ${
+                isSelected(planId)
+                  ? 'mx-auto w-full max-w-md lg:mx-0 lg:max-w-none'
+                  : 'hidden lg:flex'
+              }`}
             >
-              {isSelected(planId) && (
+              {(planId === 'annual' || isSelected(planId)) && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="flex items-center gap-1.5 rounded-full bg-brand-500 px-4 py-1.5 text-sm font-semibold text-white shadow-md">
                     {planId === 'annual' && <Sparkles className="h-3.5 w-3.5" />}
-                    {planId === 'semester' && <Star className="h-3.5 w-3.5" />}
-                    {planId === 'annual' ? 'Mais popular' : planId === 'semester' ? 'Selecionado' : 'Selecionado'}
+                    {planId === 'semester' && isSelected(planId) && <Star className="h-3.5 w-3.5" />}
+                    {planId === 'annual' ? 'Mais popular' : 'Selecionado'}
                   </span>
                 </div>
               )}
@@ -239,11 +257,13 @@ export function PlanPicker({
 
               <div className="mb-6">{renderPrice(planId)}</div>
 
-              {savings > 0 && planId !== 'monthly' && (
-                <p className="-mt-4 mb-4 text-xs text-slate-400 dark:text-slate-500">
-                  Economize R${formatBRL(savings)} em relação ao mensal (R${formatBRL(monthlyPrice)}/mês)
-                </p>
-              )}
+              <div className="-mt-4 mb-4 min-h-10">
+                {savings > 0 && planId !== 'monthly' && (
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Economize R${formatBRL(savings)} em relação ao mensal
+                  </p>
+                )}
+              </div>
 
               {renderCta(planId)}
 
@@ -261,7 +281,7 @@ export function PlanPicker({
       </div>
 
       {mode === 'landing' && (
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-8">
+        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-8">
           {['Sem taxa de cancelamento', 'Dados 100% seguros', 'Suporte em português'].map((badge) => (
             <div key={badge} className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <Check className="h-4 w-4 text-brand-green-500" />

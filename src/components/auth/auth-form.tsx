@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ApiError } from '@/lib/api';
 import { maskCpfInput } from '@/lib/cpf';
+import { PasswordRequirements } from '@/components/auth/password-requirements';
 import { useState } from 'react';
 
 interface FieldConfig {
@@ -16,6 +17,7 @@ interface FieldConfig {
   type?: string;
   placeholder?: string;
   mask?: 'cpf';
+  showPasswordRequirements?: boolean;
 }
 
 interface AuthFormProps {
@@ -33,6 +35,8 @@ export function AuthForm({ schema, onSubmit, fields, submitLabel, footer }: Auth
   const form = useForm({
     resolver: zodResolver(schema as z.ZodObject<z.ZodRawShape>),
   });
+
+  const watchedValues = form.watch();
 
   const handleSubmit = form.handleSubmit(async (data) => {
     setError('');
@@ -67,6 +71,9 @@ export function AuthForm({ schema, onSubmit, fields, submitLabel, footer }: Auth
             <p className="text-sm text-red-500">
               {(form.formState.errors[field.name] as { message?: string })?.message}
             </p>
+          )}
+          {field.showPasswordRequirements && (
+            <PasswordRequirements password={String(watchedValues[field.name] ?? '')} />
           )}
         </div>
       ))}

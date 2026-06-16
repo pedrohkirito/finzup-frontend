@@ -26,7 +26,7 @@ function ResetPasswordContent() {
           router.push('/login');
         }}
         fields={[
-          { name: 'password', label: 'Nova senha', type: 'password' },
+          { name: 'password', label: 'Nova senha', type: 'password', showPasswordRequirements: true },
           { name: 'confirmPassword', label: 'Confirmar senha', type: 'password' },
         ]}
         submitLabel="Redefinir senha"

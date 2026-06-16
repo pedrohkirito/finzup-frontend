@@ -14,12 +14,14 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
+import { LandingSummaryMock } from '@/components/landing/summary-mock';
 import { PricingSection } from '@/components/landing/pricing-section';
+import { TRIAL_DAYS } from '@/constants/billing';
 
 export const metadata: Metadata = {
   title: 'Finzup — Controle Financeiro Pessoal Inteligente',
   description:
-    'Organize suas finanças pessoais com o Finzup. Controle receitas, despesas, investimentos e orçamentos em um só lugar. Simples, seguro e eficiente.',
+    `Organize suas finanças pessoais com o Finzup. Teste grátis por ${TRIAL_DAYS} dias. Controle receitas, despesas, investimentos e orçamentos em um só lugar.`,
   keywords:
     'controle financeiro, finanças pessoais, orçamento pessoal, controle de gastos, gestão financeira, app financeiro, investimentos pessoais',
   authors: [{ name: 'Finzup' }],
@@ -41,7 +43,7 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     title: 'Finzup — Controle Financeiro Pessoal Inteligente',
     description:
-      'Organize suas finanças pessoais com o Finzup. Controle receitas, despesas, investimentos e orçamentos em um só lugar.',
+      `Organize suas finanças pessoais com o Finzup. Teste grátis por ${TRIAL_DAYS} dias. Controle receitas, despesas, investimentos e orçamentos em um só lugar.`,
     siteName: 'Finzup',
   },
   twitter: {
@@ -96,12 +98,6 @@ const features = [
   },
 ];
 
-const stats = [
-  { value: '10.000+', label: 'Usuários ativos' },
-  { value: 'R$50M+', label: 'Gerenciados' },
-  { value: '4.9★', label: 'Avaliação média' },
-];
-
 const whyFinzup = [
   { icon: Zap, text: 'Interface intuitiva e fácil de usar desde o primeiro acesso' },
   { icon: Shield, text: 'Seus dados protegidos com segurança e privacidade total' },
@@ -136,7 +132,7 @@ export default function Home() {
             </a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-5 sm:gap-6">
             <Link
               href="/login"
               className="text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
@@ -145,7 +141,7 @@ export default function Home() {
             </Link>
             <Link
               href="/register"
-              className="rounded-full bg-brand-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-200/50 dark:hover:shadow-brand-900/50"
+              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-200/50 sm:px-5 dark:hover:shadow-brand-900/50"
             >
               Começar grátis
             </Link>
@@ -154,7 +150,7 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-32 pb-24">
+      <section className="relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-24">
         {/* Fundo com gradientes */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-brand-green-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900" />
@@ -167,19 +163,19 @@ export default function Home() {
             {/* Badge */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 dark:border-brand-800 dark:bg-brand-950 dark:text-brand-300">
               <Zap className="h-3.5 w-3.5" />
-              Controle financeiro simples e poderoso
+              {TRIAL_DAYS} dias grátis para experimentar
             </div>
 
-            <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl dark:text-white">
+            <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl sm:text-6xl lg:text-7xl dark:text-white">
               Suas finanças,{' '}
               <span className="bg-gradient-to-r from-brand-500 to-brand-green-500 bg-clip-text text-transparent">
                 finalmente organizadas
               </span>
             </h1>
 
-            <p className="mb-10 text-xl leading-relaxed text-slate-600 dark:text-slate-400">
-              Controle receitas, despesas, investimentos e orçamentos em um só lugar. Tome decisões
-              financeiras inteligentes com clareza e segurança.
+            <p className="mb-8 text-lg leading-relaxed text-slate-600 sm:mb-10 sm:text-xl dark:text-slate-400">
+              Controle receitas, despesas, investimentos e orçamentos em um só lugar. Teste grátis por{' '}
+              {TRIAL_DAYS} dias — cancele quando quiser, sem cobrança imediata.
             </p>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -187,7 +183,7 @@ export default function Home() {
                 href="/register"
                 className="group inline-flex items-center gap-2 rounded-full bg-brand-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-200/60 transition-all hover:-translate-y-0.5 hover:bg-brand-600 hover:shadow-xl hover:shadow-brand-300/50 dark:shadow-brand-900/50"
               >
-                Começar gratuitamente
+                Começar {TRIAL_DAYS} dias grátis
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <a
@@ -199,68 +195,23 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="mt-20 grid grid-cols-3 divide-x divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white/80 shadow-xl shadow-slate-200/60 backdrop-blur dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
-            {stats.map((stat) => (
-              <div key={stat.label} className="px-6 py-6 text-center sm:px-10">
-                <div className="text-3xl font-extrabold text-slate-900 dark:text-white">{stat.value}</div>
-                <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Mock do dashboard */}
-          <div className="relative mx-auto mt-16 max-w-2xl">
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-brand-50 to-brand-green-50 p-6 shadow-2xl shadow-slate-300/40 dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:shadow-none sm:p-8">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Junho 2026</p>
-                  <p className="text-lg font-bold text-slate-900 dark:text-white">Resumo Financeiro</p>
-                </div>
-                <span className="rounded-full bg-brand-green-100 px-3 py-1 text-sm font-bold text-brand-green-700 dark:bg-brand-green-950 dark:text-brand-green-400">
-                  +R$2.450,00
-                </span>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { label: 'Receitas', value: 'R$8.500,00', pct: 100, color: 'bg-brand-green-500' },
-                  { label: 'Despesas', value: 'R$4.200,00', pct: 49, color: 'bg-orange-500' },
-                  { label: 'Investimentos', value: 'R$1.850,00', pct: 22, color: 'bg-violet-500' },
-                ].map(({ label, value, pct, color }) => (
-                  <div key={label} className="rounded-xl bg-white/80 p-4 backdrop-blur dark:bg-slate-900/80">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{label}</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{value}</span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                      <div
-                        className={`h-full rounded-full ${color} transition-all`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-brand-400/15 blur-2xl" />
-            <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-brand-green-400/15 blur-2xl" />
-          </div>
+          <LandingSummaryMock />
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="bg-slate-50 py-24 dark:bg-slate-900">
+      <section id="features" className="bg-slate-50 py-16 sm:py-24 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
-            <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-16">
+            <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:mb-4 sm:text-4xl dark:text-white">
               Tudo que você precisa para cuidar do seu dinheiro
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
+            <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
               Recursos completos para uma gestão financeira pessoal eficiente e sem complicação.
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {features.map((feature) => (
               <div
                 key={feature.title}
@@ -280,17 +231,17 @@ export default function Home() {
       </section>
 
       {/* Por que Finzup */}
-      <section className="bg-white py-24 dark:bg-slate-950">
+      <section className="bg-white py-16 sm:py-24 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
-              <h2 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:mb-6 sm:text-4xl dark:text-white">
                 Por que escolher o{' '}
                 <span className="bg-gradient-to-r from-brand-500 to-brand-green-500 bg-clip-text text-transparent">
                   Finzup?
                 </span>
               </h2>
-              <p className="mb-8 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+              <p className="mb-6 text-base leading-relaxed text-slate-600 sm:mb-8 sm:text-lg dark:text-slate-400">
                 Criado para brasileiros que querem simplificar a vida financeira sem abrir mão de
                 funcionalidades poderosas e de um design agradável.
               </p>
@@ -309,7 +260,7 @@ export default function Home() {
                   href="/register"
                   className="group inline-flex items-center gap-2 rounded-full bg-brand-500 px-7 py-3 text-sm font-semibold text-white shadow-md shadow-brand-200/60 transition-all hover:-translate-y-0.5 hover:bg-brand-600 hover:shadow-lg dark:shadow-brand-900/50"
                 >
-                  Experimente agora
+                  Começar {TRIAL_DAYS} dias grátis
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
@@ -370,34 +321,6 @@ export default function Home() {
       {/* Seção de preços */}
       <PricingSection />
 
-      {/* CTA Final */}
-      <section className="bg-white py-24 dark:bg-slate-950">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 to-brand-700 px-8 py-16 text-center shadow-2xl shadow-brand-900/30">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 left-1/4 h-64 w-64 rounded-full bg-white blur-3xl" />
-              <div className="absolute bottom-0 right-1/4 h-64 w-64 rounded-full bg-white blur-3xl" />
-            </div>
-            <div className="relative">
-              <h2 className="mb-4 text-4xl font-extrabold text-white">
-                Comece a organizar suas finanças hoje
-              </h2>
-              <p className="mb-8 text-lg text-brand-100">
-                Junte-se a milhares de brasileiros que já transformaram sua relação com o dinheiro usando o
-                Finzup.
-              </p>
-              <Link
-                href="/register"
-                className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-bold text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
-              >
-                Criar minha conta gratuitamente
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-slate-50 py-12 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -420,7 +343,7 @@ export default function Home() {
                 href="/register"
                 className="text-sm text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
               >
-                Cadastrar
+                Criar conta
               </Link>
             </div>
           </div>

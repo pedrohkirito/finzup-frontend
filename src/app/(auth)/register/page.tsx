@@ -45,7 +45,7 @@ export default function RegisterPage() {
           { name: 'name', label: 'Nome completo', placeholder: 'Seu nome' },
           { name: 'cpf', label: 'CPF', placeholder: '000.000.000-00', mask: 'cpf' },
           { name: 'email', label: 'Email', type: 'email', placeholder: 'seu@email.com' },
-          { name: 'password', label: 'Senha', type: 'password' },
+          { name: 'password', label: 'Senha', type: 'password', showPasswordRequirements: true },
           { name: 'confirmPassword', label: 'Confirmar senha', type: 'password' },
         ]}
         submitLabel="Criar conta"

@@ -96,19 +96,13 @@ export default function AssinaturaPageContent() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {trialExpired ? 'Sua assinatura expirou' : 'Comece seu teste gratuito'}
-          </h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">
-            Olá, {user.name.split(/\s+/)[0]}. Escolha um plano e cadastre o cartão — a cobrança só começa após{' '}
-            {trialDays} dias.
-          </p>
-        </div>
-        <Button type="button" variant="outline" onClick={() => logout()}>
-          Sair da conta
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          {trialExpired ? 'Sua assinatura expirou' : 'Comece seu teste gratuito'}
+        </h1>
+        <p className="mt-1 text-slate-600 dark:text-slate-400">
+          Escolha um plano e inicie os {TRIAL_DAYS} dias grátis. A cobrança só começa após o período de teste.
+        </p>
       </div>
 
       {checkoutMessage && (
@@ -124,6 +118,12 @@ export default function AssinaturaPageContent() {
       )}
 
       <PlanPicker mode="subscribe" onSelectPlan={handleSelectPlan} loadingPlan={loadingPlan} compactHeader />
+
+      <div className="flex justify-center border-t border-slate-200 pt-8 dark:border-slate-800">
+        <Button type="button" variant="outline" onClick={() => logout()}>
+          Sair da conta
+        </Button>
+      </div>
     </div>
   );
 }
