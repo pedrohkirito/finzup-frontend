@@ -17,8 +17,7 @@ import {
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 
 const links = [
@@ -33,13 +32,8 @@ const links = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const logout = useLogout();
   const { theme, toggle } = useTheme();
-
-  const logout = async () => {
-    await api.post('/auth/logout');
-    router.push('/login');
-  };
 
   return (
     <aside className="hidden w-64 flex-col border-r border-slate-200/80 bg-white p-4 shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-none md:flex">

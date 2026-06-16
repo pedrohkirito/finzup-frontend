@@ -17,6 +17,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { PaymentMethod } from '@/types';
 import { Plus, Star, Trash2 } from 'lucide-react';
 import { z } from 'zod';
+import { useRouter } from 'next/navigation';
+
+const planLabels: Record<string, string> = {
+  monthly: 'Mensal',
+  semester: 'Semestral',
+  annual: 'Anual',
+};
+
+const statusLabels: Record<string, string> = {
+  none: 'Sem assinatura',
+  active: 'Ativa',
+  trialing: 'Em teste (Stripe)',
+  past_due: 'Pagamento pendente',
+  canceled: 'Cancelada',
+  unpaid: 'Não paga',
+};
 
 const methodSchema = z.object({
   name: z.string().min(1),
@@ -34,8 +50,10 @@ const typeLabels: Record<string, string> = {
 
 export default function ConfiguracoesPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [billingLoading, setBillingLoading] = useState(false);
   const { data: user } = useAuth();
 
   const { data: methods } = useQuery({
@@ -67,6 +85,50 @@ export default function ConfiguracoesPage() {
           <div>
             <p className="text-slate-500">Email</p>
             <p className="font-medium">{user?.email || '—'}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Assinatura</CardTitle></CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          <div>
+            <p className="text-slate-500">Status</p>
+            <p className="font-medium">
+              {user?.billing.inTrial
+                ? `Teste gratuito (${user.billing.daysLeftInTrial} dia${user.billing.daysLeftInTrial === 1 ? '' : 's'} até a cobrança)`
+                : statusLabels[user?.billing.status ?? 'none'] ?? user?.billing.status}
+            </p>
+          </div>
+          {user?.billing.plan && (
+            <div>
+              <p className="text-slate-500">Plano</p>
+              <p className="font-medium">{planLabels[user.billing.plan] ?? user.billing.plan}</p>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {!user?.billing.hasActiveSubscription ? (
+              <Button type="button" onClick={() => router.push('/assinatura')}>
+                Iniciar teste grátis
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={billingLoading}
+                onClick={async () => {
+                  setBillingLoading(true);
+                  try {
+                    const { url } = await api.post<{ url: string }>('/billing/portal-session');
+                    window.location.href = url;
+                  } finally {
+                    setBillingLoading(false);
+                  }
+                }}
+              >
+                Gerenciar assinatura
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -19,7 +19,7 @@ import {
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { api } from '@/lib/api';
+import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 
 const primaryLinks = [
@@ -37,16 +37,11 @@ const moreLinks = [
 
 export function MobileNav() {
   const pathname = usePathname();
-  const router = useRouter();
+  const logout = useLogout();
   const { theme, toggle } = useTheme();
   const [moreOpen, setMoreOpen] = useState(false);
 
   const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));
-
-  const logout = async () => {
-    await api.post('/auth/logout');
-    router.push('/login');
-  };
 
   return (
     <>

@@ -3,11 +3,25 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
+import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { loginSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
+import { getPostAuthRedirect } from '@/lib/post-auth';
+import { useQueryClient } from '@tanstack/react-query';
+import type { User } from '@/types';
 
 export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
+
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -16,7 +30,11 @@ export default function LoginPage() {
         schema={loginSchema}
         onSubmit={async (data) => {
           await api.post('/auth/login', { email: String(data.email), password: String(data.password) });
-          router.push('/dashboard');
+          const user = await queryClient.fetchQuery({
+            queryKey: ['auth', 'me'],
+            queryFn: () => api.get<User>('/users/me'),
+          });
+          router.push(getPostAuthRedirect(user));
         }}
         fields={[
           { name: 'email', label: 'Email', type: 'email', placeholder: 'seu@email.com' },

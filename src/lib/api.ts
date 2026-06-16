@@ -25,6 +25,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const json = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (res.status === 402 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/assinatura')) {
+      window.location.href = '/assinatura';
+    }
+
     throw new ApiError(
       res.status,
       json.error?.code || 'UNKNOWN',

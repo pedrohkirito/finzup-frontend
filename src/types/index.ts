@@ -1,3 +1,18 @@
+export interface UserBilling {
+  status: 'none' | 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid';
+  plan: 'monthly' | 'semester' | 'annual' | null;
+  stripePriceId: string | null;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  hasAccess: boolean;
+  hasActiveSubscription: boolean;
+  inTrial: boolean;
+  trialExpired: boolean;
+  daysLeftInTrial: number;
+  trialDays: number;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -5,6 +20,7 @@ export interface User {
   email: string;
   emailVerifiedAt: string | null;
   createdAt: string;
+  billing: UserBilling;
 }
 
 export interface FinancialMonth {

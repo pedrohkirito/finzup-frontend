@@ -31,7 +31,7 @@ function VerifyEmailContent() {
         .get(`/auth/verify-email?token=${token}`)
         .then(() => {
           setMessage('Email verificado! Redirecionando...');
-          setTimeout(() => router.push('/dashboard'), 1500);
+          setTimeout(() => router.push('/assinatura'), 1500);
         })
         .catch((err: ApiError) => setMessage(err.message))
         .finally(() => setLoading(false));

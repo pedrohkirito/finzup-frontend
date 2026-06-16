@@ -3,11 +3,21 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
+import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { registerSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
+
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -26,7 +36,7 @@ export default function RegisterPage() {
             password,
           });
           if (result.emailVerified) {
-            router.push('/dashboard');
+            router.push('/assinatura');
             return;
           }
           router.push('/verify-email?email=' + encodeURIComponent(email));

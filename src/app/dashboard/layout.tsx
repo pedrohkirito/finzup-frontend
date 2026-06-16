@@ -8,6 +8,7 @@ import { MobileNav } from '@/components/layout/mobile-nav';
 import { MonthPicker } from '@/components/layout/month-picker';
 import { MonthProvider } from '@/hooks/use-month';
 import { useAuth } from '@/hooks/use-auth';
+import { TrialBanner } from '@/components/billing/trial-banner';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, isError } = useAuth();
@@ -19,6 +20,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [isLoading, isError, router]);
 
+  useEffect(() => {
+    if (!isLoading && user && !user.billing?.hasAccess) {
+      router.replace('/assinatura');
+    }
+  }, [isLoading, user, router]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -27,7 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!user) return null;
+  if (!user || !user.billing?.hasAccess) return null;
 
   const firstName = user.name.trim().split(/\s+/)[0] || user.name;
 
@@ -59,7 +66,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
           </header>
-          <main className="flex-1 overflow-y-auto bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">{children}</main>
+          <main className="flex-1 overflow-y-auto bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
+            <TrialBanner billing={user.billing} />
+            {children}
+          </main>
         </div>
         <MobileNav />
       </div>
