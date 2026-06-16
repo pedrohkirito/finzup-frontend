@@ -34,8 +34,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!user || !user.billing?.hasAccess) return null;
+  if (!user?.billing?.hasAccess) return null;
 
+  const { billing } = user;
   const firstName = user.name.trim().split(/\s+/)[0] || user.name;
 
   return (
@@ -67,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </header>
           <main className="flex-1 overflow-y-auto bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
-            <TrialBanner billing={user.billing} />
+            <TrialBanner billing={billing} />
             {children}
           </main>
         </div>

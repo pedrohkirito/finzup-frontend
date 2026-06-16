@@ -95,19 +95,19 @@ export default function ConfiguracoesPage() {
           <div>
             <p className="text-slate-500">Status</p>
             <p className="font-medium">
-              {user?.billing.inTrial
+              {user?.billing?.inTrial
                 ? `Teste gratuito (${user.billing.daysLeftInTrial} dia${user.billing.daysLeftInTrial === 1 ? '' : 's'} até a cobrança)`
-                : statusLabels[user?.billing.status ?? 'none'] ?? user?.billing.status}
+                : statusLabels[user?.billing?.status ?? 'none'] ?? user?.billing?.status}
             </p>
           </div>
-          {user?.billing.plan && (
+          {user?.billing?.plan && (
             <div>
               <p className="text-slate-500">Plano</p>
               <p className="font-medium">{planLabels[user.billing.plan] ?? user.billing.plan}</p>
             </div>
           )}
           <div className="flex flex-wrap gap-2">
-            {!user?.billing.hasActiveSubscription ? (
+            {!user?.billing?.hasActiveSubscription ? (
               <Button type="button" onClick={() => router.push('/assinatura')}>
                 Iniciar teste grátis
               </Button>
