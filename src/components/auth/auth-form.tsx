@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ApiError } from '@/lib/api';
+import { maskCpfInput } from '@/lib/cpf';
 import { useState } from 'react';
 
 interface FieldConfig {
@@ -14,6 +15,7 @@ interface FieldConfig {
   label: string;
   type?: string;
   placeholder?: string;
+  mask?: 'cpf';
 }
 
 interface AuthFormProps {
@@ -53,7 +55,13 @@ export function AuthForm({ schema, onSubmit, fields, submitLabel, footer }: Auth
             id={field.name}
             type={field.type || 'text'}
             placeholder={field.placeholder}
-            {...form.register(field.name)}
+            {...form.register(field.name, {
+              onChange: field.mask === 'cpf'
+                ? (e) => {
+                    e.target.value = maskCpfInput(e.target.value);
+                  }
+                : undefined,
+            })}
           />
           {form.formState.errors[field.name] && (
             <p className="text-sm text-red-500">

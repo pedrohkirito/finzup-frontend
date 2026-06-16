@@ -50,7 +50,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-40 min-h-[var(--mobile-nav-height)] border-t border-slate-200 bg-white/95 px-1 py-1.5 backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95">
+      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-40 min-h-[var(--mobile-nav-height)] border-t border-slate-200/80 bg-white/95 px-1 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.07)] backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-none">
         <div className="mx-auto flex max-w-lg items-stretch justify-around">
           {primaryLinks.map(({ href, icon: Icon, label }) => {
             const active = isNavLinkActive(pathname, href);

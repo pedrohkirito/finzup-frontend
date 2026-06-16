@@ -85,7 +85,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         {cards.map(({ key, title, value, icon: Icon, accent, bg, itemCount }) => (
           <Card
             key={key}
-            className="cursor-pointer transition-all hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700"
+            className="cursor-pointer transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 dark:hover:border-slate-700"
             onClick={() => setOpenDialog(key)}
           >
             <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
@@ -113,7 +113,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         ))}
 
         <Card
-          className="cursor-pointer transition-all hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700 sm:col-span-2 xl:col-span-5"
+          className="cursor-pointer transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 dark:hover:border-slate-700 sm:col-span-2 xl:col-span-5"
           onClick={() => setOpenDialog('investimentos')}
         >
           <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
@@ -164,7 +164,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
               {summary.budgets!.map((budget) => (
                 <div
                   key={budget.id}
-                  className="cursor-pointer rounded-lg border border-slate-100 p-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                  className="cursor-pointer rounded-lg bg-slate-50/80 p-3 transition-all hover:bg-slate-100/80 hover:shadow-sm dark:bg-slate-800/30 dark:hover:bg-slate-800/50"
                   onClick={() => setOpenBudget(budget)}
                 >
                   <div className="mb-2.5 flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">

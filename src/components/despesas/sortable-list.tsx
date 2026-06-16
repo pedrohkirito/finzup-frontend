@@ -80,6 +80,9 @@ export function SortableList<T extends { id: string }>({
   sortable?: boolean;
 }) {
   const [localItems, setLocalItems] = useState(items);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  );
 
   useEffect(() => {
     setLocalItems(items);
@@ -95,10 +98,6 @@ export function SortableList<T extends { id: string }>({
       </div>
     );
   }
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;

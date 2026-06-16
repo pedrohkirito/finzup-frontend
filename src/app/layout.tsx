@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Finzup — Organização Financeira',
   description: 'Gerencie receitas, despesas e investimentos de forma simples',
+  icons: {
+    icon: '/images/finzup_icon.ico',
+    shortcut: '/images/finzup_icon.ico',
+    apple: '/images/finzup_icon.png',
+  },
 };
 
 export const viewport: Viewport = {

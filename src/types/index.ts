@@ -1,5 +1,7 @@
 export interface User {
   id: string;
+  name: string;
+  cpf: string | null;
   email: string;
   emailVerifiedAt: string | null;
   createdAt: string;

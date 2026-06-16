@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidCpf, normalizeCpf } from './cpf';
 
 export const emailSchema = z.string().email('Email inválido');
 
@@ -9,6 +10,15 @@ export const passwordSchema = z
   .regex(/[a-z]/, 'Precisa de uma minúscula')
   .regex(/[0-9]/, 'Precisa de um número');
 
+export const nameSchema = z.string().min(2, 'Nome deve ter no mínimo 2 caracteres').max(120);
+
+export const cpfSchema = z
+  .string()
+  .min(1, 'CPF obrigatório')
+  .transform((v) => normalizeCpf(v))
+  .refine((v) => /^\d{11}$/.test(v), 'CPF deve ter 11 dígitos')
+  .refine(isValidCpf, 'CPF inválido');
+
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, 'Senha obrigatória'),
@@ -16,6 +26,8 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
+    name: nameSchema,
+    cpf: cpfSchema,
     email: emailSchema,
     password: passwordSchema,
     confirmPassword: z.string(),

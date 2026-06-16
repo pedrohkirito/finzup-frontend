@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '@/lib/api';
 import { changePasswordSchema } from '@/lib/validators';
+import { formatCpf } from '@/lib/cpf';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +36,7 @@ export default function ConfiguracoesPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const { data: user } = useAuth();
 
   const { data: methods } = useQuery({
     queryKey: ['payment-methods'],
@@ -47,8 +50,26 @@ export default function ConfiguracoesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold sm:text-2xl">Configurações</h1>
-        <p className="text-sm text-slate-500">Senha e métodos de pagamento</p>
+        <p className="text-sm text-slate-500">Perfil, senha e métodos de pagamento</p>
       </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Perfil</CardTitle></CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div>
+            <p className="text-slate-500">Nome</p>
+            <p className="font-medium">{user?.name || '—'}</p>
+          </div>
+          <div>
+            <p className="text-slate-500">CPF</p>
+            <p className="font-medium">{user?.cpf ? formatCpf(user.cpf) : '—'}</p>
+          </div>
+          <div>
+            <p className="text-slate-500">Email</p>
+            <p className="font-medium">{user?.email || '—'}</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader><CardTitle className="text-base">Alterar senha</CardTitle></CardHeader>

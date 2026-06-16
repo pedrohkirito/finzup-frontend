@@ -15,9 +15,13 @@ export default function RegisterPage() {
       <AuthForm
         schema={registerSchema}
         onSubmit={async (data) => {
+          const name = String(data.name);
+          const cpf = String(data.cpf);
           const email = String(data.email);
           const password = String(data.password);
           const result = await api.post<{ emailVerified?: boolean }>('/auth/register', {
+            name,
+            cpf,
             email,
             password,
           });
@@ -28,6 +32,8 @@ export default function RegisterPage() {
           router.push('/verify-email?email=' + encodeURIComponent(email));
         }}
         fields={[
+          { name: 'name', label: 'Nome completo', placeholder: 'Seu nome' },
+          { name: 'cpf', label: 'CPF', placeholder: '000.000.000-00', mask: 'cpf' },
           { name: 'email', label: 'Email', type: 'email', placeholder: 'seu@email.com' },
           { name: 'password', label: 'Senha', type: 'password' },
           { name: 'confirmPassword', label: 'Confirmar senha', type: 'password' },
