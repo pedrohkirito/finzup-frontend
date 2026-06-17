@@ -41,3 +41,7 @@ export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   assinatura: 'Assinaturas',
   financiamento: 'Financiamentos',
 };
+
+export const EXPENSE_CATEGORY_ORDER = ['avulsa', 'fixa', 'parcelamento', 'assinatura', 'financiamento'] as const;
+
+export const EXPENSE_BREAKDOWN_TYPES = ['fixa', 'assinatura', 'parcelamento', 'financiamento'] as const;

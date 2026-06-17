@@ -7,14 +7,7 @@ import { ReportOverview } from '@/components/reports/report-overview';
 import { ReportAlerts } from '@/components/reports/report-alerts';
 import { ReportIncomeExpenseChart } from '@/components/reports/report-income-expense-chart';
 import { ReportIncomeByItemChart } from '@/components/reports/report-income-by-item-chart';
-import { ReportExpenseTypeChart } from '@/components/reports/report-expense-type-chart';
-import { ReportFixedVsVariableChart } from '@/components/reports/report-fixed-vs-variable-chart';
-import { ReportBudgetChart } from '@/components/reports/report-budget-chart';
-import { ReportPaymentMethods } from '@/components/reports/report-payment-methods';
-import { ReportTopExpenses } from '@/components/reports/report-top-expenses';
-import { ReportCreditCard } from '@/components/reports/report-credit-card';
 import { ReportInvestment } from '@/components/reports/report-investment';
-import { ReportParetoChart } from '@/components/reports/report-pareto-chart';
 import { ReportMonthlyTrendChart } from '@/components/reports/report-monthly-trend-chart';
 
 export default function RelatoriosPage() {
@@ -58,36 +51,26 @@ export default function RelatoriosPage() {
         overview={report.overview}
         investment={report.investment}
         creditCardBill={report.creditCardBill}
-      />
+        expenseByType={report.expenseByType}
+        expenses={report.items.expenses}
+        paymentMethods={report.paymentMethods}
+      >
+        <div className="grid gap-3 md:grid-cols-2">
+          <ReportIncomeExpenseChart
+            totalIncome={report.overview.totalIncome}
+            totalExpenses={report.overview.totalExpenses}
+            totalDonations={report.overview.totalDonations}
+            totalInvested={report.investment.totalInvested}
+          />
+          <ReportIncomeByItemChart incomes={report.items.incomes} />
+        </div>
+      </ReportOverview>
 
       {report.alerts.length > 0 && <ReportAlerts alerts={report.alerts} />}
 
-      <ReportMonthlyTrendChart monthlyTrend={report.monthlyTrend} />
-
       <div className="grid gap-6 md:grid-cols-2">
-        <ReportIncomeExpenseChart
-          totalIncome={report.overview.totalIncome}
-          totalExpenses={report.overview.totalExpenses}
-          totalDonations={report.overview.totalDonations}
-        />
-
-        <ReportIncomeByItemChart incomes={report.items.incomes} />
-
-        <ReportFixedVsVariableChart fixedVsVariable={report.fixedVsVariable} />
-
-        <ReportExpenseTypeChart expenseByType={report.expenseByType} />
-
-        <ReportCreditCard creditCardBill={report.creditCardBill} />
-
-        <ReportParetoChart paretoExpenses={report.paretoExpenses} className="md:col-span-2" />
-
-        <ReportBudgetChart budgetByCategory={report.budgetByCategory} className="md:col-span-2" />
-
-        <ReportPaymentMethods paymentMethods={report.paymentMethods} />
-
-        <ReportTopExpenses topExpenses={report.topExpenses} />
-
         <ReportInvestment investment={report.investment} items={report.items.investments} />
+        <ReportMonthlyTrendChart monthlyTrend={report.monthlyTrend} />
       </div>
     </div>
   );

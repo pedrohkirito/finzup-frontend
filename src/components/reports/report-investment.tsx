@@ -1,10 +1,11 @@
 'use client';
 
+import { useMemo } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import type { MonthReport } from '@/types';
 import { ReportSection } from './report-section';
-import { Progress } from '@/components/ui/progress';
-import { PiggyBank } from 'lucide-react';
+import { ReportIncomeCompositionChart } from './report-income-composition-chart';
+import { CHART_COLORS } from './chart-utils';
 
 export function ReportInvestment({
   investment,
@@ -15,44 +16,40 @@ export function ReportInvestment({
   items: MonthReport['items']['investments'];
   className?: string;
 }) {
-  const progress = Math.min(investment.progress, 100);
+  const { totalInvested, targetAmount, progress } = investment;
+  const progressPct = Math.min(progress, 100);
+
+  const chartItems = useMemo(
+    () =>
+      items.map((item, index) => ({
+        label: item.name,
+        value: item.amount,
+        pct: totalInvested > 0 ? (item.amount / totalInvested) * 100 : 0,
+        color: CHART_COLORS[(index + 1) % CHART_COLORS.length],
+      })),
+    [items, totalInvested],
+  );
+
+  const description =
+    targetAmount > 0
+      ? `Meta de ${formatCurrency(targetAmount)} · ${progressPct.toFixed(0)}% atingida`
+      : 'Aportes realizados neste mês';
 
   return (
-    <ReportSection className={className} title="Investimentos" description="Aportes do mês em relação à meta">
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-950/60">
-            <PiggyBank className="h-5 w-5 text-emerald-600" />
+    <ReportSection className={className} title="Investimentos" description={description}>
+      {items.length === 0 ? (
+        <p className="py-8 text-center text-sm text-slate-500">Nenhum investimento registrado neste mês.</p>
+      ) : (
+        <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/20">
+          <div className="mb-4 flex items-baseline justify-between gap-2">
+            <h4 className="text-sm font-semibold text-emerald-600">Aportes do mês</h4>
+            <span className="text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">
+              {formatCurrency(totalInvested)}
+            </span>
           </div>
-          <div className="flex-1">
-            <div className="flex flex-wrap items-end justify-between gap-2">
-              <div>
-                <p className="text-2xl font-bold text-emerald-600">{formatCurrency(investment.totalInvested)}</p>
-                <p className="text-xs text-slate-500">investidos este mês</p>
-              </div>
-              <p className="text-sm text-slate-500">
-                Meta: <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(investment.targetAmount)}</span>
-              </p>
-            </div>
-            <Progress value={progress} className="mt-3" />
-            <p className="mt-1 text-xs text-slate-400">{progress.toFixed(0)}% da meta atingida</p>
-          </div>
+          <ReportIncomeCompositionChart items={chartItems} />
         </div>
-
-        {items.length > 0 && (
-          <div className="space-y-2 border-t pt-4">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50"
-              >
-                <span className="truncate text-sm font-medium">{item.name}</span>
-                <span className="shrink-0 text-sm font-semibold text-emerald-600">{formatCurrency(item.amount)}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </ReportSection>
   );
 }
