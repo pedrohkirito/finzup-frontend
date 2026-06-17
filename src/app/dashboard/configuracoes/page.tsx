@@ -76,7 +76,14 @@ const methodTypeBars: Record<PaymentMethod['type'], string> = {
   other:    'bg-slate-400',
 };
 
-function getBillingStatusBadge(status: string, inTrial: boolean) {
+function getBillingStatusBadge(status: string, inTrial: boolean, cancelAtPeriodEnd = false) {
+  if (inTrial && cancelAtPeriodEnd) {
+    return {
+      label: 'Cancelamento agendado',
+      className:
+        'border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    };
+  }
   if (inTrial) return { label: 'Teste gratuito', className: 'border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-800 dark:bg-brand-950/60 dark:text-brand-300' };
   switch (status) {
     case 'active':   return { label: 'Ativa',    className: 'border-brand-green-200 bg-brand-green-50 text-brand-green-700 dark:border-brand-green-800 dark:bg-brand-green-950/60 dark:text-brand-green-300' };
@@ -106,7 +113,11 @@ export default function ConfiguracoesPage() {
   const passwordForm = useForm({ resolver: zodResolver(changePasswordSchema) });
   const newPassword = passwordForm.watch('newPassword') ?? '';
 
-  const billingBadge = getBillingStatusBadge(user?.billing?.status ?? 'none', !!user?.billing?.inTrial);
+  const billingBadge = getBillingStatusBadge(
+    user?.billing?.status ?? 'none',
+    !!user?.billing?.inTrial,
+    !!user?.billing?.cancelAtPeriodEnd,
+  );
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
     : null;
@@ -337,7 +348,9 @@ export default function ConfiguracoesPage() {
                 </span>
                 {user?.billing?.inTrial && (
                   <span className="text-xs text-slate-500">
-                    {user.billing.daysLeftInTrial} dia{user.billing.daysLeftInTrial === 1 ? '' : 's'} até a primeira cobrança
+                    {user.billing.cancelAtPeriodEnd
+                      ? `${user.billing.daysLeftInTrial} dia${user.billing.daysLeftInTrial === 1 ? '' : 's'} de teste restantes · assinatura cancelada`
+                      : `${user.billing.daysLeftInTrial} dia${user.billing.daysLeftInTrial === 1 ? '' : 's'} até a primeira cobrança`}
                   </span>
                 )}
               </div>
