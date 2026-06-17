@@ -21,6 +21,7 @@ import { Progress } from '@/components/ui/progress';
 import { CreditPaymentToggle } from '@/components/despesas/credit-payment-toggle';
 import { ItemActions } from '@/components/despesas/item-actions';
 import { SortableList } from '@/components/despesas/sortable-list';
+import { PaymentMethodField } from '@/components/payment-methods/payment-method-field';
 import { formatCurrency, cn } from '@/lib/utils';
 import type {
   ExpenseEntry,
@@ -34,7 +35,6 @@ import type {
   MonthSummary,
 } from '@/types';
 import { Plus, RefreshCw, TrendingDown } from 'lucide-react';
-import Link from 'next/link';
 
 function getExpenseAmountColor(isCredit: boolean, isPaid: boolean) {
   return isCredit && !isPaid ? 'text-violet-600' : 'text-orange-600 dark:text-orange-400';
@@ -90,27 +90,6 @@ function canCancelFinancingEntry(entry: FinancingEntry, installmentsPaid: number
   return entry.installmentNumber === installmentsPaid || entry.installmentNumber === installmentsPaid + 1;
 }
 
-function PaymentMethodSelect({
-  methods,
-  value,
-  onChange,
-}: {
-  methods: PaymentMethod[];
-  value?: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger><SelectValue placeholder="Método de pagamento" /></SelectTrigger>
-      <SelectContent>
-        {methods.map((m) => (
-          <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
 function BudgetSelect({
   budgets,
   value,
@@ -133,20 +112,6 @@ function BudgetSelect({
         ))}
       </SelectContent>
     </Select>
-  );
-}
-
-function CreditPaymentMethodNotice() {
-  return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
-      <p>
-        Parcelamentos no cartão exigem um método de pagamento do tipo crédito.{' '}
-        <Link href="/dashboard/configuracoes" className="font-medium underline underline-offset-2">
-          Cadastre um cartão de crédito em Configurações
-        </Link>{' '}
-        para continuar.
-      </p>
-    </div>
   );
 }
 
@@ -217,8 +182,6 @@ export default function DespesasPage() {
   const financingForm = useForm({ resolver: zodResolver(financingSchema), defaultValues: { installmentsPaid: 0, earlyPaymentAmount: 0 } });
 
   const defaultMethod = methods?.find((m) => m.isDefault)?.id;
-  const creditMethods = methods?.filter((m) => m.type === 'credit') ?? [];
-  const hasCreditMethods = creditMethods.length > 0;
 
   const openEdit = (type: EditType, item: ExpenseEntry | FixedExpenseTemplate | InstallmentPlan | Subscription | Financing) => {
     if (type === 'one_off') {
@@ -324,13 +287,11 @@ export default function DespesasPage() {
               >
                 <div className="space-y-2"><Label>Nome</Label><Input {...expenseForm.register('name')} /></div>
                 <div className="space-y-2"><Label>Valor</Label><FormCurrencyInput control={expenseForm.control} name="amount" placeholder="0,00" /></div>
-                {methods && (
-                  <PaymentMethodSelect
-                    methods={methods}
-                    value={expenseForm.watch('paymentMethodId') || defaultMethod}
-                    onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
-                  />
-                )}
+                <PaymentMethodField
+                  methods={methods ?? []}
+                  value={expenseForm.watch('paymentMethodId') || defaultMethod}
+                  onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
+                />
                 {budgetTemplates && budgetTemplates.length > 0 && (
                   <div className="space-y-2">
                     <Label>Orçamento</Label>
@@ -434,8 +395,8 @@ export default function DespesasPage() {
                   <div className="space-y-2"><Label>Nome</Label><Input placeholder="Ex: Aluguel" {...fixedTemplateForm.register('name')} /></div>
                   <div className="space-y-2"><Label>Valor padrão (R$)</Label><FormCurrencyInput control={fixedTemplateForm.control} name="defaultAmount" placeholder="0,00" /></div>
                   {methods && (
-                    <PaymentMethodSelect
-                      methods={methods}
+                    <PaymentMethodField
+                      methods={methods ?? []}
                       value={fixedTemplateForm.watch('paymentMethodId') || defaultMethod}
                       onChange={(v) => fixedTemplateForm.setValue('paymentMethodId', v)}
                     />
@@ -548,15 +509,14 @@ export default function DespesasPage() {
                 <div className="space-y-2"><Label>Total de parcelas</Label><Input type="number" {...installmentForm.register('totalInstallments')} /></div>
                 <div className="space-y-2"><Label>Valor da parcela</Label><FormCurrencyInput control={installmentForm.control} name="installmentAmount" placeholder="0,00" /></div>
                 <div className="space-y-2"><Label>Parcelas já pagas</Label><Input type="number" {...installmentForm.register('installmentsPaid')} /></div>
-                {!hasCreditMethods ? (
-                  <CreditPaymentMethodNotice />
-                ) : (
-                  <PaymentMethodSelect
-                    methods={creditMethods}
-                    value={installmentForm.watch('paymentMethodId')}
-                    onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
-                  />
-                )}
+                <PaymentMethodField
+                  methods={methods ?? []}
+                  typeFilter="credit"
+                  defaultType="credit"
+                  label="Cartão de crédito"
+                  value={installmentForm.watch('paymentMethodId')}
+                  onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
+                />
                 {budgetTemplates && budgetTemplates.length > 0 && (
                   <div className="space-y-2">
                     <Label>Orçamento</Label>
@@ -567,7 +527,7 @@ export default function DespesasPage() {
                     />
                   </div>
                 )}
-                <Button type="submit" className="w-full" disabled={!hasCreditMethods}>Salvar</Button>
+                <Button type="submit" className="w-full" disabled={!installmentForm.watch('paymentMethodId')}>Salvar</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -662,13 +622,11 @@ export default function DespesasPage() {
               >
                 <div className="space-y-2"><Label>Nome</Label><Input {...subscriptionForm.register('name')} /></div>
                 <div className="space-y-2"><Label>Valor mensal</Label><FormCurrencyInput control={subscriptionForm.control} name="amount" placeholder="0,00" /></div>
-                {methods && (
-                  <PaymentMethodSelect
-                    methods={methods}
-                    value={subscriptionForm.watch('paymentMethodId')}
-                    onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
-                  />
-                )}
+                <PaymentMethodField
+                  methods={methods ?? []}
+                  value={subscriptionForm.watch('paymentMethodId')}
+                  onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
+                />
                 {budgetTemplates && budgetTemplates.length > 0 && (
                   <div className="space-y-2">
                     <Label>Orçamento</Label>
@@ -769,13 +727,11 @@ export default function DespesasPage() {
                 <div className="space-y-2"><Label>Total de parcelas</Label><Input type="number" {...financingForm.register('totalInstallments')} /></div>
                 <div className="space-y-2"><Label>Parcelas já pagas</Label><Input type="number" {...financingForm.register('installmentsPaid')} /></div>
                 <div className="space-y-2"><Label>Valor pago no adiantamento</Label><FormCurrencyInput control={financingForm.control} name="earlyPaymentAmount" placeholder="0,00" /></div>
-                {methods && (
-                  <PaymentMethodSelect
-                    methods={methods}
-                    value={financingForm.watch('paymentMethodId')}
-                    onChange={(v) => financingForm.setValue('paymentMethodId', v)}
-                  />
-                )}
+                <PaymentMethodField
+                  methods={methods ?? []}
+                  value={financingForm.watch('paymentMethodId')}
+                  onChange={(v) => financingForm.setValue('paymentMethodId', v)}
+                />
                 <Button type="submit" className="w-full">Salvar</Button>
               </form>
             </DialogContent>
@@ -895,13 +851,11 @@ export default function DespesasPage() {
             >
               <div className="space-y-2"><Label>Nome</Label><Input {...expenseForm.register('name')} /></div>
               <div className="space-y-2"><Label>Valor</Label><FormCurrencyInput control={expenseForm.control} name="amount" placeholder="0,00" /></div>
-              {methods && (
-                <PaymentMethodSelect
-                  methods={methods}
-                  value={expenseForm.watch('paymentMethodId') || defaultMethod}
-                  onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
-                />
-              )}
+              <PaymentMethodField
+                methods={methods ?? []}
+                value={expenseForm.watch('paymentMethodId') || defaultMethod}
+                onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
+              />
               {budgetTemplates && budgetTemplates.length > 0 && (
                 <div className="space-y-2">
                   <Label>Orçamento</Label>
@@ -931,13 +885,11 @@ export default function DespesasPage() {
             >
               <div className="space-y-2"><Label>Nome</Label><Input {...fixedTemplateForm.register('name')} /></div>
               <div className="space-y-2"><Label>Valor padrão (R$)</Label><FormCurrencyInput control={fixedTemplateForm.control} name="defaultAmount" placeholder="0,00" /></div>
-              {methods && (
-                <PaymentMethodSelect
-                  methods={methods}
-                  value={fixedTemplateForm.watch('paymentMethodId') || defaultMethod}
-                  onChange={(v) => fixedTemplateForm.setValue('paymentMethodId', v)}
-                />
-              )}
+              <PaymentMethodField
+                methods={methods ?? []}
+                value={fixedTemplateForm.watch('paymentMethodId') || defaultMethod}
+                onChange={(v) => fixedTemplateForm.setValue('paymentMethodId', v)}
+              />
               {budgetTemplates && budgetTemplates.length > 0 && (
                 <div className="space-y-2">
                   <Label>Orçamento</Label>
@@ -968,15 +920,14 @@ export default function DespesasPage() {
               <div className="space-y-2"><Label>Total de parcelas</Label><Input type="number" {...installmentForm.register('totalInstallments')} /></div>
               <div className="space-y-2"><Label>Valor da parcela</Label><FormCurrencyInput control={installmentForm.control} name="installmentAmount" placeholder="0,00" /></div>
               <div className="space-y-2"><Label>Parcelas já pagas</Label><Input type="number" {...installmentForm.register('installmentsPaid')} /></div>
-              {!hasCreditMethods ? (
-                <CreditPaymentMethodNotice />
-              ) : (
-                <PaymentMethodSelect
-                  methods={creditMethods}
-                  value={installmentForm.watch('paymentMethodId')}
-                  onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
-                />
-              )}
+              <PaymentMethodField
+                methods={methods ?? []}
+                typeFilter="credit"
+                defaultType="credit"
+                label="Cartão de crédito"
+                value={installmentForm.watch('paymentMethodId')}
+                onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
+              />
               {budgetTemplates && budgetTemplates.length > 0 && (
                 <div className="space-y-2">
                   <Label>Orçamento</Label>
@@ -987,7 +938,7 @@ export default function DespesasPage() {
                   />
                 </div>
               )}
-              <Button type="submit" className="w-full" disabled={!hasCreditMethods}>Salvar alterações</Button>
+              <Button type="submit" className="w-full" disabled={!installmentForm.watch('paymentMethodId')}>Salvar alterações</Button>
             </form>
           )}
 
@@ -1005,13 +956,11 @@ export default function DespesasPage() {
             >
               <div className="space-y-2"><Label>Nome</Label><Input {...subscriptionForm.register('name')} /></div>
               <div className="space-y-2"><Label>Valor mensal</Label><FormCurrencyInput control={subscriptionForm.control} name="amount" placeholder="0,00" /></div>
-              {methods && (
-                <PaymentMethodSelect
-                  methods={methods}
-                  value={subscriptionForm.watch('paymentMethodId')}
-                  onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
-                />
-              )}
+              <PaymentMethodField
+                methods={methods ?? []}
+                value={subscriptionForm.watch('paymentMethodId')}
+                onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
+              />
               {budgetTemplates && budgetTemplates.length > 0 && (
                 <div className="space-y-2">
                   <Label>Orçamento</Label>
@@ -1040,13 +989,11 @@ export default function DespesasPage() {
               <div className="space-y-2"><Label>Total de parcelas</Label><Input type="number" {...financingForm.register('totalInstallments')} /></div>
               <div className="space-y-2"><Label>Parcelas já pagas</Label><Input type="number" {...financingForm.register('installmentsPaid')} /></div>
               <div className="space-y-2"><Label>Valor pago no adiantamento</Label><FormCurrencyInput control={financingForm.control} name="earlyPaymentAmount" placeholder="0,00" /></div>
-              {methods && (
-                <PaymentMethodSelect
-                  methods={methods}
-                  value={financingForm.watch('paymentMethodId')}
-                  onChange={(v) => financingForm.setValue('paymentMethodId', v)}
-                />
-              )}
+              <PaymentMethodField
+                methods={methods ?? []}
+                value={financingForm.watch('paymentMethodId')}
+                onChange={(v) => financingForm.setValue('paymentMethodId', v)}
+              />
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>
           )}

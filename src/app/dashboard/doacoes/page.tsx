@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PaymentMethodField } from '@/components/payment-methods/payment-method-field';
 import { ItemActions } from '@/components/despesas/item-actions';
 import { SortableList } from '@/components/despesas/sortable-list';
 import { formatCurrency } from '@/lib/utils';
@@ -81,20 +82,11 @@ function DonationForm({
         <Label>Valor</Label>
         <FormCurrencyInput control={form.control} name="amount" placeholder="0,00" />
       </div>
-      <div className="space-y-2">
-        <Label>Forma de pagamento</Label>
-        <Select
-          value={form.watch('paymentMethodId') ?? ''}
-          onValueChange={(v) => form.setValue('paymentMethodId', v)}
-        >
-          <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-          <SelectContent>
-            {paymentMethods?.map((m) => (
-              <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <PaymentMethodField
+        methods={paymentMethods ?? []}
+        value={form.watch('paymentMethodId') ?? ''}
+        onChange={(v) => form.setValue('paymentMethodId', v)}
+      />
       <div className="space-y-2">
         <Label>Orçamento</Label>
         <BudgetSelect

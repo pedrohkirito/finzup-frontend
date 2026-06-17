@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
       </div>
     );
   }
@@ -41,9 +41,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <MonthProvider>
-      <div className="flex min-h-screen bg-white dark:bg-slate-950">
+      <div className="flex min-h-screen bg-white dark:bg-slate-950 md:h-screen md:overflow-hidden">
         <Sidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-4 pt-mobile-header pb-3 shadow-sm backdrop-blur-md md:px-8 md:py-4 dark:border-slate-800 dark:bg-slate-900/95 dark:shadow-none">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center justify-between gap-3">
@@ -55,8 +55,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 </div>
                 <div className="hidden min-w-0 md:block">
-                  <p className="text-sm text-slate-500">Olá,</p>
-                  <p className="truncate font-medium text-slate-900 dark:text-white">{firstName}</p>
+                  <p className="text-sm font-medium text-brand-600 dark:text-brand-400">Olá,</p>
+                  <p className="truncate text-lg font-semibold tracking-tight text-slate-900 dark:text-white">{firstName}</p>
                 </div>
                 <div className="sm:hidden">
                   <MonthPicker compact />
@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
           </header>
-          <main className="flex-1 overflow-y-auto bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
+          <main className="min-h-0 flex-1 overflow-y-auto bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
             <TrialBanner billing={billing} />
             {children}
           </main>

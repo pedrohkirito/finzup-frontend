@@ -36,7 +36,7 @@ export function Sidebar() {
   const { theme, toggle } = useTheme();
 
   return (
-    <aside className="hidden w-64 flex-col border-r border-slate-200/80 bg-white p-4 shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-none md:flex">
+    <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white p-4 shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-none md:flex md:h-screen md:overflow-y-auto">
       <div className="mb-8 flex items-center gap-2 px-2">
         <Logo size={36} className="h-9 w-9" />
         <span className="text-xl font-bold text-slate-900 dark:text-white">Finzup</span>
