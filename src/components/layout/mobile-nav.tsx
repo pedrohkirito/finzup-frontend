@@ -15,6 +15,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  BarChart3,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ const primaryLinks = [
 ];
 
 const moreLinks = [
+  { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },
   { href: '/dashboard/doacoes', icon: Heart, label: 'Doações' },
   { href: '/dashboard/configuracoes', icon: Settings, label: 'Configurações' },

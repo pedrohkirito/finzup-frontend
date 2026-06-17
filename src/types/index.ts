@@ -208,3 +208,48 @@ export interface MonthSummary {
     investments: SummaryItem[];
   };
 }
+
+export interface MonthReport {
+  month: FinancialMonth;
+  overview: {
+    totalIncome: number;
+    totalExpenses: number;
+    totalDonations: number;
+    balance: number;
+    savingsRate: number;
+    expenseRatio: number;
+    committedAmount: number;
+    commitmentRate: number;
+  };
+  expenseByType: { key: string; label: string; amount: number; percentage: number }[];
+  fixedVsVariable: {
+    fixed: { amount: number; percentage: number };
+    variable: { amount: number; percentage: number };
+  };
+  paretoExpenses: { id: string; name: string; amount: number; cumulativePercentage: number }[];
+  monthlyTrend: {
+    monthId: string;
+    year: number;
+    month: number;
+    label: string;
+    totalIncome: number;
+    totalExpenses: number;
+    totalDonations: number;
+    totalInvested: number;
+  }[];
+  budgetByCategory: {
+    id: string;
+    name: string;
+    limit: number;
+    spent: number;
+    remaining: number;
+    progress: number;
+    overBudget: boolean;
+  }[];
+  paymentMethods: { id: string; name: string; type: string; amount: number; percentage: number }[];
+  topExpenses: { id: string; name: string; amount: number; category?: string }[];
+  creditCardBill: MonthSummary['creditCardBill'];
+  investment: MonthSummary['investment'];
+  alerts: { type: string; message: string; budgetId?: string }[];
+  items: MonthSummary['items'];
+}

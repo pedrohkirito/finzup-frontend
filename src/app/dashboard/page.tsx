@@ -1,21 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
 import { useMonthStore } from '@/hooks/use-month';
+import { useMonthSummary } from '@/hooks/use-month-summary';
 import { SummaryCards } from '@/components/dashboard/summary-cards';
 import { CloseMonthBanner } from '@/components/dashboard/close-month-banner';
 import { OnboardingTour } from '@/components/onboarding/tour';
-import type { MonthSummary } from '@/types';
 
 export default function DashboardPage() {
   const { selectedMonthId } = useMonthStore();
-
-  const { data: summary, isLoading } = useQuery({
-    queryKey: ['months', selectedMonthId, 'summary'],
-    queryFn: () => api.get<MonthSummary>(`/months/${selectedMonthId}/summary`),
-    enabled: !!selectedMonthId,
-  });
+  const { data: summary, isLoading } = useMonthSummary(selectedMonthId);
 
   if (!selectedMonthId || isLoading) {
     return (

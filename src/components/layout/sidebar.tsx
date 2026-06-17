@@ -13,6 +13,7 @@ import {
   Moon,
   Sun,
   Target,
+  BarChart3,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -22,6 +23,7 @@ import { useTheme } from '@/providers/theme-provider';
 
 const links = [
   { href: '/dashboard', label: 'Resumo', icon: LayoutDashboard },
+  { href: '/dashboard/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
