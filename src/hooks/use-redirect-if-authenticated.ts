@@ -6,14 +6,14 @@ import { getPostAuthRedirect } from '@/lib/post-auth';
 import { useAuth } from './use-auth';
 
 export function useRedirectIfAuthenticated() {
-  const { data: user, isLoading } = useAuth();
+  const { data: user, status } = useAuth({ refetchOnWindowFocus: false });
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (status !== 'pending' && user) {
       router.push(getPostAuthRedirect(user));
     }
-  }, [isLoading, user, router]);
+  }, [status, user, router]);
 
-  return { isLoading, isAuthenticated: !!user };
+  return { isLoading: status === 'pending', isAuthenticated: !!user };
 }

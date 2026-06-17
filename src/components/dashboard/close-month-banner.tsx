@@ -15,6 +15,7 @@ interface ClosePreview {
   installmentsToAdvance: { id: string; name: string; installmentAmount: string | number }[];
   subscriptionsToCarry: { id: string; name: string; amount: string | number }[];
   financingsToAdvance: { id: string; name: string; installmentAmount: string | number }[];
+  investmentGoalToCarry: { targetAmount: string | number } | null;
 }
 
 export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
@@ -85,7 +86,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
       <div>
         <p className="font-medium text-amber-900 dark:text-amber-200">Pronto para fechar o mês?</p>
         <p className="text-sm text-amber-700 dark:text-amber-400">
-          Receitas, doações e despesas recorrentes serão copiadas para o próximo mês.
+          Receitas, doações, despesas recorrentes e meta de investimentos serão copiadas para o próximo mês.
         </p>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -120,6 +121,14 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
                   {preview.fixedExpensesToCreate.map((e) => (
                     <p key={e.id} className="text-slate-500">{e.name} — {formatCurrency(Number(e.defaultAmount))}</p>
                   ))}
+                </div>
+              )}
+              {preview.investmentGoalToCarry && (
+                <div>
+                  <p className="font-medium">Meta de investimentos:</p>
+                  <p className="text-slate-500">
+                    {formatCurrency(Number(preview.investmentGoalToCarry.targetAmount))}
+                  </p>
                 </div>
               )}
             </div>

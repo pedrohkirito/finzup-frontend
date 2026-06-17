@@ -34,6 +34,7 @@ import type {
   MonthSummary,
 } from '@/types';
 import { Plus, RefreshCw, TrendingDown } from 'lucide-react';
+import Link from 'next/link';
 
 function getExpenseAmountColor(isCredit: boolean, isPaid: boolean) {
   return isCredit && !isPaid ? 'text-violet-600' : 'text-orange-600 dark:text-orange-400';
@@ -135,6 +136,20 @@ function BudgetSelect({
   );
 }
 
+function CreditPaymentMethodNotice() {
+  return (
+    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+      <p>
+        Parcelamentos no cartão exigem um método de pagamento do tipo crédito.{' '}
+        <Link href="/dashboard/configuracoes" className="font-medium underline underline-offset-2">
+          Cadastre um cartão de crédito em Configurações
+        </Link>{' '}
+        para continuar.
+      </p>
+    </div>
+  );
+}
+
 export default function DespesasPage() {
   const { selectedMonthId } = useMonthStore();
   const { data: months } = useMonths();
@@ -202,6 +217,8 @@ export default function DespesasPage() {
   const financingForm = useForm({ resolver: zodResolver(financingSchema), defaultValues: { installmentsPaid: 0, earlyPaymentAmount: 0 } });
 
   const defaultMethod = methods?.find((m) => m.isDefault)?.id;
+  const creditMethods = methods?.filter((m) => m.type === 'credit') ?? [];
+  const hasCreditMethods = creditMethods.length > 0;
 
   const openEdit = (type: EditType, item: ExpenseEntry | FixedExpenseTemplate | InstallmentPlan | Subscription | Financing) => {
     if (type === 'one_off') {
@@ -531,9 +548,11 @@ export default function DespesasPage() {
                 <div className="space-y-2"><Label>Total de parcelas</Label><Input type="number" {...installmentForm.register('totalInstallments')} /></div>
                 <div className="space-y-2"><Label>Valor da parcela</Label><FormCurrencyInput control={installmentForm.control} name="installmentAmount" placeholder="0,00" /></div>
                 <div className="space-y-2"><Label>Parcelas já pagas</Label><Input type="number" {...installmentForm.register('installmentsPaid')} /></div>
-                {methods && (
+                {!hasCreditMethods ? (
+                  <CreditPaymentMethodNotice />
+                ) : (
                   <PaymentMethodSelect
-                    methods={methods.filter((m) => m.type === 'credit')}
+                    methods={creditMethods}
                     value={installmentForm.watch('paymentMethodId')}
                     onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
                   />
@@ -548,7 +567,7 @@ export default function DespesasPage() {
                     />
                   </div>
                 )}
-                <Button type="submit" className="w-full">Salvar</Button>
+                <Button type="submit" className="w-full" disabled={!hasCreditMethods}>Salvar</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -949,9 +968,11 @@ export default function DespesasPage() {
               <div className="space-y-2"><Label>Total de parcelas</Label><Input type="number" {...installmentForm.register('totalInstallments')} /></div>
               <div className="space-y-2"><Label>Valor da parcela</Label><FormCurrencyInput control={installmentForm.control} name="installmentAmount" placeholder="0,00" /></div>
               <div className="space-y-2"><Label>Parcelas já pagas</Label><Input type="number" {...installmentForm.register('installmentsPaid')} /></div>
-              {methods && (
+              {!hasCreditMethods ? (
+                <CreditPaymentMethodNotice />
+              ) : (
                 <PaymentMethodSelect
-                  methods={methods.filter((m) => m.type === 'credit')}
+                  methods={creditMethods}
                   value={installmentForm.watch('paymentMethodId')}
                   onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
                 />
@@ -966,7 +987,7 @@ export default function DespesasPage() {
                   />
                 </div>
               )}
-              <Button type="submit" className="w-full">Salvar alterações</Button>
+              <Button type="submit" className="w-full" disabled={!hasCreditMethods}>Salvar alterações</Button>
             </form>
           )}
 
