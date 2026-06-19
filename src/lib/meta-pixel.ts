@@ -21,7 +21,8 @@ export function trackMetaEvent(event: string, params?: Record<string, unknown>) 
 /** Dispara conversão após cadastro concluído com sucesso. */
 export function trackRegistrationComplete() {
   trackMetaEvent('CompleteRegistration', {
-    test_event_code: 'TEST91399',
+    status: 'completed',
+    content_name: 'Cadastro Finzup',
   });
 }
 
