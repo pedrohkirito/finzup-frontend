@@ -9,6 +9,7 @@ import { type BillingPlanId } from '@/constants/billing-plans';
 import { TRIAL_DAYS } from '@/constants/billing';
 import { useAuth, useLogout } from '@/hooks/use-auth';
 import { api } from '@/lib/api';
+import { trackSubscriptionConversion } from '@/lib/meta-pixel';
 
 export default function AssinaturaPageContent() {
   const router = useRouter();
@@ -30,9 +31,12 @@ export default function AssinaturaPageContent() {
 
   useEffect(() => {
     if (!isLoading && user?.billing?.hasAccess) {
+      if (checkoutStatus === 'success') {
+        trackSubscriptionConversion(user.id, user.billing);
+      }
       router.replace('/dashboard');
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, user, router, checkoutStatus]);
 
   useEffect(() => {
     if (checkoutStatus === 'canceled') {
@@ -50,6 +54,7 @@ export default function AssinaturaPageContent() {
       const result = await refetch();
       if (result.data?.billing?.hasAccess) {
         clearInterval(interval);
+        trackSubscriptionConversion(result.data.id, result.data.billing);
         queryClient.invalidateQueries();
         router.replace('/dashboard');
       } else if (attempts >= 15) {
