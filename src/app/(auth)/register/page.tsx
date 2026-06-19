@@ -6,6 +6,7 @@ import { AuthForm } from '@/components/auth/auth-form';
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { registerSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
+import { trackRegistrationComplete } from '@/lib/meta-pixel';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function RegisterPage() {
             email,
             password,
           });
+          trackRegistrationComplete();
           if (result.emailVerified) {
             router.push('/assinatura');
             return;

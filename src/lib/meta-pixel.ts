@@ -18,6 +18,11 @@ export function trackMetaEvent(event: string, params?: Record<string, unknown>) 
   window.fbq?.('track', event);
 }
 
+/** Dispara conversão após cadastro concluído com sucesso. */
+export function trackRegistrationComplete() {
+  trackMetaEvent('CompleteRegistration');
+}
+
 function hasTrackedStartTrial(userId: string): boolean {
   try {
     return sessionStorage.getItem(START_TRIAL_STORAGE_KEY) === userId;
