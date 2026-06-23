@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { MetaPixel } from '@/components/analytics/meta-pixel';
 import './globals.css';
 import { QueryProvider } from '@/providers/query-provider';
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>{children}</ThemeProvider>
         </QueryProvider>
         <Analytics />
+        <SpeedInsights />
         <MetaPixel />
       </body>
     </html>
