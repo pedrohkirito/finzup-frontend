@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
+import { AuthBackLink } from '@/components/auth/auth-back-link';
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { loginSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
@@ -25,6 +26,7 @@ export default function LoginPage() {
 
   return (
     <div>
+      <AuthBackLink />
       <h2 className="mb-6 text-xl font-semibold">Entrar na conta</h2>
       <AuthForm
         schema={loginSchema}

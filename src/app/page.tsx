@@ -332,7 +332,19 @@ export default function Home() {
             <p className="text-sm text-slate-500 dark:text-slate-400">
               © {new Date().getFullYear()} Finzup. Todos os direitos reservados.
             </p>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <Link
+                href="/politica-de-privacidade"
+                className="text-sm text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              >
+                Política de Privacidade
+              </Link>
+              <Link
+                href="/termos-de-uso"
+                className="text-sm text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              >
+                Termos de Uso
+              </Link>
               <Link
                 href="/login"
                 className="text-sm text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
