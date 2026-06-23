@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { SupportLink } from '@/components/layout/support-link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
@@ -125,6 +126,7 @@ export function MobileNav() {
             })}
           </div>
           <div className="space-y-1 border-t border-slate-200 pt-3 dark:border-slate-800">
+            <SupportLink variant="mobile" onOpen={() => setMoreOpen(false)} />
             <Button variant="ghost" className="h-11 w-full justify-start gap-3 px-3" onClick={toggle}>
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}

@@ -18,6 +18,7 @@ import {
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { SupportLink } from '@/components/layout/support-link';
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -63,6 +64,7 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto flex flex-col gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+        <SupportLink />
         <Button variant="ghost" className="justify-start" onClick={toggle}>
           {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
