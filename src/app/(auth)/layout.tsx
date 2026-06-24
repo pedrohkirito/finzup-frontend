@@ -1,8 +1,10 @@
 import { Logo } from '@/components/brand/logo';
+import { MixpanelIdentify } from '@/components/analytics/mixpanel-identify';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50/70 p-4 dark:bg-slate-950 sm:p-6">
+      <MixpanelIdentify />
       <div className="w-full max-w-md">
         <div className="mb-6 text-center sm:mb-8">
           <Logo size={56} className="mx-auto mb-4 h-12 w-12 sm:h-14 sm:w-14" priority />

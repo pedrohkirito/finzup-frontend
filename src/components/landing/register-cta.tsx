@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { trackLead } from '@/lib/meta-pixel';
+import { trackLead } from '@/lib/funnel-analytics';
 
 interface RegisterCtaProps {
   href?: string;

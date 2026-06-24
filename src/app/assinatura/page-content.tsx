@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { PlanPicker } from '@/components/billing/plan-picker';
@@ -10,7 +10,12 @@ import { type BillingPlanId } from '@/constants/billing-plans';
 import { TRIAL_DAYS } from '@/constants/billing';
 import { useAuth, useLogout } from '@/hooks/use-auth';
 import { api } from '@/lib/api';
-import { trackInitiateCheckout, trackSubscriptionConversion } from '@/lib/meta-pixel';
+import {
+  trackCheckoutCanceled,
+  trackInitiateCheckout,
+  trackSubscriptionPageViewed,
+  trackTrialStarted,
+} from '@/lib/funnel-analytics';
 
 export default function AssinaturaPageContent() {
   const router = useRouter();
@@ -23,6 +28,14 @@ export default function AssinaturaPageContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const checkoutStatus = searchParams.get('checkout');
+  const subscriptionPageTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isLoading && user && !subscriptionPageTrackedRef.current) {
+      subscriptionPageTrackedRef.current = true;
+      trackSubscriptionPageViewed(user.billing?.trialExpired ?? false);
+    }
+  }, [isLoading, user]);
 
   useEffect(() => {
     if (!isLoading && isError) {
@@ -33,7 +46,7 @@ export default function AssinaturaPageContent() {
   useEffect(() => {
     if (!isLoading && user?.billing?.hasAccess) {
       if (checkoutStatus === 'success') {
-        trackSubscriptionConversion(user.id, user.billing);
+        trackTrialStarted(user.id, user.billing);
       }
       router.replace('/dashboard');
     }
@@ -41,6 +54,7 @@ export default function AssinaturaPageContent() {
 
   useEffect(() => {
     if (checkoutStatus === 'canceled') {
+      trackCheckoutCanceled();
       setCheckoutMessage('Cadastro cancelado. Escolha um plano para iniciar o teste gratuito.');
       return;
     }
@@ -55,7 +69,7 @@ export default function AssinaturaPageContent() {
       const result = await refetch();
       if (result.data?.billing?.hasAccess) {
         clearInterval(interval);
-        trackSubscriptionConversion(result.data.id, result.data.billing);
+        trackTrialStarted(result.data.id, result.data.billing);
         queryClient.invalidateQueries();
         router.replace('/dashboard');
       } else if (attempts >= 15) {

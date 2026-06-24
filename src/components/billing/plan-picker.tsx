@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Check, Loader2, Sparkles, Star, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TRIAL_DAYS } from '@/constants/billing';
+import { trackLead } from '@/lib/funnel-analytics';
 import {
   BILLING_FEATURES,
   BILLING_PLAN_GRID_ORDER,
@@ -39,6 +40,7 @@ export function PlanPicker({
   defaultSelected = 'annual',
   compactHeader = false,
 }: PlanPickerProps) {
+  const router = useRouter();
   const [selected, setSelected] = useState<BillingPlanId>(defaultSelected);
   const monthlyPrice = BILLING_PLANS.monthly.total;
 
@@ -125,9 +127,16 @@ export function PlanPicker({
 
     if (mode === 'landing') {
       return (
-        <Link href="/register" className={className}>
+        <button
+          type="button"
+          className={className}
+          onClick={() => {
+            trackLead('Pricing Section', { ctaLocation: 'plan_picker', plan: planId });
+            router.push('/register');
+          }}
+        >
           {label}
-        </Link>
+        </button>
       );
     }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
@@ -7,11 +8,15 @@ import { AuthBackLink } from '@/components/auth/auth-back-link';
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { registerSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
-import { trackRegistrationComplete } from '@/lib/meta-pixel';
+import { trackRegistrationComplete, trackRegistrationStarted } from '@/lib/funnel-analytics';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
+
+  useEffect(() => {
+    trackRegistrationStarted();
+  }, []);
 
   if (isLoading || isAuthenticated) {
     return (
@@ -49,7 +54,7 @@ export default function RegisterPage() {
             acceptedTerms: true,
             marketingOptIn,
           });
-          trackRegistrationComplete();
+          trackRegistrationComplete(marketingOptIn);
           if (result.emailVerified) {
             router.push('/assinatura');
             return;

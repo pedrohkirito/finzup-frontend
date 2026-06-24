@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { trackEmailVerified, trackVerifyEmailPageViewed } from '@/lib/funnel-analytics';
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -26,10 +27,15 @@ function VerifyEmailContent() {
   const [cooldownSeconds, setCooldownSeconds] = useState(showResend ? RESEND_COOLDOWN_SECONDS : 0);
 
   useEffect(() => {
+    trackVerifyEmailPageViewed(!!token);
+  }, [token]);
+
+  useEffect(() => {
     if (token) {
       api
         .get(`/auth/verify-email?token=${token}`)
         .then(() => {
+          trackEmailVerified();
           setMessage('Email verificado! Redirecionando...');
           setTimeout(() => router.push('/assinatura'), 1500);
         })

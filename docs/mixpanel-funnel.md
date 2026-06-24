@@ -1,0 +1,54 @@
+# Mixpanel — Funil Landing → Teste Gratuito
+
+Guia para configurar o funil de conversão no painel Mixpanel após o deploy.
+
+## Pré-requisitos
+
+1. Adicionar `NEXT_PUBLIC_MIXPANEL_TOKEN` no frontend (Vercel / `.env.local`)
+2. Adicionar `MIXPANEL_TOKEN` no backend (mesmo project token)
+3. Fazer deploy e aguardar eventos chegarem em **Events → Live View**
+
+## Eventos do funil
+
+| Ordem | Evento | Descrição |
+|-------|--------|-----------|
+| 1 | `page_viewed` | Toda navegação (filtro `path = /` para landing) |
+| 2 | `landing_cta_clicked` | Clique em CTA da landing ou seção de preços |
+| 3 | `registration_started` | Usuário abriu `/register` |
+| 4 | `registration_completed` | Cadastro concluído com sucesso |
+| 5 | `email_verified` | Email confirmado (pula se `SKIP_EMAIL_VERIFICATION`) |
+| 6 | `subscription_page_viewed` | Usuário viu `/assinatura` |
+| 7 | `checkout_initiated` | Plano selecionado, redirect para Stripe |
+| 8 | `trial_started` | Teste gratuito ativado (client + server deduplicados) |
+
+## Criar o Funnel Report
+
+1. **Reports → Funnels → Create**
+2. Adicionar steps na ordem acima
+3. Para o step 1, adicionar filtro: `path` equals `/`
+4. Salvar como **"Landing → Trial Started"**
+
+## Breakdowns recomendados
+
+- **Por origem:** `utm_source`, `utm_medium`, `utm_campaign`
+- **Por CTA:** `content_name`, `cta_location`
+- **Por plano:** `plan` (em `checkout_initiated` e `trial_started`)
+
+## Cohort de drop-off
+
+1. **Users → Cohorts → Create**
+2. Incluir usuários com `registration_completed` nos últimos 30 dias
+3. Excluir usuários com `trial_started`
+4. Usar para remarketing ou análise de abandono na página `/assinatura`
+
+## Deduplicação client/server
+
+O evento `trial_started` usa `$insert_id: trial_started_{userId}` em frontend e backend. O Mixpanel deduplica automaticamente dentro de 24h — conte apenas uma conversão por usuário.
+
+## Propriedades de usuário
+
+Após login/cadastro, o frontend chama `identify` com:
+- `$email`
+- `$name`
+
+Super properties de UTM são registradas na primeira sessão (`utm_source`, `utm_medium`, etc.).
