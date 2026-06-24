@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { LandingSummaryMock } from '@/components/landing/summary-mock';
+import { ContactSection } from '@/components/landing/contact-section';
 import { PricingSection } from '@/components/landing/pricing-section';
 import { TRIAL_DAYS } from '@/constants/billing';
 
@@ -129,6 +130,12 @@ export default function Home() {
               className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
               Preços
+            </a>
+            <a
+              href="#contato"
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+            >
+              Contato
             </a>
           </nav>
 
@@ -320,6 +327,8 @@ export default function Home() {
 
       {/* Seção de preços */}
       <PricingSection />
+
+      <ContactSection />
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-slate-50 py-12 dark:border-slate-800 dark:bg-slate-900">
