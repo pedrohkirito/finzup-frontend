@@ -231,9 +231,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Prova social */}
-      <SocialProof />
-
       {/* Como funciona */}
       <HowItWorks />
 
@@ -267,6 +264,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Prova social */}
+      <SocialProof />
 
       {/* Por que Finzup */}
       <section className="bg-white py-16 sm:py-24 dark:bg-slate-950">
