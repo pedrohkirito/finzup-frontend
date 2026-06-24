@@ -16,6 +16,8 @@ export function MixpanelProvider() {
   }, []);
 
   useEffect(() => {
+    if (pathname.startsWith('/dashboard')) return;
+
     trackMixpanelEvent('page_viewed', {
       path: pathname,
       referrer: typeof document !== 'undefined' ? document.referrer || undefined : undefined,
