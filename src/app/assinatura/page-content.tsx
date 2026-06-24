@@ -77,12 +77,16 @@ export default function AssinaturaPageContent() {
 
     try {
       const { url } = await api.post<{ url: string }>('/billing/checkout-session', { plan });
+      if (url.startsWith(window.location.origin)) {
+        router.push(url.replace(window.location.origin, ''));
+        return;
+      }
       window.location.href = url;
     } catch {
       setErrorMessage('Não foi possível iniciar o pagamento. Tente novamente.');
       setLoadingPlan(null);
     }
-  }, []);
+  }, [router]);
 
   if (isLoading || !user) {
     return (
