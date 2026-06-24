@@ -22,6 +22,7 @@ import { Faq } from '@/components/landing/faq';
 import { RegisterCta } from '@/components/landing/register-cta';
 import { ContactSection } from '@/components/landing/contact-section';
 import { PricingSection } from '@/components/landing/pricing-section';
+import { Utmify } from '@/components/analytics/utmify';
 import { TRIAL_DAYS } from '@/constants/billing';
 
 export const metadata: Metadata = {
@@ -126,6 +127,7 @@ const whyFinzup = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
+      <Utmify />
       {/* Navbar */}
       <header className="fixed top-0 right-0 left-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-950/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
