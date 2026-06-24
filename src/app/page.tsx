@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   TrendingUp,
-  Receipt,
   PiggyBank,
   Target,
   Heart,
@@ -10,11 +9,17 @@ import {
   Shield,
   Smartphone,
   Zap,
+  Gift,
+  RefreshCw,
   ArrowRight,
   CheckCircle2,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { LandingSummaryMock } from '@/components/landing/summary-mock';
+import { SocialProof } from '@/components/landing/social-proof';
+import { HowItWorks } from '@/components/landing/how-it-works';
+import { Faq } from '@/components/landing/faq';
+import { RegisterCta } from '@/components/landing/register-cta';
 import { ContactSection } from '@/components/landing/contact-section';
 import { PricingSection } from '@/components/landing/pricing-section';
 import { TRIAL_DAYS } from '@/constants/billing';
@@ -22,7 +27,7 @@ import { TRIAL_DAYS } from '@/constants/billing';
 export const metadata: Metadata = {
   title: 'Finzup — Controle Financeiro Pessoal Inteligente',
   description:
-    `Organize suas finanças pessoais com o Finzup. Teste grátis por ${TRIAL_DAYS} dias. Controle receitas, despesas, investimentos e orçamentos em um só lugar.`,
+    `Seu dinheiro está sumindo? Veja para onde cada real vai. Teste grátis por ${TRIAL_DAYS} dias — sem compromisso.`,
   keywords:
     'controle financeiro, finanças pessoais, orçamento pessoal, controle de gastos, gestão financeira, app financeiro, investimentos pessoais',
   authors: [{ name: 'Finzup' }],
@@ -44,37 +49,54 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     title: 'Finzup — Controle Financeiro Pessoal Inteligente',
     description:
-      `Organize suas finanças pessoais com o Finzup. Teste grátis por ${TRIAL_DAYS} dias. Controle receitas, despesas, investimentos e orçamentos em um só lugar.`,
+      `Seu dinheiro está sumindo? Veja para onde cada real vai. Teste grátis por ${TRIAL_DAYS} dias — sem compromisso.`,
     siteName: 'Finzup',
+    images: [
+      {
+        url: '/images/finzup_icon.png',
+        width: 512,
+        height: 512,
+        alt: 'Finzup — Controle Financeiro Pessoal',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Finzup — Controle Financeiro Pessoal Inteligente',
-    description: 'Organize suas finanças pessoais com o Finzup.',
+    description: `Seu dinheiro está sumindo? Veja para onde cada real vai. Teste grátis por ${TRIAL_DAYS} dias.`,
+    images: ['/images/finzup_icon.png'],
   },
 };
 
+
 const features = [
   {
-    icon: TrendingUp,
-    title: 'Controle de Receitas',
+    icon: RefreshCw,
+    title: 'Se repete sozinho todo mês',
     description:
-      'Registre e categorize todas as suas fontes de renda. Acompanhe o crescimento da sua renda ao longo do tempo com facilidade.',
+      'Marque lançamentos recorrentes ou cadastre despesas fixas. Ao fechar o mês, tudo já aparece no próximo — sem recomeçar do zero.',
+    colorClass: 'bg-brand-green-100 text-brand-green-600 dark:bg-brand-green-950 dark:text-brand-green-400',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Controle de receitas e despesas',
+    description:
+      'Registre e categorize todas as suas fontes de renda e gastos. Veja o panorama completo do seu mês em um só lugar.',
     colorClass: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
   },
   {
-    icon: Receipt,
-    title: 'Gestão de Despesas',
-    description:
-      'Monitore todos os seus gastos com categorização inteligente e receba alertas quando se aproximar dos limites definidos.',
-    colorClass: 'bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-400',
-  },
-  {
     icon: Target,
-    title: 'Orçamentos',
+    title: 'Orçamentos que funcionam',
     description:
       'Defina metas de gastos por categoria e acompanhe em tempo real se você está dentro do que foi planejado.',
     colorClass: 'bg-brand-100 text-brand-600 dark:bg-brand-950 dark:text-brand-400',
+  },
+  {
+    icon: BarChart3,
+    title: 'Relatórios que te ajudam a decidir',
+    description:
+      'Visualize sua saúde financeira com relatórios e gráficos claros que facilitam a tomada de decisões.',
+    colorClass: 'bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400',
   },
   {
     icon: PiggyBank,
@@ -90,16 +112,10 @@ const features = [
       'Gerencie suas doações e contribuições, mantendo um histórico completo e organizado das suas contribuições.',
     colorClass: 'bg-pink-100 text-pink-600 dark:bg-pink-950 dark:text-pink-400',
   },
-  {
-    icon: BarChart3,
-    title: 'Relatórios Detalhados',
-    description:
-      'Visualize sua saúde financeira com relatórios e gráficos claros que facilitam a tomada de decisões.',
-    colorClass: 'bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400',
-  },
 ];
 
 const whyFinzup = [
+  { icon: RefreshCw, text: 'Cadastre uma vez — receitas, despesas fixas e orçamentos voltam no mês seguinte' },
   { icon: Zap, text: 'Interface intuitiva e fácil de usar desde o primeiro acesso' },
   { icon: Shield, text: 'Seus dados protegidos com segurança e privacidade total' },
   { icon: Smartphone, text: 'Acesse de qualquer dispositivo, a qualquer hora e lugar' },
@@ -146,12 +162,12 @@ export default function Home() {
             >
               Entrar
             </Link>
-            <Link
-              href="/register"
+            <RegisterCta
+              contentName="Navbar"
               className="rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-200/50 sm:px-5 dark:hover:shadow-brand-900/50"
             >
               Começar grátis
-            </Link>
+            </RegisterCta>
           </div>
         </div>
       </header>
@@ -169,30 +185,32 @@ export default function Home() {
           <div className="mx-auto max-w-3xl text-center">
             {/* Badge */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 dark:border-brand-800 dark:bg-brand-950 dark:text-brand-300">
-              <Zap className="h-3.5 w-3.5" />
-              {TRIAL_DAYS} dias grátis para experimentar
+              <Gift className="h-3.5 w-3.5" />
+              {TRIAL_DAYS} dias grátis — teste sem compromisso
             </div>
 
-            <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl sm:text-6xl lg:text-7xl dark:text-white">
-              Suas finanças,{' '}
+            <h1 className="mb-5 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
+              Seu dinheiro está sumindo{' '}
               <span className="bg-gradient-to-r from-brand-500 to-brand-green-500 bg-clip-text text-transparent">
-                finalmente organizadas
+                e você não sabe por quê?
               </span>
             </h1>
 
             <p className="mb-8 text-lg leading-relaxed text-slate-600 sm:mb-10 sm:text-xl dark:text-slate-400">
-              Controle receitas, despesas, investimentos e orçamentos em um só lugar. Teste grátis por{' '}
-              {TRIAL_DAYS} dias — cancele quando quiser, sem cobrança imediata.
+              Veja exatamente para onde{' '}
+              <span className="font-semibold text-slate-900 dark:text-white">cada real</span>{' '}
+              está indo — cadastre uma vez e, no mês seguinte, o Finzup repete seus lançamentos
+              automaticamente.
             </p>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
-                href="/register"
+              <RegisterCta
+                contentName="Hero"
                 className="group inline-flex items-center gap-2 rounded-full bg-brand-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-200/60 transition-all hover:-translate-y-0.5 hover:bg-brand-600 hover:shadow-xl hover:shadow-brand-300/50 dark:shadow-brand-900/50"
               >
-                Começar {TRIAL_DAYS} dias grátis
+                Começar grátis
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
+              </RegisterCta>
               <a
                 href="#pricing"
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-3.5 text-base font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600"
@@ -200,11 +218,22 @@ export default function Home() {
                 Ver planos e preços
               </a>
             </div>
+
+            <p className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+              <CheckCircle2 className="h-4 w-4 text-brand-green-500" />
+              Sem compromisso · cancele quando quiser
+            </p>
           </div>
 
           <LandingSummaryMock />
         </div>
       </section>
+
+      {/* Prova social */}
+      <SocialProof />
+
+      {/* Como funciona */}
+      <HowItWorks />
 
       {/* Features */}
       <section id="features" className="bg-slate-50 py-16 sm:py-24 dark:bg-slate-900">
@@ -214,7 +243,7 @@ export default function Home() {
               Tudo que você precisa para cuidar do seu dinheiro
             </h2>
             <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
-              Recursos completos para uma gestão financeira pessoal eficiente e sem complicação.
+              Recursos completos — com recorrência automática para você não recomeçar do zero todo mês.
             </p>
           </div>
 
@@ -249,8 +278,9 @@ export default function Home() {
                 </span>
               </h2>
               <p className="mb-6 text-base leading-relaxed text-slate-600 sm:mb-8 sm:text-lg dark:text-slate-400">
-                Criado para brasileiros que querem simplificar a vida financeira sem abrir mão de
-                funcionalidades poderosas e de um design agradável.
+                Criado para quem não quer passar horas em planilha. Você configura o mês uma vez e
+                o Finzup prepara o próximo — com recorrências, despesas fixas e orçamentos que se
+                repetem sozinhos.
               </p>
               <ul className="space-y-4">
                 {whyFinzup.map(({ icon: Icon, text }) => (
@@ -263,13 +293,13 @@ export default function Home() {
                 ))}
               </ul>
               <div className="mt-10">
-                <Link
-                  href="/register"
+                <RegisterCta
+                  contentName="Por que Finzup"
                   className="group inline-flex items-center gap-2 rounded-full bg-brand-500 px-7 py-3 text-sm font-semibold text-white shadow-md shadow-brand-200/60 transition-all hover:-translate-y-0.5 hover:bg-brand-600 hover:shadow-lg dark:shadow-brand-900/50"
                 >
-                  Começar {TRIAL_DAYS} dias grátis
+                  Começar grátis
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
+                </RegisterCta>
               </div>
             </div>
 
@@ -325,13 +355,35 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <Faq />
+
       {/* Seção de preços */}
       <PricingSection />
 
       <ContactSection />
 
+      {/* CTA final */}
+      <section className="bg-gradient-to-br from-brand-500 to-brand-green-500 py-16 sm:py-20">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Seu dinheiro não precisa sumir no escuro
+          </h2>
+          <p className="mb-8 text-base text-white/90 sm:text-lg">
+            {TRIAL_DAYS} dias grátis para testar sem compromisso. Cancele quando quiser.
+          </p>
+          <RegisterCta
+            contentName="CTA final"
+            className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-brand-600 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            Começar grátis
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </RegisterCta>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-slate-50 py-12 dark:border-slate-800 dark:bg-slate-900">
+      <footer className="border-t border-slate-200 bg-slate-50 py-12 pb-24 md:pb-12 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2.5">
@@ -370,6 +422,17 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* CTA fixo no mobile */}
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 p-3 backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95">
+        <RegisterCta
+          contentName="CTA fixo mobile"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brand-200/60 transition-colors hover:bg-brand-600 dark:shadow-brand-900/50"
+        >
+          Começar grátis
+          <ArrowRight className="h-4 w-4" />
+        </RegisterCta>
+      </div>
     </div>
   );
 }

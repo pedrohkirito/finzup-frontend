@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { ApiError } from '@/lib/api';
 import { maskCpfInput } from '@/lib/cpf';
 import { PasswordRequirements } from '@/components/auth/password-requirements';
+import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
 interface FieldConfig {
@@ -34,6 +35,10 @@ interface AuthFormProps {
 export function AuthForm({ schema, onSubmit, fields, submitLabel, footer, defaultValues }: AuthFormProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+
+  const togglePasswordVisibility = (name: string) =>
+    setVisiblePasswords((current) => ({ ...current, [name]: !current[name] }));
 
   const form = useForm({
     resolver: zodResolver(schema as z.ZodObject<z.ZodRawShape>),
@@ -62,18 +67,22 @@ export function AuthForm({ schema, onSubmit, fields, submitLabel, footer, defaul
 
           return (
             <div key={field.name} className="space-y-2">
-              <div className="flex items-start gap-3">
+              <label
+                htmlFor={field.name}
+                className="flex cursor-pointer items-start gap-3 rounded-lg py-1"
+              >
                 <Checkbox
                   id={field.name}
                   checked={checked}
+                  className="mt-0.5"
                   onCheckedChange={(value) =>
                     form.setValue(field.name, value === true, { shouldValidate: true })
                   }
                 />
-                <Label htmlFor={field.name} className="cursor-pointer text-sm leading-relaxed font-normal">
+                <span className="text-sm leading-relaxed font-normal text-slate-700 dark:text-slate-300">
                   {field.checkboxLabel ?? field.label}
-                </Label>
-              </div>
+                </span>
+              </label>
               {form.formState.errors[field.name] && (
                 <p className="text-sm text-red-500">
                   {(form.formState.errors[field.name] as { message?: string })?.message}
@@ -83,21 +92,38 @@ export function AuthForm({ schema, onSubmit, fields, submitLabel, footer, defaul
           );
         }
 
+        const isPassword = field.type === 'password';
+        const isVisible = visiblePasswords[field.name] === true;
+        const inputType = isPassword ? (isVisible ? 'text' : 'password') : field.type || 'text';
+
         return (
           <div key={field.name} className="space-y-2">
             <Label htmlFor={field.name}>{field.label}</Label>
-            <Input
-              id={field.name}
-              type={field.type || 'text'}
-              placeholder={field.placeholder}
-              {...form.register(field.name, {
-                onChange: field.mask === 'cpf'
-                  ? (e) => {
-                      e.target.value = maskCpfInput(e.target.value);
-                    }
-                  : undefined,
-              })}
-            />
+            <div className="relative">
+              <Input
+                id={field.name}
+                type={inputType}
+                placeholder={field.placeholder}
+                className={isPassword ? 'pr-10' : undefined}
+                {...form.register(field.name, {
+                  onChange: field.mask === 'cpf'
+                    ? (e) => {
+                        e.target.value = maskCpfInput(e.target.value);
+                      }
+                    : undefined,
+                })}
+              />
+              {isPassword && (
+                <button
+                  type="button"
+                  onClick={() => togglePasswordVisibility(field.name)}
+                  aria-label={isVisible ? 'Ocultar senha' : 'Mostrar senha'}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              )}
+            </div>
             {form.formState.errors[field.name] && (
               <p className="text-sm text-red-500">
                 {(form.formState.errors[field.name] as { message?: string })?.message}

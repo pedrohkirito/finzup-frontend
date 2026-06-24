@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { PlanPicker } from '@/components/billing/plan-picker';
+import { TrialTrust } from '@/components/billing/trial-trust';
 import { Button } from '@/components/ui/button';
 import { type BillingPlanId } from '@/constants/billing-plans';
 import { TRIAL_DAYS } from '@/constants/billing';
 import { useAuth, useLogout } from '@/hooks/use-auth';
 import { api } from '@/lib/api';
-import { trackSubscriptionConversion } from '@/lib/meta-pixel';
+import { trackInitiateCheckout, trackSubscriptionConversion } from '@/lib/meta-pixel';
 
 export default function AssinaturaPageContent() {
   const router = useRouter();
@@ -72,6 +73,7 @@ export default function AssinaturaPageContent() {
     setErrorMessage(null);
     setCheckoutMessage(null);
     setLoadingPlan(plan);
+    trackInitiateCheckout(plan);
 
     try {
       const { url } = await api.post<{ url: string }>('/billing/checkout-session', { plan });
@@ -121,6 +123,8 @@ export default function AssinaturaPageContent() {
           {errorMessage}
         </div>
       )}
+
+      <TrialTrust />
 
       <PlanPicker mode="subscribe" onSelectPlan={handleSelectPlan} loadingPlan={loadingPlan} compactHeader />
 

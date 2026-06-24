@@ -42,22 +42,15 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Senha obrigatória'),
 });
 
-export const registerSchema = z
-  .object({
-    name: nameSchema,
-    cpf: cpfSchema,
-    email: emailSchema,
-    password: passwordSchema,
-    confirmPassword: z.string(),
-    acceptedTerms: z.boolean().refine((value) => value === true, {
-      message: 'Você precisa aceitar os Termos de Uso e a Política de Privacidade',
-    }),
-    marketingOptIn: z.boolean(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: 'Senhas não conferem',
-    path: ['confirmPassword'],
-  });
+export const registerSchema = z.object({
+  name: nameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  acceptedTerms: z.boolean().refine((value) => value === true, {
+    message: 'Você precisa aceitar os Termos de Uso e a Política de Privacidade',
+  }),
+  marketingOptIn: z.boolean(),
+});
 
 export const changePasswordSchema = z
   .object({

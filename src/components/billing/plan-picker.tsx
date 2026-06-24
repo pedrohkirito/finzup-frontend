@@ -152,11 +152,23 @@ export function PlanPicker({
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:mb-4 sm:text-4xl dark:text-white">
             {mode === 'subscribe' ? 'Escolha seu plano' : 'Planos simples e transparentes'}
           </h2>
-          <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
-            {mode === 'subscribe'
-              ? `Escolha um plano e inicie os ${TRIAL_DAYS} dias grátis. A cobrança só começa após o período de teste.`
-              : `Comece com ${TRIAL_DAYS} dias grátis. Cancele quando quiser sem burocracia.`}
-          </p>
+          {mode === 'landing' ? (
+            <>
+              <p className="mb-3 text-lg font-semibold leading-relaxed text-slate-800 sm:text-xl dark:text-slate-200">
+                Menos que um{' '}
+                <span className="text-brand-600 dark:text-brand-400">café por mês</span> para nunca
+                mais perder o controle do seu dinheiro.
+              </p>
+              <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
+                Comece com {TRIAL_DAYS} dias grátis. Cancele quando quiser sem burocracia.
+              </p>
+            </>
+          ) : (
+            <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
+              Escolha um plano e inicie os {TRIAL_DAYS} dias grátis. A cobrança só começa após o
+              período de teste.
+            </p>
+          )}
         </div>
       )}
 

@@ -26,6 +26,16 @@ export function trackRegistrationComplete() {
   });
 }
 
+/** Dispara ao clicar em um CTA da landing que leva ao cadastro. */
+export function trackLead(contentName = 'Landing CTA') {
+  trackMetaEvent('Lead', { content_name: contentName });
+}
+
+/** Dispara ao iniciar o checkout (redirecionamento para a Stripe). */
+export function trackInitiateCheckout(planId: BillingPlanId) {
+  trackMetaEvent('InitiateCheckout', getPlanParams(planId));
+}
+
 function hasTrackedStartTrial(userId: string): boolean {
   try {
     return sessionStorage.getItem(START_TRIAL_STORAGE_KEY) === userId;

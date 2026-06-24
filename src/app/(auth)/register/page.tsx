@@ -24,7 +24,13 @@ export default function RegisterPage() {
   return (
     <div>
       <AuthBackLink />
-      <h2 className="mb-6 text-xl font-semibold">Criar conta</h2>
+      <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase">
+        Passo 1 de 2
+      </p>
+      <h2 className="mb-1 text-xl font-semibold">Criar conta</h2>
+      <p className="mb-6 text-sm text-slate-500">
+        7 dias grátis · cancele quando quiser, sem cobrança durante o teste.
+      </p>
       <AuthForm
         schema={registerSchema}
         defaultValues={{
@@ -33,13 +39,11 @@ export default function RegisterPage() {
         }}
         onSubmit={async (data) => {
           const name = String(data.name);
-          const cpf = String(data.cpf);
           const email = String(data.email);
           const password = String(data.password);
           const marketingOptIn = data.marketingOptIn === true;
           const result = await api.post<{ emailVerified?: boolean }>('/auth/register', {
             name,
-            cpf,
             email,
             password,
             acceptedTerms: true,
@@ -54,10 +58,8 @@ export default function RegisterPage() {
         }}
         fields={[
           { name: 'name', label: 'Nome completo', placeholder: 'Seu nome' },
-          { name: 'cpf', label: 'CPF', placeholder: '000.000.000-00', mask: 'cpf' },
           { name: 'email', label: 'Email', type: 'email', placeholder: 'seu@email.com' },
           { name: 'password', label: 'Senha', type: 'password', showPasswordRequirements: true },
-          { name: 'confirmPassword', label: 'Confirmar senha', type: 'password' },
           {
             name: 'marketingOptIn',
             type: 'checkbox',
