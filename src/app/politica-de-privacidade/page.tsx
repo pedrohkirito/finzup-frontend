@@ -118,8 +118,8 @@ const privacySections = [
             funcionalidades), <strong>apenas quando você tiver consentido</strong> em recebê-las;
           </li>
           <li>
-            Medir audiência, desempenho de campanhas e melhorar a experiência na plataforma (ferramentas de
-            analytics e pixel de conversão);
+            Medir audiência, desempenho de campanhas, funis de conversão e melhorar a experiência na
+            plataforma (ferramentas de analytics, como Mixpanel, e pixel de conversão);
           </li>
           <li>Garantir a segurança da plataforma e prevenir acessos não autorizados;</li>
           <li>Atender solicitações de suporte;</li>
@@ -174,7 +174,11 @@ const privacySections = [
             publicitárias, quando você interage com o site;
           </li>
           <li>
-            <strong>Vercel Analytics</strong> — estatísticas agregadas de acesso e uso do site.
+            <strong>Vercel Analytics</strong> — estatísticas agregadas de acesso e uso do site;
+          </li>
+          <li>
+            <strong>Mixpanel</strong> — análise de funil e eventos de uso (como cadastro, assinatura e
+            início do teste gratuito), para entender e melhorar a jornada do usuário na plataforma.
           </li>
         </ul>
         <p>
@@ -191,7 +195,7 @@ const privacySections = [
         <p>
           Alguns dos prestadores listados acima podem processar dados em servidores localizados fora do
           Brasil, incluindo Estados Unidos e outros países onde mantêm infraestrutura (como AWS, Stripe,
-          Meta e Vercel).
+          Meta, Mixpanel e Vercel).
         </p>
         <p>
           Quando houver transferência internacional, adotamos medidas para garantir um nível adequado de
@@ -305,8 +309,9 @@ const privacySections = [
             <strong>Preferências:</strong> lembrar configurações como tema da interface;
           </li>
           <li>
-            <strong>Analíticos:</strong> Vercel Analytics, para entender de forma agregada como o site é
-            utilizado;
+            <strong>Analíticos:</strong> Vercel Analytics e Mixpanel, para entender de forma agregada como
+            o site é utilizado e como os usuários percorrem etapas como cadastro e início do teste
+            gratuito;
           </li>
           <li>
             <strong>Marketing e medição:</strong> Meta (Facebook Pixel), para medir cadastros, trials e

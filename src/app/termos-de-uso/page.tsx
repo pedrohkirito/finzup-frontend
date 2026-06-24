@@ -222,6 +222,13 @@ const termsSections = [
           </a>
           . Responderemos em até {LGPD_RESPONSE_DAYS} dias, conforme a LGPD.
         </p>
+        <p>
+          Para medir audiência, desempenho de campanhas e etapas do funil de cadastro e assinatura,
+          utilizamos ferramentas de análise e medição, incluindo <strong>Mixpanel</strong>, Meta (Facebook
+          Pixel) e Vercel Analytics, conforme detalhado na Política de Privacidade. O uso dessas
+          ferramentas limita-se às finalidades descritas naquela política e não inclui o compartilhamento
+          dos dados financeiros que você registra na plataforma.
+        </p>
       </>
     ),
   },
