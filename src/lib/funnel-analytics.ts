@@ -34,6 +34,22 @@ export function trackEmailVerified() {
   trackMixpanelEvent('email_verified');
 }
 
+export function trackVerificationEmailResent() {
+  trackMixpanelEvent('verification_email_resent');
+}
+
+export function trackVerifyEmailPollSuccess() {
+  trackMixpanelEvent('verify_email_poll_success');
+}
+
+export function trackGoogleAuthStarted(mode: 'login' | 'register') {
+  trackMixpanelEvent('google_auth_started', { mode });
+}
+
+export function trackGoogleAuthCompleted(mode: 'login' | 'register') {
+  trackMixpanelEvent('google_auth_completed', { mode });
+}
+
 export function trackSubscriptionPageViewed(trialExpired: boolean) {
   trackMixpanelEvent('subscription_page_viewed', { trial_expired: trialExpired });
 }

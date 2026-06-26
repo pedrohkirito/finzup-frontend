@@ -29,10 +29,7 @@
       padding: 32px 16px 64px;
     }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
+    .container { max-width: 800px; margin: 0 auto; }
 
     header {
       background: linear-gradient(135deg, var(--brand) 0%, var(--green) 100%);
@@ -52,17 +49,8 @@
       margin-bottom: 8px;
     }
 
-    header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1.3;
-      margin-bottom: 12px;
-    }
-
-    header p {
-      font-size: 15px;
-      opacity: 0.92;
-    }
+    header h1 { font-size: 28px; font-weight: 700; line-height: 1.3; margin-bottom: 12px; }
+    header p { font-size: 15px; opacity: 0.92; }
 
     .card {
       background: #fff;
@@ -73,6 +61,8 @@
       box-shadow: 0 2px 12px rgba(3, 182, 230, 0.06);
     }
 
+    .card.done { border-color: #bbf7d0; background: linear-gradient(180deg, #fff 0%, #f0fdf4 100%); }
+
     h2 {
       font-size: 20px;
       font-weight: 700;
@@ -82,34 +72,12 @@
       border-bottom: 2px solid var(--slate-200);
     }
 
-    h3 {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--slate-900);
-      margin: 20px 0 10px;
-    }
-
+    h3 { font-size: 16px; font-weight: 700; color: var(--slate-900); margin: 20px 0 10px; }
     p { margin-bottom: 12px; font-size: 15px; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      margin: 16px 0;
-    }
-
-    th, td {
-      padding: 10px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--slate-200);
-    }
-
-    th {
-      background: var(--slate-50);
-      font-weight: 600;
-      color: var(--slate-900);
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0; }
+    th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--slate-200); }
+    th { background: var(--slate-50); font-weight: 600; color: var(--slate-900); }
     tr:last-child td { border-bottom: none; }
 
     .badge {
@@ -124,36 +92,20 @@
     .badge-p2 { background: #fef3c7; color: #b45309; }
     .badge-p3 { background: #dbeafe; color: #1d4ed8; }
     .badge-p4 { background: var(--slate-200); color: var(--slate-700); }
+    .badge-done { background: #dcfce7; color: #166534; }
+    .badge-new { background: #e0f2fe; color: #0369a1; }
 
-    .priority-card {
-      border-left: 4px solid var(--brand);
-      margin-bottom: 20px;
-    }
-
+    .priority-card { border-left: 4px solid var(--brand); margin-bottom: 20px; }
     .priority-card.p1 { border-left-color: var(--red); }
+    .priority-card.p1.done { border-left-color: var(--green); }
     .priority-card.p2 { border-left-color: var(--amber); }
     .priority-card.p3 { border-left-color: var(--brand); }
     .priority-card.p4 { border-left-color: var(--slate-500); }
 
-    .priority-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
+    .priority-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .priority-header h2 { border: none; padding: 0; margin: 0; flex: 1; }
 
-    .priority-header h2 {
-      border: none;
-      padding: 0;
-      margin: 0;
-      flex: 1;
-    }
-
-    ul {
-      margin: 8px 0 16px 20px;
-      font-size: 15px;
-    }
-
+    ul { margin: 8px 0 16px 20px; font-size: 15px; }
     li { margin-bottom: 6px; }
 
     .impact {
@@ -177,6 +129,7 @@
       overflow-x: auto;
       white-space: pre;
       color: var(--slate-900);
+      margin-bottom: 16px;
     }
 
     .stat-grid {
@@ -194,18 +147,8 @@
       text-align: center;
     }
 
-    .stat .value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--brand-dark);
-    }
-
-    .stat .label {
-      font-size: 12px;
-      color: var(--slate-500);
-      margin-top: 4px;
-    }
-
+    .stat .value { font-size: 28px; font-weight: 700; color: var(--brand-dark); }
+    .stat .label { font-size: 12px; color: var(--slate-500); margin-top: 4px; }
     .stat.critical .value { color: var(--red); }
 
     .note {
@@ -218,15 +161,33 @@
       margin-top: 16px;
     }
 
+    .info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: #1e40af;
+      margin-bottom: 16px;
+    }
+
     .checklist { list-style: none; margin-left: 0; }
     .checklist li::before { content: "☐ "; color: var(--brand); font-weight: 700; }
+    .checklist.done li::before { content: "✓ "; color: var(--green); }
 
-    footer {
-      text-align: center;
-      font-size: 13px;
-      color: var(--slate-500);
-      margin-top: 32px;
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .compare div {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 14px;
     }
+    .compare strong { display: block; margin-bottom: 6px; color: var(--slate-900); }
+
+    @media (max-width: 600px) { .compare { grid-template-columns: 1fr; } }
+
+    footer { text-align: center; font-size: 13px; color: var(--slate-500); margin-top: 32px; }
 
     @media print {
       body { background: #fff; padding: 0; }
@@ -240,12 +201,16 @@
     <header>
       <p class="label">Finzup · Growth</p>
       <h1>Análise do funil de conversão</h1>
-      <p>Período: últimos 7 dias · Objetivo: priorizar melhorias para aumentar vendas (trials iniciados)</p>
+      <p>Baseline: últimos 7 dias (pré-checkout customizado) · Objetivo: aumentar trials iniciados</p>
     </header>
 
-    <!-- KPIs -->
+    <div class="info">
+      <strong>Atualização jun/2026:</strong> checkout customizado com Stripe Payment Element embarcado na <code>/assinatura</code> foi implementado. Os KPIs abaixo são o <strong>baseline histórico</strong> — use-os para comparar após o deploy.
+    </div>
+
+    <!-- KPIs baseline -->
     <div class="card">
-      <h2>Visão geral</h2>
+      <h2>Visão geral (baseline)</h2>
       <div class="stat-grid">
         <div class="stat">
           <div class="value">256</div>
@@ -269,55 +234,76 @@
       </p>
     </div>
 
-    <!-- Funil tabela -->
+    <!-- Implementação -->
+    <div class="card done">
+      <h2>Implementado — checkout customizado</h2>
+      <div class="compare">
+        <div>
+          <strong>Antes</strong>
+          Redirect para Checkout hospedado na Stripe. Usuário saía do Finzup. Abandonos difíceis de rastrear.
+        </div>
+        <div>
+          <strong>Depois</strong>
+          2 passos na <code>/assinatura</code>: planos → Payment Element. Permanece no domínio Finzup. Evento <code>checkout_form_viewed</code>.
+        </div>
+      </div>
+      <h3>Fluxo atual</h3>
+      <ol style="margin-left:20px;font-size:15px;">
+        <li><strong>Passo 1 — Planos:</strong> <code>checkout_initiated</code></li>
+        <li><strong>Passo 2 — Pagamento:</strong> Payment Element → <code>checkout_form_viewed</code></li>
+        <li><strong>Processamento:</strong> webhook + polling → <code>trial_started</code> → dashboard</li>
+      </ol>
+      <h3>Deploy em produção</h3>
+      <ul class="checklist">
+        <li><code>STRIPE_WEBHOOK_SECRET</code> (Live) no backend</li>
+        <li>Webhook Live em <code>/api/v1/webhooks/stripe</code></li>
+        <li><code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...</code> no frontend</li>
+        <li>Price IDs Live alinhados com <code>sk_live_...</code></li>
+      </ul>
+    </div>
+
+    <!-- Funil tabela baseline -->
     <div class="card">
-      <h2>Funil completo</h2>
+      <h2>Funil completo (baseline)</h2>
       <table>
         <thead>
-          <tr>
-            <th>Etapa</th>
-            <th>Usuários</th>
-            <th>Taxa</th>
-          </tr>
+          <tr><th>Etapa</th><th>Usuários</th><th>Taxa</th></tr>
         </thead>
         <tbody>
           <tr><td>Visitou a landing</td><td>256</td><td>100%</td></tr>
           <tr><td>Clicou no CTA</td><td>41</td><td>16%</td></tr>
-          <tr><td>Completou cadastro</td><td>17</td><td>6,6% do total</td></tr>
+          <tr><td>Completou cadastro</td><td>17</td><td>6,6%</td></tr>
           <tr><td>Viu /assinatura</td><td>~13–15</td><td>—</td></tr>
-          <tr><td>Iniciou checkout (Stripe)</td><td>12</td><td>80% dos que viram assinatura</td></tr>
-          <tr><td><strong>Iniciou trial</strong></td><td><strong>3</strong></td><td><strong style="color:var(--red);">25% dos checkouts</strong></td></tr>
+          <tr><td>Iniciou checkout</td><td>12</td><td>80%</td></tr>
+          <tr><td><strong>Iniciou trial</strong></td><td><strong>3</strong></td><td><strong style="color:var(--red);">25%</strong></td></tr>
         </tbody>
       </table>
       <div class="note">
-        Dos 12 checkouts iniciados: 3 trials, 2 cancelamentos explícitos e <strong>~7 abandonos silenciosos</strong> no Stripe.
+        Baseline com redirect Stripe: 3 trials, 2 cancelamentos explícitos, <strong>~7 abandonos silenciosos</strong>.
       </div>
     </div>
 
-    <!-- Funis Mixpanel -->
+    <!-- Funil pós-deploy -->
     <div class="card">
-      <h2>Funis detalhados (Mixpanel)</h2>
-
-      <h3>1. Landing + Registro</h3>
+      <h2>Funil recomendado pós-deploy</h2>
       <table>
+        <thead>
+          <tr><th>Ordem</th><th>Evento</th><th>Descrição</th></tr>
+        </thead>
         <tbody>
-          <tr><td>page_viewed</td><td>256</td><td>100%</td></tr>
-          <tr><td>landing_cta_clicked</td><td>41</td><td>16,02%</td></tr>
-          <tr><td>registration_started</td><td>41</td><td>100%</td></tr>
-          <tr><td>registration_completed</td><td>17</td><td>41,46%</td></tr>
+          <tr><td>6</td><td><code>subscription_page_viewed</code></td><td>Passo 1: planos</td></tr>
+          <tr><td>7</td><td><code>checkout_initiated</code></td><td>Sessão Stripe criada</td></tr>
+          <tr><td>7b</td><td><code>checkout_form_viewed</code> <span class="badge badge-new">novo</span></td><td>Passo 2: Payment Element</td></tr>
+          <tr><td>8</td><td><code>trial_started</code></td><td>Teste ativado</td></tr>
         </tbody>
       </table>
-      <p><strong>Conversão geral:</strong> 6,64%</p>
+      <p><code>checkout_canceled</code> dispara ao voltar do passo 2 para planos.</p>
+    </div>
 
-      <h3>2. Email verificado</h3>
-      <table>
-        <tbody>
-          <tr><td>verify_email_page_viewed</td><td>33</td><td>100%</td></tr>
-          <tr><td>subscription_page_viewed</td><td>13</td><td>39,39%</td></tr>
-        </tbody>
-      </table>
-
-      <h3>3. Checkout finalizado</h3>
+    <!-- Funis Mixpanel baseline -->
+    <div class="card">
+      <h2>Funis detalhados — baseline (Mixpanel)</h2>
+      <h3>Checkout finalizado</h3>
       <table>
         <tbody>
           <tr><td>subscription_page_viewed</td><td>15</td><td>100%</td></tr>
@@ -330,37 +316,46 @@
     <!-- Funil visual -->
     <div class="card">
       <h2>Resumo visual</h2>
+      <p style="font-size:14px;color:var(--slate-500);margin-bottom:8px;">Baseline (redirect Stripe)</p>
       <div class="funnel">Landing 256
-  └─ 16% ⚠️ volume ──► CTA 41
-                          └─ 100% ──► Register 41
-                                          └─ 42% ⚠️ ──► Cadastro OK 17
-                                                              └─ ~76% ──► /assinatura ~13
-                                                                              └─ 80% ✓ ──► Checkout 12
-                                                                                              └─ 25% 🔴 ──► Trial 3</div>
+  └─ 16% ⚠️ ──► CTA 41
+                    └─ 42% ⚠️ ──► Cadastro 17
+                                        └─ /assinatura ~13
+                                              └─ checkout 12
+                                                    └─ 25% 🔴 Trial 3</div>
+      <p style="font-size:14px;color:var(--slate-500);margin-bottom:8px;">Fluxo atual (checkout customizado)</p>
+      <div class="funnel">/assinatura Passo 1 (planos)
+  └─ checkout_initiated
+        └─ Passo 2 (Payment Element)
+              └─ checkout_form_viewed
+                    ├─ checkout_canceled
+                    └─ trial_started → /dashboard</div>
     </div>
 
     <!-- Prioridade 1 -->
-    <div class="card priority-card p1">
+    <div class="card priority-card p1 done">
       <div class="priority-header">
-        <span class="badge badge-p1">Prioridade 1</span>
-        <h2>Checkout Stripe → trial</h2>
+        <span class="badge badge-done">Implementado</span>
+        <h2>Checkout → trial</h2>
       </div>
-      <p><strong>Problema:</strong> 12 iniciaram checkout, só 3 viraram trial (75% de perda). Apenas 2 cancelaram explicitamente.</p>
-      <h3>Por que acontece</h3>
-      <ul>
-        <li>Trial exige cartão no Stripe, mesmo com “7 dias grátis” — alta fricção no Brasil.</li>
-        <li>Usuário sai do Finzup para página externa — perde contexto e confiança.</li>
-        <li>Stripe pode não reforçar “R$ 0 hoje” da mesma forma que a página /assinatura.</li>
+      <p><strong>Problema (baseline):</strong> 12 checkouts, 3 trials (75% de perda). Maioria abandonou no redirect Stripe.</p>
+      <h3>Entregue</h3>
+      <ul class="checklist done">
+        <li>Payment Element embutido na /assinatura</li>
+        <li>Resumo do pedido, timeline do teste, copy de confiança (Stripe, R$ 0 hoje)</li>
+        <li>Evento checkout_form_viewed</li>
+        <li>checkout_canceled ao voltar do pagamento</li>
+        <li>Recuperação de stripeCustomerId órfão</li>
       </ul>
-      <h3>O que atacar</h3>
+      <h3>Medir após deploy</h3>
       <ul class="checklist">
-        <li>Reforçar antes do redirect: “R$ 0 hoje · cobrança só no dia 7 · cancele em 1 clique”.</li>
-        <li>Testar Stripe Checkout customizado ou Payment Element embutido na /assinatura.</li>
-        <li>Analisar abandonos no Stripe Dashboard (cartão, 3DS, revisão do valor).</li>
-        <li>Breakdown por plano (monthly vs annual — R$ 106,80 pode assustar).</li>
-        <li>Verificar falha de webhook / tracking de trial_started.</li>
+        <li>Funil checkout_initiated → checkout_form_viewed → trial_started</li>
+        <li>Comparar taxa com baseline de 25%</li>
+        <li>Breakdown por plan (monthly vs annual)</li>
+        <li>Abandonos no Payment Element (Stripe Dashboard)</li>
+        <li>Falhas de webhook vs. polling</li>
       </ul>
-      <div class="impact"><strong>Impacto:</strong> subir de 25% → 50% aqui dobra os trials (de 3 para ~6) sem mexer no topo do funil.</div>
+      <div class="impact"><strong>Meta:</strong> 25% → 40–50% na etapa checkout → trial. Validar em 7–14 dias pós-deploy.</div>
     </div>
 
     <!-- Prioridade 2 -->
@@ -370,20 +365,14 @@
         <h2>Email verificado → /assinatura</h2>
       </div>
       <p><strong>Problema:</strong> 33 viram verify-email, só 13 chegaram em /assinatura (~60% de perda).</p>
-      <h3>Por que acontece</h3>
-      <ul>
-        <li>Cadastro não autentica até verificar o email.</li>
-        <li>Página diz “você pode fechar esta aba” — incentiva abandono.</li>
-        <li>Email de boas-vindas só é enviado após verificação.</li>
-      </ul>
       <h3>O que atacar</h3>
       <ul class="checklist">
-        <li>CTA claro na página de espera: “Abra o email e clique no link”.</li>
-        <li>Email de verificação orientado à conversão.</li>
-        <li>Sequência de lembrete D+0, D+1, D+3.</li>
-        <li>Considerar login social (Google).</li>
+        <li>CTA claro na página de espera</li>
+        <li>Email de verificação orientado à conversão</li>
+        <li>Sequência de lembrete D+0, D+1, D+3</li>
+        <li>Considerar login social (Google)</li>
       </ul>
-      <div class="impact"><strong>Impacto:</strong> recuperar metade dos 20 usuários = +10 na assinatura, potencialmente +8 checkouts.</div>
+      <div class="impact"><strong>Impacto:</strong> +10 na assinatura se recuperar metade dos perdidos.</div>
     </div>
 
     <!-- Prioridade 3 -->
@@ -393,14 +382,12 @@
         <h2>Conclusão do cadastro</h2>
       </div>
       <p><strong>Problema:</strong> 41 abriram /register, 17 completaram (58% de abandono).</p>
-      <h3>O que atacar</h3>
       <ul class="checklist">
-        <li>Simplificar requisitos de senha no cadastro.</li>
-        <li>Marketing opt-in desmarcado por padrão.</li>
-        <li>Prova social ou benefício ao lado do formulário.</li>
-        <li>Medir abandono por campo no Mixpanel.</li>
+        <li>Simplificar requisitos de senha</li>
+        <li>Marketing opt-in desmarcado por padrão</li>
+        <li>Prova social ao lado do formulário</li>
+        <li>Medir abandono por campo no Mixpanel</li>
       </ul>
-      <div class="impact"><strong>Impacto:</strong> 42% → 60% de conclusão = +7 cadastros/semana.</div>
     </div>
 
     <!-- Prioridade 4 -->
@@ -409,15 +396,12 @@
         <span class="badge badge-p4">Prioridade 4</span>
         <h2>Landing → clique no CTA</h2>
       </div>
-      <p><strong>Problema:</strong> 256 visitantes, 41 cliques (16%). Maior volume absoluto (215 pessoas), mas visitantes frios.</p>
-      <h3>O que atacar</h3>
+      <p><strong>Problema:</strong> 256 visitantes, 41 cliques (16%).</p>
       <ul class="checklist">
-        <li>Breakdown por utm_source / cta_location.</li>
-        <li>Testar CTA único mais forte no hero.</li>
-        <li>Reforçar dor + prova social.</li>
-        <li>Testar headline focada no diferencial.</li>
+        <li>Breakdown por utm_source / cta_location</li>
+        <li>Testar CTA único mais forte no hero</li>
+        <li>Reforçar dor + prova social</li>
       </ul>
-      <div class="impact"><strong>Impacto:</strong> +5 pp no CTA ≈ +13 cadastros/semana (médio prazo).</div>
     </div>
 
     <!-- Tabela resumo -->
@@ -425,32 +409,32 @@
       <h2>Ordem de execução</h2>
       <table>
         <thead>
-          <tr>
-            <th>#</th>
-            <th>Área</th>
-            <th>Motivo</th>
-          </tr>
+          <tr><th>#</th><th>Área</th><th>Status</th><th>Motivo</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td><span class="badge badge-p1">1</span></td>
-            <td>Checkout / Stripe</td>
-            <td>Maior ROI imediato; leads quentes; 75% de perda</td>
+            <td><span class="badge badge-done">1</span></td>
+            <td>Checkout → trial</td>
+            <td>Implementado — medir</td>
+            <td>Maior ROI; baseline 75% de perda</td>
           </tr>
           <tr>
             <td><span class="badge badge-p2">2</span></td>
             <td>Pós-verificação de email</td>
-            <td>Usuários engajados que somem antes de ver o plano</td>
+            <td>Pendente</td>
+            <td>Engajados que somem antes do plano</td>
           </tr>
           <tr>
             <td><span class="badge badge-p3">3</span></td>
             <td>Formulário de cadastro</td>
-            <td>Gargalo médio, relativamente fácil de iterar</td>
+            <td>Pendente</td>
+            <td>Gargalo médio</td>
           </tr>
           <tr>
             <td><span class="badge badge-p4">4</span></td>
             <td>Landing / CTA</td>
-            <td>Volume alto, intenção menor; validar tráfego antes de redesign</td>
+            <td>Pendente</td>
+            <td>Volume alto, intenção menor</td>
           </tr>
         </tbody>
       </table>
@@ -459,16 +443,16 @@
     <!-- Validação -->
     <div class="card">
       <h2>Validação de dados</h2>
-      <p>Alguns números não fecham perfeitamente (ex.: 17 cadastros vs 33 views em verify_email_page_viewed). Antes de implementar:</p>
       <ul>
-        <li>Criar funil de <strong>mesmo usuário</strong> no Mixpanel (ver <code>mixpanel-funnel.md</code>).</li>
-        <li>Breakdowns por <code>utm_source</code>, <code>plan</code> e dispositivo.</li>
-        <li>Cruzar com Stripe Dashboard para abandonos reais vs. falha de tracking.</li>
+        <li>Recriar funil com <code>checkout_form_viewed</code> (ver <code>mixpanel-funnel.md</code>)</li>
+        <li>Breakdowns por <code>utm_source</code>, <code>plan</code> e dispositivo</li>
+        <li>Cruzar com Stripe Dashboard: abandonos no Payment Element vs. webhook</li>
+        <li>Comparar 7 dias pós-deploy com o baseline deste documento</li>
       </ul>
     </div>
 
     <footer>
-      Gerado em junho/2026 · Finzup · Baseado nos funis Mixpanel dos últimos 7 dias
+      Baseline: junho/2026 (Mixpanel, 7 dias) · Atualizado com checkout customizado · Finzup
     </footer>
 
   </div>

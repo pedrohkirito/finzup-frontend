@@ -29,10 +29,11 @@ interface AuthFormProps {
   fields: FieldConfig[];
   submitLabel: string;
   footer?: React.ReactNode;
+  socialAuth?: (values: Record<string, unknown>) => React.ReactNode;
   defaultValues?: Record<string, unknown>;
 }
 
-export function AuthForm({ schema, onSubmit, fields, submitLabel, footer, defaultValues }: AuthFormProps) {
+export function AuthForm({ schema, onSubmit, fields, submitLabel, footer, socialAuth, defaultValues }: AuthFormProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
@@ -139,6 +140,7 @@ export function AuthForm({ schema, onSubmit, fields, submitLabel, footer, defaul
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Aguarde...' : submitLabel}
       </Button>
+      {socialAuth?.(watchedValues)}
       {footer}
     </form>
   );

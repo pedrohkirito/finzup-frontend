@@ -232,7 +232,7 @@ export default function AssinaturaPageContent() {
     <div className="space-y-8">
       <div>
         <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase">
-          Passo 1 de 2
+          Passo 3 de 3
         </p>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
           {trialExpired ? 'Sua assinatura expirou' : 'Comece seu teste gratuito'}

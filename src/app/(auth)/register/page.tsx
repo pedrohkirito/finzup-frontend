@@ -1,18 +1,34 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
 import { AuthBackLink } from '@/components/auth/auth-back-link';
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { registerSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
 import { trackRegistrationComplete, trackRegistrationStarted } from '@/lib/funnel-analytics';
+import { useEffect } from 'react';
+
+function AuthDivider() {
+  return (
+    <div className="relative py-2">
+      <div className="absolute inset-0 flex items-center">
+        <span className="w-full border-t border-slate-200" />
+      </div>
+      <div className="relative flex justify-center text-xs uppercase">
+        <span className="bg-white px-2 text-slate-500">ou</span>
+      </div>
+    </div>
+  );
+}
 
 export default function RegisterPage() {
   const router = useRouter();
   const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
+  const [googleError, setGoogleError] = useState('');
 
   useEffect(() => {
     trackRegistrationStarted();
@@ -106,6 +122,19 @@ export default function RegisterPage() {
           },
         ]}
         submitLabel="Criar conta"
+        socialAuth={(values) => (
+          <>
+            <AuthDivider />
+            <GoogleSignInButton
+              mode="register"
+              acceptedTerms={values.acceptedTerms === true}
+              marketingOptIn={values.marketingOptIn === true}
+              disabled={values.acceptedTerms !== true}
+              onError={setGoogleError}
+            />
+            {googleError && <p className="mt-2 text-center text-sm text-red-500">{googleError}</p>}
+          </>
+        )}
         footer={
           <p className="pt-2 text-center text-sm text-slate-500">
             Já tem conta?{' '}

@@ -1,14 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
 import { z } from 'zod';
 import { api } from '@/lib/api';
-import { useState } from 'react';
 
 const schema = z.object({ email: z.string().email() });
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
+  const searchParams = useSearchParams();
+  const emailFromQuery = searchParams.get('email') ?? '';
   const [sent, setSent] = useState(false);
 
   return (
@@ -21,6 +24,7 @@ export default function ForgotPasswordPage() {
       ) : (
         <AuthForm
           schema={schema}
+          defaultValues={{ email: emailFromQuery }}
           onSubmit={async (data) => {
             await api.post('/auth/forgot-password', data);
             setSent(true);
@@ -33,5 +37,13 @@ export default function ForgotPasswordPage() {
         Voltar ao login
       </Link>
     </div>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }

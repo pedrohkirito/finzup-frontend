@@ -16,10 +16,25 @@ Guia para configurar o funil de conversão no painel Mixpanel após o deploy.
 | 2 | `landing_cta_clicked` | Clique em CTA da landing ou seção de preços |
 | 3 | `registration_started` | Usuário abriu `/register` |
 | 4 | `registration_completed` | Cadastro concluído com sucesso |
-| 5 | `email_verified` | Email confirmado (pula se `SKIP_EMAIL_VERIFICATION`) |
-| 6 | `subscription_page_viewed` | Usuário viu `/assinatura` |
-| 7 | `checkout_initiated` | Plano selecionado, redirect para Stripe |
-| 8 | `trial_started` | Teste gratuito ativado (client + server deduplicados) |
+| 4b | `google_auth_completed` | Login/cadastro via Google (pula verificação de email) |
+| 5 | `verify_email_page_viewed` | Página de espera ou link de verificação |
+| 5b | `verification_email_resent` | Reenvio manual do email de verificação |
+| 5c | `verify_email_poll_success` | Sessão detectada via "Já cliquei no link" |
+| 6 | `email_verified` | Email confirmado (pula se Google ou `SKIP_EMAIL_VERIFICATION`) |
+| 7 | `subscription_page_viewed` | Usuário viu `/assinatura` |
+| 8 | `checkout_initiated` | Plano selecionado, sessão de checkout criada |
+| 8b | `checkout_form_viewed` | Payment Element exibido (passo 2 do checkout customizado) |
+| 9 | `trial_started` | Teste gratuito ativado (client + server deduplicados) |
+
+## Funil com ramo Google
+
+Para usuários que entram com Google, o fluxo pula `verify_email_page_viewed` e `email_verified`:
+
+`registration_started` → `google_auth_completed` → `subscription_page_viewed` → …
+
+Para cadastro email/senha:
+
+`registration_completed` → `verify_email_page_viewed` → `email_verified` → `subscription_page_viewed` → …
 
 ## Criar o Funnel Report
 
@@ -32,7 +47,7 @@ Guia para configurar o funil de conversão no painel Mixpanel após o deploy.
 
 - **Por origem:** `utm_source`, `utm_medium`, `utm_campaign`
 - **Por CTA:** `content_name`, `cta_location`
-- **Por plano:** `plan` (em `checkout_initiated` e `trial_started`)
+- **Por plano:** `plan` (em `checkout_initiated`, `checkout_form_viewed` e `trial_started`)
 
 ## Cohort de drop-off
 

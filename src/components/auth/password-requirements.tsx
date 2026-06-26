@@ -9,6 +9,8 @@ interface PasswordRequirementsProps {
 }
 
 export function PasswordRequirements({ password }: PasswordRequirementsProps) {
+  if (!password) return null;
+
   const requirements = getPasswordRequirementStatus(password);
 
   return (
