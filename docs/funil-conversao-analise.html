@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análise do funil de conversão — Finzup</title>
+  <style>
+    :root {
+      --brand: #03b6e6;
+      --brand-dark: #027394;
+      --green: #22bd7b;
+      --slate-900: #0f172a;
+      --slate-700: #334155;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-50: #f8fafc;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --bg: #f0f9fc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--slate-700);
+      line-height: 1.6;
+      padding: 32px 16px 64px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--brand) 0%, var(--green) 100%);
+      border-radius: 16px;
+      padding: 36px 32px;
+      color: #fff;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 24px rgba(3, 182, 230, 0.2);
+    }
+
+    header .label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 15px;
+      opacity: 0.92;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #b8e8f8;
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(3, 182, 230, 0.06);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--slate-200);
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin: 20px 0 10px;
+    }
+
+    p { margin-bottom: 12px; font-size: 15px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 16px 0;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--slate-200);
+    }
+
+    th {
+      background: var(--slate-50);
+      font-weight: 600;
+      color: var(--slate-900);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge-p1 { background: #fee2e2; color: #b91c1c; }
+    .badge-p2 { background: #fef3c7; color: #b45309; }
+    .badge-p3 { background: #dbeafe; color: #1d4ed8; }
+    .badge-p4 { background: var(--slate-200); color: var(--slate-700); }
+
+    .priority-card {
+      border-left: 4px solid var(--brand);
+      margin-bottom: 20px;
+    }
+
+    .priority-card.p1 { border-left-color: var(--red); }
+    .priority-card.p2 { border-left-color: var(--amber); }
+    .priority-card.p3 { border-left-color: var(--brand); }
+    .priority-card.p4 { border-left-color: var(--slate-500); }
+
+    .priority-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .priority-header h2 {
+      border: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+    }
+
+    ul {
+      margin: 8px 0 16px 20px;
+      font-size: 15px;
+    }
+
+    li { margin-bottom: 6px; }
+
+    .impact {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #166534;
+      margin-top: 12px;
+    }
+
+    .funnel {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--slate-900);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .stat {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--brand-dark);
+    }
+
+    .stat .label {
+      font-size: 12px;
+      color: var(--slate-500);
+      margin-top: 4px;
+    }
+
+    .stat.critical .value { color: var(--red); }
+
+    .note {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: #92400e;
+      margin-top: 16px;
+    }
+
+    .checklist { list-style: none; margin-left: 0; }
+    .checklist li::before { content: "☐ "; color: var(--brand); font-weight: 700; }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--slate-500);
+      margin-top: 32px;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .card { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <p class="label">Finzup · Growth</p>
+      <h1>Análise do funil de conversão</h1>
+      <p>Período: últimos 7 dias · Objetivo: priorizar melhorias para aumentar vendas (trials iniciados)</p>
+    </header>
+
+    <!-- KPIs -->
+    <div class="card">
+      <h2>Visão geral</h2>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="value">256</div>
+          <div class="label">Visitantes landing</div>
+        </div>
+        <div class="stat">
+          <div class="value">17</div>
+          <div class="label">Cadastros completos</div>
+        </div>
+        <div class="stat">
+          <div class="value">12</div>
+          <div class="label">Checkouts iniciados</div>
+        </div>
+        <div class="stat critical">
+          <div class="value">3</div>
+          <div class="label">Trials iniciados</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-weight:600;color:var(--slate-900);margin-top:8px;">
+        Conversão landing → trial: <strong style="color:var(--red);">~1,2%</strong>
+      </p>
+    </div>
+
+    <!-- Funil tabela -->
+    <div class="card">
+      <h2>Funil completo</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Etapa</th>
+            <th>Usuários</th>
+            <th>Taxa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Visitou a landing</td><td>256</td><td>100%</td></tr>
+          <tr><td>Clicou no CTA</td><td>41</td><td>16%</td></tr>
+          <tr><td>Completou cadastro</td><td>17</td><td>6,6% do total</td></tr>
+          <tr><td>Viu /assinatura</td><td>~13–15</td><td>—</td></tr>
+          <tr><td>Iniciou checkout (Stripe)</td><td>12</td><td>80% dos que viram assinatura</td></tr>
+          <tr><td><strong>Iniciou trial</strong></td><td><strong>3</strong></td><td><strong style="color:var(--red);">25% dos checkouts</strong></td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        Dos 12 checkouts iniciados: 3 trials, 2 cancelamentos explícitos e <strong>~7 abandonos silenciosos</strong> no Stripe.
+      </div>
+    </div>
+
+    <!-- Funis Mixpanel -->
+    <div class="card">
+      <h2>Funis detalhados (Mixpanel)</h2>
+
+      <h3>1. Landing + Registro</h3>
+      <table>
+        <tbody>
+          <tr><td>page_viewed</td><td>256</td><td>100%</td></tr>
+          <tr><td>landing_cta_clicked</td><td>41</td><td>16,02%</td></tr>
+          <tr><td>registration_started</td><td>41</td><td>100%</td></tr>
+          <tr><td>registration_completed</td><td>17</td><td>41,46%</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Conversão geral:</strong> 6,64%</p>
+
+      <h3>2. Email verificado</h3>
+      <table>
+        <tbody>
+          <tr><td>verify_email_page_viewed</td><td>33</td><td>100%</td></tr>
+          <tr><td>subscription_page_viewed</td><td>13</td><td>39,39%</td></tr>
+        </tbody>
+      </table>
+
+      <h3>3. Checkout finalizado</h3>
+      <table>
+        <tbody>
+          <tr><td>subscription_page_viewed</td><td>15</td><td>100%</td></tr>
+          <tr><td>checkout_initiated</td><td>12</td><td>80%</td></tr>
+          <tr><td>trial_started</td><td>3</td><td>25%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Funil visual -->
+    <div class="card">
+      <h2>Resumo visual</h2>
+      <div class="funnel">Landing 256
+  └─ 16% ⚠️ volume ──► CTA 41
+                          └─ 100% ──► Register 41
+                                          └─ 42% ⚠️ ──► Cadastro OK 17
+                                                              └─ ~76% ──► /assinatura ~13
+                                                                              └─ 80% ✓ ──► Checkout 12
+                                                                                              └─ 25% 🔴 ──► Trial 3</div>
+    </div>
+
+    <!-- Prioridade 1 -->
+    <div class="card priority-card p1">
+      <div class="priority-header">
+        <span class="badge badge-p1">Prioridade 1</span>
+        <h2>Checkout Stripe → trial</h2>
+      </div>
+      <p><strong>Problema:</strong> 12 iniciaram checkout, só 3 viraram trial (75% de perda). Apenas 2 cancelaram explicitamente.</p>
+      <h3>Por que acontece</h3>
+      <ul>
+        <li>Trial exige cartão no Stripe, mesmo com “7 dias grátis” — alta fricção no Brasil.</li>
+        <li>Usuário sai do Finzup para página externa — perde contexto e confiança.</li>
+        <li>Stripe pode não reforçar “R$ 0 hoje” da mesma forma que a página /assinatura.</li>
+      </ul>
+      <h3>O que atacar</h3>
+      <ul class="checklist">
+        <li>Reforçar antes do redirect: “R$ 0 hoje · cobrança só no dia 7 · cancele em 1 clique”.</li>
+        <li>Testar Stripe Checkout customizado ou Payment Element embutido na /assinatura.</li>
+        <li>Analisar abandonos no Stripe Dashboard (cartão, 3DS, revisão do valor).</li>
+        <li>Breakdown por plano (monthly vs annual — R$ 106,80 pode assustar).</li>
+        <li>Verificar falha de webhook / tracking de trial_started.</li>
+      </ul>
+      <div class="impact"><strong>Impacto:</strong> subir de 25% → 50% aqui dobra os trials (de 3 para ~6) sem mexer no topo do funil.</div>
+    </div>
+
+    <!-- Prioridade 2 -->
+    <div class="card priority-card p2">
+      <div class="priority-header">
+        <span class="badge badge-p2">Prioridade 2</span>
+        <h2>Email verificado → /assinatura</h2>
+      </div>
+      <p><strong>Problema:</strong> 33 viram verify-email, só 13 chegaram em /assinatura (~60% de perda).</p>
+      <h3>Por que acontece</h3>
+      <ul>
+        <li>Cadastro não autentica até verificar o email.</li>
+        <li>Página diz “você pode fechar esta aba” — incentiva abandono.</li>
+        <li>Email de boas-vindas só é enviado após verificação.</li>
+      </ul>
+      <h3>O que atacar</h3>
+      <ul class="checklist">
+        <li>CTA claro na página de espera: “Abra o email e clique no link”.</li>
+        <li>Email de verificação orientado à conversão.</li>
+        <li>Sequência de lembrete D+0, D+1, D+3.</li>
+        <li>Considerar login social (Google).</li>
+      </ul>
+      <div class="impact"><strong>Impacto:</strong> recuperar metade dos 20 usuários = +10 na assinatura, potencialmente +8 checkouts.</div>
+    </div>
+
+    <!-- Prioridade 3 -->
+    <div class="card priority-card p3">
+      <div class="priority-header">
+        <span class="badge badge-p3">Prioridade 3</span>
+        <h2>Conclusão do cadastro</h2>
+      </div>
+      <p><strong>Problema:</strong> 41 abriram /register, 17 completaram (58% de abandono).</p>
+      <h3>O que atacar</h3>
+      <ul class="checklist">
+        <li>Simplificar requisitos de senha no cadastro.</li>
+        <li>Marketing opt-in desmarcado por padrão.</li>
+        <li>Prova social ou benefício ao lado do formulário.</li>
+        <li>Medir abandono por campo no Mixpanel.</li>
+      </ul>
+      <div class="impact"><strong>Impacto:</strong> 42% → 60% de conclusão = +7 cadastros/semana.</div>
+    </div>
+
+    <!-- Prioridade 4 -->
+    <div class="card priority-card p4">
+      <div class="priority-header">
+        <span class="badge badge-p4">Prioridade 4</span>
+        <h2>Landing → clique no CTA</h2>
+      </div>
+      <p><strong>Problema:</strong> 256 visitantes, 41 cliques (16%). Maior volume absoluto (215 pessoas), mas visitantes frios.</p>
+      <h3>O que atacar</h3>
+      <ul class="checklist">
+        <li>Breakdown por utm_source / cta_location.</li>
+        <li>Testar CTA único mais forte no hero.</li>
+        <li>Reforçar dor + prova social.</li>
+        <li>Testar headline focada no diferencial.</li>
+      </ul>
+      <div class="impact"><strong>Impacto:</strong> +5 pp no CTA ≈ +13 cadastros/semana (médio prazo).</div>
+    </div>
+
+    <!-- Tabela resumo -->
+    <div class="card">
+      <h2>Ordem de execução</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Área</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-p1">1</span></td>
+            <td>Checkout / Stripe</td>
+            <td>Maior ROI imediato; leads quentes; 75% de perda</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-p2">2</span></td>
+            <td>Pós-verificação de email</td>
+            <td>Usuários engajados que somem antes de ver o plano</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-p3">3</span></td>
+            <td>Formulário de cadastro</td>
+            <td>Gargalo médio, relativamente fácil de iterar</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-p4">4</span></td>
+            <td>Landing / CTA</td>
+            <td>Volume alto, intenção menor; validar tráfego antes de redesign</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Validação -->
+    <div class="card">
+      <h2>Validação de dados</h2>
+      <p>Alguns números não fecham perfeitamente (ex.: 17 cadastros vs 33 views em verify_email_page_viewed). Antes de implementar:</p>
+      <ul>
+        <li>Criar funil de <strong>mesmo usuário</strong> no Mixpanel (ver <code>mixpanel-funnel.md</code>).</li>
+        <li>Breakdowns por <code>utm_source</code>, <code>plan</code> e dispositivo.</li>
+        <li>Cruzar com Stripe Dashboard para abandonos reais vs. falha de tracking.</li>
+      </ul>
+    </div>
+
+    <footer>
+      Gerado em junho/2026 · Finzup · Baseado nos funis Mixpanel dos últimos 7 dias
+    </footer>
+
+  </div>
+</body>
+</html>

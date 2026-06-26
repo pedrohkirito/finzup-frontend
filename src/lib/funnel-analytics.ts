@@ -48,6 +48,15 @@ export function trackInitiateCheckout(planId: BillingPlanId) {
   });
 }
 
+export function trackCheckoutFormViewed(planId: BillingPlanId) {
+  const plan = BILLING_PLANS[planId];
+  trackMixpanelEvent('checkout_form_viewed', {
+    plan: planId,
+    plan_label: plan.label,
+    value_brl: plan.total,
+  });
+}
+
 export function trackCheckoutCanceled() {
   trackMixpanelEvent('checkout_canceled');
 }
