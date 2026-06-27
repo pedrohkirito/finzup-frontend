@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
+import { setKnownUserId } from '@/lib/mixpanel';
 import { Button } from '@/components/ui/button';
 import { TRIAL_DAYS } from '@/constants/billing';
 import type { User } from '@/types';
@@ -56,40 +57,48 @@ function VerifyEmailContent() {
     setPolling(false);
   }, []);
 
-  const redirectToLoginAfterVerification = useCallback(() => {
-    stopPolling();
-    trackEmailVerified();
-    trackVerifyEmailRedirectToLogin();
-    setRedirectingToLogin(true);
-    window.setTimeout(() => {
-      router.replace(loginAfterVerificationUrl(email ?? undefined));
-    }, 1000);
-  }, [email, router, stopPolling]);
+  const redirectToLoginAfterVerification = useCallback(
+    (userId?: string) => {
+      stopPolling();
+      if (userId) setKnownUserId(userId);
+      trackEmailVerified();
+      trackVerifyEmailRedirectToLogin();
+      setRedirectingToLogin(true);
+      window.setTimeout(() => {
+        router.replace(loginAfterVerificationUrl(email ?? undefined));
+      }, 1000);
+    },
+    [email, router, stopPolling],
+  );
 
-  const handleVerifiedSession = useCallback(() => {
-    stopPolling();
-    trackEmailVerified();
-    trackVerifyEmailPollSuccess();
-    router.push('/assinatura');
-  }, [router, stopPolling]);
+  const handleVerifiedSession = useCallback(
+    (user: User) => {
+      stopPolling();
+      setKnownUserId(user.id, { email: user.email, name: user.name });
+      trackEmailVerified();
+      trackVerifyEmailPollSuccess();
+      router.push('/assinatura');
+    },
+    [router, stopPolling],
+  );
 
   const checkVerification = useCallback(async () => {
     if (!email) return false;
 
     try {
-      await api.get<User>('/users/me');
-      handleVerifiedSession();
+      const user = await api.get<User>('/users/me');
+      handleVerifiedSession(user);
       return true;
     } catch {
       // sessão ainda não disponível neste navegador
     }
 
     try {
-      const { verified } = await api.get<{ verified: boolean }>(
+      const { verified, userId } = await api.get<{ verified: boolean; userId?: string }>(
         `/auth/verification-status?email=${encodeURIComponent(email)}`,
       );
       if (verified) {
-        redirectToLoginAfterVerification();
+        redirectToLoginAfterVerification(userId);
         return true;
       }
     } catch {
@@ -107,15 +116,18 @@ function VerifyEmailContent() {
     if (!token) return;
 
     api
-      .get<{ message: string }>(`/auth/verify-email?token=${token}`)
-      .then(() => {
+      .get<{ message: string; userId: string }>(`/auth/verify-email?token=${token}`)
+      .then((data) => {
+        setKnownUserId(data.userId);
         trackEmailVerified();
         setMessage('Email verificado! Redirecionando...');
         setTimeout(() => router.push('/assinatura'), 1500);
       })
       .catch((err: ApiError) => {
         if (err.code === 'EMAIL_ALREADY_VERIFIED') {
-          const payload = err.details as { email?: string } | undefined;
+          const payload = err.details as { email?: string; userId?: string } | undefined;
+          if (payload?.userId) setKnownUserId(payload.userId);
+          trackEmailVerified();
           setRedirectingToLogin(true);
           window.setTimeout(() => {
             router.replace(loginAfterVerificationUrl(payload?.email));

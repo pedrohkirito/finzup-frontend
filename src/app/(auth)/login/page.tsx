@@ -9,6 +9,7 @@ import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { loginSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
+import { setKnownUserId } from '@/lib/mixpanel';
 import { getPostAuthRedirect } from '@/lib/post-auth';
 import { useQueryClient } from '@tanstack/react-query';
 import type { User } from '@/types';
@@ -67,6 +68,7 @@ function LoginContent() {
             queryKey: ['auth', 'me'],
             queryFn: () => api.get<User>('/users/me'),
           });
+          setKnownUserId(user.id, { email: user.email, name: user.name });
           router.push(getPostAuthRedirect(user));
         }}
         fields={[

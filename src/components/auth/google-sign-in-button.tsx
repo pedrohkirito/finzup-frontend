@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '@/lib/api';
 import { getPostAuthRedirect } from '@/lib/post-auth';
+import { setKnownUserId } from '@/lib/mixpanel';
 import { trackGoogleAuthCompleted, trackGoogleAuthStarted } from '@/lib/funnel-analytics';
 import type { User } from '@/types';
 
@@ -133,6 +134,11 @@ export function GoogleSignInButton({
           queryKey: ['auth', 'me'],
           queryFn: () => api.get<User>('/users/me'),
         });
+        setKnownUserId(
+          user.id,
+          { email: user.email, name: user.name },
+          { linkAnonymous: mode === 'register' },
+        );
         router.push(getPostAuthRedirect(user));
       } catch (err) {
         const message =

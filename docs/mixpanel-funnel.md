@@ -60,6 +60,21 @@ Para cadastro email/senha:
 
 O evento `trial_started` usa `$insert_id: trial_started_{userId}` em frontend e backend. O Mixpanel deduplica automaticamente dentro de 24h — conte apenas uma conversão por usuário.
 
+## Identidade do usuário (`user_id`)
+
+Eventos de funil usam o **ID do usuário no Finzup** como `distinct_id` sempre que possível:
+
+1. **Cadastro** — a API retorna `userId`; o frontend chama `identify` + `alias` (mesmo browser) e registra `user_id` como super property.
+2. **Verificação de email** — o backend envia `email_verified` com `distinct_id: userId` (fonte de verdade, inclusive no mobile). O frontend deduplica com `$insert_id: email_verified_{userId}`.
+3. **Login / Google OAuth** — `identify(userId)` sem `alias` (novo dispositivo).
+4. **Todos os eventos** — incluem a propriedade `user_id` quando o ID já é conhecido.
+
+### Funis no Mixpanel
+
+Use **"Performed by user with ID"** ou filtre/breakdown por propriedade `user_id` para unir eventos cross-device (ex.: cadastro no desktop, verificação no celular).
+
+`trial_started` e `email_verified` usam `$insert_id` para deduplicar client + server.
+
 ## Propriedades de usuário
 
 Após login/cadastro, o frontend chama `identify` com:

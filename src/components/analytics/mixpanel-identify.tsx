@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { identifyUser } from '@/lib/mixpanel';
+import { setKnownUserId } from '@/lib/mixpanel';
 
 export function MixpanelIdentify() {
   const { data: user } = useAuth({ refetchOnWindowFocus: false });
@@ -10,7 +10,7 @@ export function MixpanelIdentify() {
 
   useEffect(() => {
     if (!user?.id || identifiedRef.current === user.id) return;
-    identifyUser(user.id, { email: user.email, name: user.name });
+    setKnownUserId(user.id, { email: user.email, name: user.name });
     identifiedRef.current = user.id;
   }, [user]);
 

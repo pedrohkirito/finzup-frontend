@@ -9,6 +9,7 @@ import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated';
 import { registerSchema } from '@/lib/validators';
 import { api } from '@/lib/api';
+import { setKnownUserId } from '@/lib/mixpanel';
 import { trackRegistrationComplete, trackRegistrationStarted } from '@/lib/funnel-analytics';
 import { useEffect } from 'react';
 
@@ -63,13 +64,22 @@ export default function RegisterPage() {
           const email = String(data.email);
           const password = String(data.password);
           const marketingOptIn = data.marketingOptIn === true;
-          const result = await api.post<{ emailVerified?: boolean }>('/auth/register', {
-            name,
-            email,
-            password,
-            acceptedTerms: true,
-            marketingOptIn,
-          });
+          const result = await api.post<{ emailVerified?: boolean; userId?: string; user?: { id: string } }>(
+            '/auth/register',
+            {
+              name,
+              email,
+              password,
+              acceptedTerms: true,
+              marketingOptIn,
+            },
+          );
+
+          const userId = result.user?.id ?? result.userId;
+          if (userId) {
+            setKnownUserId(userId, { email, name }, { linkAnonymous: true });
+          }
+
           trackRegistrationComplete(marketingOptIn);
           if (result.emailVerified) {
             router.push('/assinatura');

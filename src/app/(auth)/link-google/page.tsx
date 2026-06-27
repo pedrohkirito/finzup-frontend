@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { AuthForm } from '@/components/auth/auth-form';
 import { AuthBackLink } from '@/components/auth/auth-back-link';
 import { api } from '@/lib/api';
+import { setKnownUserId } from '@/lib/mixpanel';
 import { getPostAuthRedirect } from '@/lib/post-auth';
 import type { User } from '@/types';
 
@@ -56,6 +57,7 @@ function LinkGoogleContent() {
             queryKey: ['auth', 'me'],
             queryFn: () => api.get<User>('/users/me'),
           });
+          setKnownUserId(user.id, { email: user.email, name: user.name });
           router.push(getPostAuthRedirect(user));
         }}
         fields={[{ name: 'password', label: 'Senha da conta Finzup', type: 'password' }]}

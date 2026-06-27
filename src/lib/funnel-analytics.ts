@@ -1,6 +1,6 @@
 import { BILLING_PLANS, type BillingPlanId } from '@/constants/billing-plans';
 import type { UserBilling } from '@/types';
-import { trackMixpanelEvent } from '@/lib/mixpanel';
+import { getKnownUserId, trackMixpanelEvent } from '@/lib/mixpanel';
 import {
   trackInitiateCheckout as trackMetaInitiateCheckout,
   trackLead as trackMetaLead,
@@ -31,7 +31,11 @@ export function trackVerifyEmailPageViewed(hasToken: boolean) {
 }
 
 export function trackEmailVerified() {
-  trackMixpanelEvent('email_verified');
+  const userId = getKnownUserId();
+  trackMixpanelEvent('email_verified', {
+    source: 'client',
+    ...(userId ? { $insert_id: `email_verified_${userId}` } : {}),
+  });
 }
 
 export function trackVerificationEmailResent() {
@@ -91,6 +95,7 @@ export function trackTrialStarted(userId: string, billing: UserBilling) {
     plan: billing.plan,
     plan_label: plan?.label,
     source: 'client',
+    user_id: userId,
     $insert_id: `trial_started_${userId}`,
   });
 }
