@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
 import { AuthBackLink } from '@/components/auth/auth-back-link';
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
@@ -26,9 +26,12 @@ function AuthDivider() {
   );
 }
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const emailFromQuery = searchParams.get('email') ?? '';
+  const justVerified = searchParams.get('verified') === '1';
   const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
   const [googleError, setGoogleError] = useState('');
 
@@ -44,8 +47,20 @@ export default function LoginPage() {
     <div>
       <AuthBackLink />
       <h2 className="mb-6 text-xl font-semibold">Entrar na conta</h2>
+
+      {justVerified && (
+        <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left text-sm text-emerald-900">
+          <p className="font-semibold">Email confirmado!</p>
+          <p className="mt-2 leading-relaxed text-emerald-800">
+            Entre com seu email e senha para continuar. Você pode fazer isso aqui ou em qualquer
+            dispositivo — use a mesma conta que acabou de confirmar.
+          </p>
+        </div>
+      )}
+
       <AuthForm
         schema={loginSchema}
+        defaultValues={emailFromQuery ? { email: emailFromQuery } : undefined}
         onSubmit={async (data) => {
           await api.post('/auth/login', { email: String(data.email), password: String(data.password) });
           const user = await queryClient.fetchQuery({
@@ -81,5 +96,13 @@ export default function LoginPage() {
         }
       />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }

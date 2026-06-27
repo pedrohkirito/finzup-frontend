@@ -33,7 +33,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       res.status,
       json.error?.code || 'UNKNOWN',
       json.error?.message || 'Erro na requisição',
-      json.error?.details,
+      json.error,
     );
   }
 

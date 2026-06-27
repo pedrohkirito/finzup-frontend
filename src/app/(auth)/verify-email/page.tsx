@@ -12,6 +12,7 @@ import {
   trackVerificationEmailResent,
   trackVerifyEmailPageViewed,
   trackVerifyEmailPollSuccess,
+  trackVerifyEmailRedirectToLogin,
 } from '@/lib/funnel-analytics';
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -22,6 +23,12 @@ function formatCooldown(seconds: number) {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function loginAfterVerificationUrl(email?: string) {
+  const query = new URLSearchParams({ verified: '1' });
+  if (email) query.set('email', email);
+  return `/login?${query.toString()}`;
 }
 
 function VerifyEmailContent() {
@@ -36,6 +43,7 @@ function VerifyEmailContent() {
   const [resending, setResending] = useState(false);
   const [polling, setPolling] = useState(false);
   const [pollTimedOut, setPollTimedOut] = useState(false);
+  const [redirectingToLogin, setRedirectingToLogin] = useState(false);
   const [cooldownSeconds, setCooldownSeconds] = useState(showResend ? RESEND_COOLDOWN_SECONDS : 0);
   const pollAttemptsRef = useRef(0);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -48,6 +56,16 @@ function VerifyEmailContent() {
     setPolling(false);
   }, []);
 
+  const redirectToLoginAfterVerification = useCallback(() => {
+    stopPolling();
+    trackEmailVerified();
+    trackVerifyEmailRedirectToLogin();
+    setRedirectingToLogin(true);
+    window.setTimeout(() => {
+      router.replace(loginAfterVerificationUrl(email ?? undefined));
+    }, 1000);
+  }, [email, router, stopPolling]);
+
   const handleVerifiedSession = useCallback(() => {
     stopPolling();
     trackEmailVerified();
@@ -55,26 +73,87 @@ function VerifyEmailContent() {
     router.push('/assinatura');
   }, [router, stopPolling]);
 
+  const checkVerification = useCallback(async () => {
+    if (!email) return false;
+
+    try {
+      await api.get<User>('/users/me');
+      handleVerifiedSession();
+      return true;
+    } catch {
+      // sessão ainda não disponível neste navegador
+    }
+
+    try {
+      const { verified } = await api.get<{ verified: boolean }>(
+        `/auth/verification-status?email=${encodeURIComponent(email)}`,
+      );
+      if (verified) {
+        redirectToLoginAfterVerification();
+        return true;
+      }
+    } catch {
+      // ignora falhas temporárias de rede
+    }
+
+    return false;
+  }, [email, handleVerifiedSession, redirectToLoginAfterVerification]);
+
   useEffect(() => {
     trackVerifyEmailPageViewed(!!token);
   }, [token]);
 
   useEffect(() => {
-    if (token) {
-      api
-        .get(`/auth/verify-email?token=${token}`)
-        .then(() => {
-          trackEmailVerified();
-          setMessage('Email verificado! Redirecionando...');
-          setTimeout(() => router.push('/assinatura'), 1500);
-        })
-        .catch((err: ApiError) => {
-          setMessageType('error');
-          setMessage(err.message);
-        })
-        .finally(() => setLoading(false));
-    }
+    if (!token) return;
+
+    api
+      .get<{ message: string }>(`/auth/verify-email?token=${token}`)
+      .then(() => {
+        trackEmailVerified();
+        setMessage('Email verificado! Redirecionando...');
+        setTimeout(() => router.push('/assinatura'), 1500);
+      })
+      .catch((err: ApiError) => {
+        if (err.code === 'EMAIL_ALREADY_VERIFIED') {
+          const payload = err.details as { email?: string } | undefined;
+          setRedirectingToLogin(true);
+          window.setTimeout(() => {
+            router.replace(loginAfterVerificationUrl(payload?.email));
+          }, 1000);
+          return;
+        }
+        setMessageType('error');
+        setMessage(err.message);
+      })
+      .finally(() => setLoading(false));
   }, [token, router]);
+
+  useEffect(() => {
+    if (token || !email) return;
+
+    setPolling(true);
+    pollAttemptsRef.current = 0;
+
+    const runPoll = async () => {
+      pollAttemptsRef.current += 1;
+      const done = await checkVerification();
+      if (done) {
+        stopPolling();
+        return;
+      }
+      if (pollAttemptsRef.current >= POLL_MAX_ATTEMPTS) {
+        stopPolling();
+        setPollTimedOut(true);
+      }
+    };
+
+    void runPoll();
+    pollIntervalRef.current = setInterval(() => {
+      void runPoll();
+    }, POLL_INTERVAL_MS);
+
+    return () => stopPolling();
+  }, [token, email, checkVerification, stopPolling]);
 
   useEffect(() => {
     if (cooldownSeconds <= 0) return;
@@ -83,33 +162,6 @@ function VerifyEmailContent() {
     }, 1000);
     return () => window.clearTimeout(timeoutId);
   }, [cooldownSeconds]);
-
-  useEffect(() => () => stopPolling(), [stopPolling]);
-
-  const startPolling = useCallback(() => {
-    if (polling) return;
-    setPollTimedOut(false);
-    setPolling(true);
-    pollAttemptsRef.current = 0;
-
-    pollIntervalRef.current = setInterval(async () => {
-      pollAttemptsRef.current += 1;
-      try {
-        const user = await api.get<User>('/users/me');
-        if (user) {
-          handleVerifiedSession();
-          return;
-        }
-      } catch {
-        // ainda não autenticado
-      }
-
-      if (pollAttemptsRef.current >= POLL_MAX_ATTEMPTS) {
-        stopPolling();
-        setPollTimedOut(true);
-      }
-    }, POLL_INTERVAL_MS);
-  }, [handleVerifiedSession, polling, stopPolling]);
 
   const resend = async () => {
     if (!email || cooldownSeconds > 0 || resending) return;
@@ -130,6 +182,10 @@ function VerifyEmailContent() {
   };
 
   if (loading) return <p>Verificando email...</p>;
+
+  if (redirectingToLogin) {
+    return <p className="text-center text-slate-600">Email confirmado! Redirecionando para o login...</p>;
+  }
 
   const tokenFailed = !!token && messageType === 'error';
 
@@ -187,11 +243,14 @@ function VerifyEmailContent() {
             <li>✓ Depois de clicar no link, você escolhe o plano e inicia o teste</li>
           </ul>
 
+          {polling && !pollTimedOut && (
+            <p className="mb-4 text-sm text-slate-500">
+              Aguardando confirmação do email...
+            </p>
+          )}
+
           {email && (
             <div className="flex flex-col gap-3">
-              <Button onClick={startPolling} disabled={polling} variant="default">
-                {polling ? 'Verificando...' : 'Já cliquei no link'}
-              </Button>
               <Button variant="outline" onClick={resend} disabled={cooldownSeconds > 0 || resending}>
                 {resending
                   ? 'Enviando...'
@@ -204,11 +263,14 @@ function VerifyEmailContent() {
 
           {pollTimedOut && (
             <p className="mt-4 text-sm text-slate-500">
-              Ainda não detectamos a confirmação. Tente reenviar o email ou{' '}
-              <Link href="/login" className="text-emerald-600 hover:underline">
+              Ainda não detectamos a confirmação. Se você já clicou no link do email,{' '}
+              <Link
+                href={loginAfterVerificationUrl(email ?? undefined)}
+                className="text-emerald-600 hover:underline"
+              >
                 entre na conta
               </Link>{' '}
-              após clicar no link.
+              com email e senha.
             </p>
           )}
 

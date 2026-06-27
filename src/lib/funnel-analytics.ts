@@ -42,6 +42,10 @@ export function trackVerifyEmailPollSuccess() {
   trackMixpanelEvent('verify_email_poll_success');
 }
 
+export function trackVerifyEmailRedirectToLogin() {
+  trackMixpanelEvent('verify_email_redirect_to_login');
+}
+
 export function trackGoogleAuthStarted(mode: 'login' | 'register') {
   trackMixpanelEvent('google_auth_started', { mode });
 }
