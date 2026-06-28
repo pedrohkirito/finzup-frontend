@@ -13,7 +13,7 @@ interface TrialBannerProps {
 export function TrialBanner({ billing }: TrialBannerProps) {
   const [reactivating, setReactivating] = useState(false);
 
-  if (!billing.inTrial) {
+  if (!billing.inTrial || billing.billingProvider !== 'stripe') {
     return null;
   }
 

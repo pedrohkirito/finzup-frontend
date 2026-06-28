@@ -30,6 +30,11 @@ export function isPasswordValid(password: string) {
 
 export const nameSchema = z.string().min(2, 'Nome deve ter no mínimo 2 caracteres').max(120);
 
+export const fullNameSchema = nameSchema.refine(
+  (value) => value.trim().split(/\s+/).filter(Boolean).length >= 2,
+  'Informe seu nome completo',
+);
+
 export const cpfSchema = z
   .string()
   .min(1, 'CPF obrigatório')
@@ -43,7 +48,8 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  name: nameSchema,
+  name: fullNameSchema,
+  cpf: cpfSchema,
   email: emailSchema,
   password: passwordSchema,
   acceptedTerms: z.boolean().refine((value) => value === true, {

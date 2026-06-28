@@ -16,6 +16,7 @@ import {
   Moon,
   Sun,
   BarChart3,
+  Sparkles,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,15 +24,17 @@ import { SupportLink } from '@/components/layout/support-link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
+import { useAssistant } from '@/providers/assistant-provider';
 
 const primaryLinks = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Resumo' },
   { href: '/dashboard/receitas', icon: TrendingUp, label: 'Receitas' },
   { href: '/dashboard/despesas', icon: Receipt, label: 'Despesas' },
-  { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
 ];
 
 const moreLinks = [
+  { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
+  { href: '/dashboard/assistente', icon: Sparkles, label: 'Assistente IA (tela cheia)' },
   { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },
   { href: '/dashboard/doacoes', icon: Heart, label: 'Doações' },
@@ -42,6 +45,7 @@ export function MobileNav() {
   const pathname = usePathname();
   const logout = useLogout();
   const { theme, toggle } = useTheme();
+  const { openAssistant } = useAssistant();
   const [moreOpen, setMoreOpen] = useState(false);
 
   const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));
@@ -49,8 +53,46 @@ export function MobileNav() {
   return (
     <>
       <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-40 min-h-[var(--mobile-nav-height)] border-t border-slate-200/80 bg-white/95 px-1 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.07)] backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-none">
-        <div className="mx-auto flex max-w-lg items-stretch justify-around">
-          {primaryLinks.map(({ href, icon: Icon, label }) => {
+        <div className="mx-auto flex max-w-lg items-end justify-around">
+          {primaryLinks.slice(0, 2).map(({ href, icon: Icon, label }) => {
+            const active = isNavLinkActive(pathname, href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors',
+                  active
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-xl transition-colors',
+                    active && 'bg-emerald-50 dark:bg-emerald-950/60',
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="truncate">{label}</span>
+              </Link>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => openAssistant()}
+            className="relative -mt-5 flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 pb-1.5 text-[11px] font-semibold text-brand-600 dark:text-brand-400"
+            aria-label="Abrir assistente de IA"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg shadow-brand-500/40 ring-4 ring-white dark:ring-slate-950">
+              <Sparkles className="h-6 w-6" />
+            </span>
+            <span className="truncate">Assistente</span>
+          </button>
+
+          {primaryLinks.slice(2).map(({ href, icon: Icon, label }) => {
             const active = isNavLinkActive(pathname, href);
             return (
               <Link

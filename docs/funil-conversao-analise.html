@@ -93,12 +93,14 @@
     .badge-p3 { background: #dbeafe; color: #1d4ed8; }
     .badge-p4 { background: var(--slate-200); color: var(--slate-700); }
     .badge-done { background: #dcfce7; color: #166534; }
+    .badge-partial { background: #fef3c7; color: #b45309; }
     .badge-new { background: #e0f2fe; color: #0369a1; }
 
     .priority-card { border-left: 4px solid var(--brand); margin-bottom: 20px; }
     .priority-card.p1 { border-left-color: var(--red); }
     .priority-card.p1.done { border-left-color: var(--green); }
     .priority-card.p2 { border-left-color: var(--amber); }
+    .priority-card.p2.partial { border-left-color: var(--green); }
     .priority-card.p3 { border-left-color: var(--brand); }
     .priority-card.p4 { border-left-color: var(--slate-500); }
 
@@ -205,7 +207,7 @@
     </header>
 
     <div class="info">
-      <strong>Atualização jun/2026:</strong> checkout customizado com Stripe Payment Element embarcado na <code>/assinatura</code> foi implementado. Os KPIs abaixo são o <strong>baseline histórico</strong> — use-os para comparar após o deploy.
+      <strong>Atualização jun/2026 (v2):</strong> além do checkout customizado, foram implementados login com Google, página de verificação com CTA de conversão, emails de verificação/lembrete (D+1 e D+3) e novos eventos Mixpanel no funil pós-cadastro. Os KPIs abaixo são o <strong>baseline histórico</strong> — use-os para comparar após o deploy.
     </div>
 
     <!-- KPIs baseline -->
@@ -259,6 +261,50 @@
         <li>Webhook Live em <code>/api/v1/webhooks/stripe</code></li>
         <li><code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...</code> no frontend</li>
         <li>Price IDs Live alinhados com <code>sk_live_...</code></li>
+        <li><code>SKIP_STRIPE_BILLING</code> desligado em produção</li>
+      </ul>
+    </div>
+
+    <!-- Implementação OAuth e verificação -->
+    <div class="card done">
+      <h2>Implementado — pós-verificação e OAuth</h2>
+      <div class="compare">
+        <div>
+          <strong>Antes</strong>
+          Página de espera genérica. Email neutro. Sem lembretes. Só email/senha.
+        </div>
+        <div>
+          <strong>Depois</strong>
+          CTA "Ative seu teste grátis", polling "Já cliquei no link", lembretes D+1/D+3, login Google.
+        </div>
+      </div>
+      <h3>Fluxo email/senha</h3>
+      <ol style="margin-left:20px;font-size:15px;">
+        <li><code>registration_completed</code> → <code>/verify-email</code></li>
+        <li><code>verify_email_page_viewed</code> → link ou "Já cliquei no link"</li>
+        <li><code>email_verified</code> (+ <code>verify_email_poll_success</code>) → <code>/assinatura</code></li>
+        <li>Lembretes D+1 e D+3 se ainda não verificou</li>
+      </ol>
+      <h3>Fluxo Google</h3>
+      <p><code>google_auth_completed</code> → <code>/assinatura</code> (pula verificação). Conta existente: <code>/link-google</code>.</p>
+      <h3>Eventos novos</h3>
+      <table>
+        <thead>
+          <tr><th>Evento</th><th>Quando</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>google_auth_started</code></td><td>Clique no botão Google</td></tr>
+          <tr><td><code>google_auth_completed</code></td><td>OAuth concluído</td></tr>
+          <tr><td><code>email_verified</code></td><td>Email confirmado</td></tr>
+          <tr><td><code>verification_email_resent</code></td><td>Reenvio manual</td></tr>
+          <tr><td><code>verify_email_poll_success</code></td><td>Polling "Já cliquei no link"</td></tr>
+        </tbody>
+      </table>
+      <h3>Deploy em produção</h3>
+      <ul class="checklist">
+        <li><code>GOOGLE_CLIENT_ID</code> no backend</li>
+        <li><code>NEXT_PUBLIC_GOOGLE_CLIENT_ID</code> no frontend</li>
+        <li>Cron: <code>npm run jobs:verification-reminders</code> (1x/dia)</li>
       </ul>
     </div>
 
@@ -286,17 +332,25 @@
     <!-- Funil pós-deploy -->
     <div class="card">
       <h2>Funil recomendado pós-deploy</h2>
+      <h3>Ramo email/senha</h3>
       <table>
         <thead>
           <tr><th>Ordem</th><th>Evento</th><th>Descrição</th></tr>
         </thead>
         <tbody>
-          <tr><td>6</td><td><code>subscription_page_viewed</code></td><td>Passo 1: planos</td></tr>
-          <tr><td>7</td><td><code>checkout_initiated</code></td><td>Sessão Stripe criada</td></tr>
-          <tr><td>7b</td><td><code>checkout_form_viewed</code> <span class="badge badge-new">novo</span></td><td>Passo 2: Payment Element</td></tr>
-          <tr><td>8</td><td><code>trial_started</code></td><td>Teste ativado</td></tr>
+          <tr><td>4</td><td><code>registration_completed</code></td><td>Cadastro concluído</td></tr>
+          <tr><td>5</td><td><code>verify_email_page_viewed</code></td><td>Página de espera ou link</td></tr>
+          <tr><td>5b</td><td><code>verification_email_resent</code> <span class="badge badge-new">novo</span></td><td>Reenvio manual</td></tr>
+          <tr><td>5c</td><td><code>verify_email_poll_success</code> <span class="badge badge-new">novo</span></td><td>Polling "Já cliquei no link"</td></tr>
+          <tr><td>6</td><td><code>email_verified</code> <span class="badge badge-new">novo</span></td><td>Email confirmado</td></tr>
+          <tr><td>7</td><td><code>subscription_page_viewed</code></td><td>Passo 1: planos</td></tr>
+          <tr><td>8</td><td><code>checkout_initiated</code></td><td>Sessão Stripe criada</td></tr>
+          <tr><td>8b</td><td><code>checkout_form_viewed</code> <span class="badge badge-new">novo</span></td><td>Passo 2: Payment Element</td></tr>
+          <tr><td>9</td><td><code>trial_started</code></td><td>Teste ativado</td></tr>
         </tbody>
       </table>
+      <h3>Ramo Google</h3>
+      <p><code>registration_started</code> → <code>google_auth_completed</code> → <code>subscription_page_viewed</code> → checkout → <code>trial_started</code></p>
       <p><code>checkout_canceled</code> dispara ao voltar do passo 2 para planos.</p>
     </div>
 
@@ -323,7 +377,20 @@
                                         └─ /assinatura ~13
                                               └─ checkout 12
                                                     └─ 25% 🔴 Trial 3</div>
-      <p style="font-size:14px;color:var(--slate-500);margin-bottom:8px;">Fluxo atual (checkout customizado)</p>
+      <p style="font-size:14px;color:var(--slate-500);margin-bottom:8px;">Fluxo atual — email/senha</p>
+      <div class="funnel">/register — Passo 1 de 2
+  └─ registration_completed
+        └─ /verify-email — Passo 2 de 2
+              └─ verify_email_page_viewed
+                    ├─ verification_email_resent
+                    ├─ lembrete D+1 / D+3
+                    └─ email_verified
+                          └─ /assinatura → trial_started</div>
+      <p style="font-size:14px;color:var(--slate-500);margin-bottom:8px;">Fluxo atual — Google</p>
+      <div class="funnel">/register ou /login
+  └─ google_auth_completed
+        └─ /assinatura → checkout → trial_started</div>
+      <p style="font-size:14px;color:var(--slate-500);margin-bottom:8px;">Fluxo atual — checkout customizado</p>
       <div class="funnel">/assinatura Passo 1 (planos)
   └─ checkout_initiated
         └─ Passo 2 (Payment Element)
@@ -359,20 +426,31 @@
     </div>
 
     <!-- Prioridade 2 -->
-    <div class="card priority-card p2">
+    <div class="card priority-card p2 partial">
       <div class="priority-header">
-        <span class="badge badge-p2">Prioridade 2</span>
+        <span class="badge badge-partial">Parcialmente implementado</span>
         <h2>Email verificado → /assinatura</h2>
       </div>
-      <p><strong>Problema:</strong> 33 viram verify-email, só 13 chegaram em /assinatura (~60% de perda).</p>
-      <h3>O que atacar</h3>
-      <ul class="checklist">
-        <li>CTA claro na página de espera</li>
-        <li>Email de verificação orientado à conversão</li>
-        <li>Sequência de lembrete D+0, D+1, D+3</li>
-        <li>Considerar login social (Google)</li>
+      <p><strong>Problema (baseline):</strong> 33 viram verify-email, só 13 chegaram em /assinatura (~60% de perda).</p>
+      <h3>Entregue</h3>
+      <ul class="checklist done">
+        <li>Página /verify-email com CTA "Ative seu teste grátis" (passo 2 de 2)</li>
+        <li>Botão "Já cliquei no link" com polling (verify_email_poll_success)</li>
+        <li>Reenvio de email com cooldown (verification_email_resent)</li>
+        <li>Email de verificação com copy de conversão</li>
+        <li>Lembretes automáticos D+1 e D+3 (cron jobs:verification-reminders)</li>
+        <li>Login/cadastro com Google (pula verificação)</li>
+        <li>Fluxo /link-google para vincular conta existente</li>
       </ul>
-      <div class="impact"><strong>Impacto:</strong> +10 na assinatura se recuperar metade dos perdidos.</div>
+      <h3>Medir após deploy</h3>
+      <ul class="checklist">
+        <li>Funil verify_email_page_viewed → email_verified → subscription_page_viewed</li>
+        <li>Comparar com baseline de 39,39%</li>
+        <li>Breakdown ramo Google vs email/senha</li>
+        <li>Eficácia dos lembretes D+1 e D+3</li>
+        <li>Confirmar cron de lembretes em produção</li>
+      </ul>
+      <div class="impact"><strong>Meta:</strong> +10 na assinatura se recuperar metade dos perdidos. Validar com dados reais.</div>
     </div>
 
     <!-- Prioridade 3 -->
@@ -419,9 +497,9 @@
             <td>Maior ROI; baseline 75% de perda</td>
           </tr>
           <tr>
-            <td><span class="badge badge-p2">2</span></td>
+            <td><span class="badge badge-partial">2</span></td>
             <td>Pós-verificação de email</td>
-            <td>Pendente</td>
+            <td>Parcialmente implementado — medir</td>
             <td>Engajados que somem antes do plano</td>
           </tr>
           <tr>
@@ -444,7 +522,8 @@
     <div class="card">
       <h2>Validação de dados</h2>
       <ul>
-        <li>Recriar funil com <code>checkout_form_viewed</code> (ver <code>mixpanel-funnel.md</code>)</li>
+        <li>Recriar funil com eventos novos (ver <code>mixpanel-funnel.md</code>)</li>
+        <li>Funis separados para ramo Google vs email/senha</li>
         <li>Breakdowns por <code>utm_source</code>, <code>plan</code> e dispositivo</li>
         <li>Cruzar com Stripe Dashboard: abandonos no Payment Element vs. webhook</li>
         <li>Comparar 7 dias pós-deploy com o baseline deste documento</li>
@@ -452,7 +531,7 @@
     </div>
 
     <footer>
-      Baseline: junho/2026 (Mixpanel, 7 dias) · Atualizado com checkout customizado · Finzup
+      Baseline: junho/2026 (Mixpanel, 7 dias) · Atualizado com checkout customizado, OAuth Google e lembretes de verificação · Finzup
     </footer>
 
   </div>

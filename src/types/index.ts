@@ -2,6 +2,7 @@ export interface UserBilling {
   status: 'none' | 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid';
   plan: 'monthly' | 'semester' | 'annual' | null;
   stripePriceId: string | null;
+  billingProvider: 'stripe' | 'asaas' | null;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
@@ -21,6 +22,10 @@ export interface User {
   emailVerifiedAt: string | null;
   createdAt: string;
   billing: UserBilling;
+  aiCredits?: {
+    balance: number;
+    included: number;
+  };
 }
 
 export interface FinancialMonth {

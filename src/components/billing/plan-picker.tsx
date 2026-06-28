@@ -1,21 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Check, Loader2, Sparkles, Star, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { TRIAL_DAYS } from '@/constants/billing';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { trackLead } from '@/lib/funnel-analytics';
 import {
   BILLING_FEATURES,
-  BILLING_PLAN_GRID_ORDER,
   BILLING_PLAN_ORDER,
   BILLING_PLANS,
   type BillingPlanId,
   formatBRL,
   formatPriceParts,
-  monthlyEquivalent,
+  planBillingLabel,
   planDiscountPercent,
+  planPriceIntervalSuffix,
   planSavingsVsMonthly,
 } from '@/constants/billing-plans';
 
@@ -40,9 +39,7 @@ export function PlanPicker({
   defaultSelected = 'annual',
   compactHeader = false,
 }: PlanPickerProps) {
-  const router = useRouter();
   const [selected, setSelected] = useState<BillingPlanId>(defaultSelected);
-  const monthlyPrice = BILLING_PLANS.monthly.total;
 
   const tabs = BILLING_PLAN_ORDER.map((id) => ({
     id,
@@ -69,35 +66,10 @@ export function PlanPicker({
     return 'border-slate-200 shadow-sm dark:border-slate-800';
   };
 
-  const cardLayoutClass = (planId: BillingPlanId) => {
-    if (planId !== 'annual') return '';
-
-    return 'lg:-my-6 lg:z-10 lg:scale-[1.06] lg:p-9 lg:shadow-2xl lg:shadow-brand-100/60 dark:lg:shadow-brand-950/40';
-  };
-
   const renderPrice = (planId: BillingPlanId) => {
     const plan = BILLING_PLANS[planId];
-
-    if (plan.intervalMonths === 1) {
-      const { int, dec } = formatPriceParts(plan.total);
-      return (
-        <>
-          <div className="flex items-end gap-1">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">R$</span>
-            <span className="text-4xl font-extrabold leading-none text-slate-900 sm:text-5xl dark:text-white">
-              {int}<span className="text-2xl sm:text-3xl">,{dec}</span>
-            </span>
-            <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">/mês</span>
-          </div>
-          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-            Cobrado mensalmente
-          </p>
-        </>
-      );
-    }
-
-    const equiv = monthlyEquivalent(plan.total, plan.intervalMonths);
-    const { int, dec } = formatPriceParts(equiv);
+    const { int, dec } = formatPriceParts(plan.total);
+    const intervalSuffix = planPriceIntervalSuffix(plan.intervalMonths);
 
     return (
       <>
@@ -106,10 +78,10 @@ export function PlanPicker({
           <span className="text-4xl font-extrabold leading-none text-slate-900 sm:text-5xl dark:text-white">
             {int}<span className="text-2xl sm:text-3xl">,{dec}</span>
           </span>
-          <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">/mês</span>
+          <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">{intervalSuffix}</span>
         </div>
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          Cobrado a cada {plan.intervalMonths === 6 ? '6 meses' : '12 meses'}
+          {planBillingLabel(plan.intervalMonths)}
         </p>
       </>
     );
@@ -118,10 +90,10 @@ export function PlanPicker({
   const renderCta = (planId: BillingPlanId) => {
     const label =
       mode === 'landing'
-        ? `Começar ${TRIAL_DAYS} dias grátis`
+        ? 'Assinar agora'
         : loadingPlan === planId
           ? 'Redirecionando...'
-          : 'Iniciar teste grátis';
+          : 'Assinar plano';
 
     const className = `mb-6 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-center text-sm font-semibold transition-all hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-70 ${ctaClass(planId)}`;
 
@@ -132,7 +104,11 @@ export function PlanPicker({
           className={className}
           onClick={() => {
             trackLead('Pricing Section', { ctaLocation: 'plan_picker', plan: planId });
-            router.push('/register');
+            if (onSelectPlan) {
+              onSelectPlan(planId);
+            } else {
+              window.location.href = '/?checkout=1';
+            }
           }}
         >
           {label}
@@ -164,31 +140,34 @@ export function PlanPicker({
           {mode === 'landing' ? (
             <>
               <p className="mb-3 text-lg font-semibold leading-relaxed text-slate-800 sm:text-xl dark:text-slate-200">
-                Menos que um{' '}
-                <span className="text-brand-600 dark:text-brand-400">café por mês</span> para nunca
-                mais perder o controle do seu dinheiro.
+                Controle financeiro premium com{' '}
+                <span className="text-brand-600 dark:text-brand-400">assistente de IA</span> incluso.
               </p>
               <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
-                Comece com {TRIAL_DAYS} dias grátis. Cancele quando quiser sem burocracia.
+                PIX ou cartão. Cancele quando quiser, sem burocracia.
               </p>
             </>
           ) : (
             <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
-              Escolha um plano e inicie os {TRIAL_DAYS} dias grátis. A cobrança só começa após o
-              período de teste.
+              Escolha um plano e pague com PIX ou cartão. Acesso imediato após a confirmação.
             </p>
           )}
         </div>
       )}
 
       <div className="mb-8 flex justify-center sm:mb-12">
-        <div className="inline-flex max-w-full items-center overflow-x-auto rounded-full border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <ScrollArea
+          variant="none"
+          orientation="horizontal"
+          className="inline-flex max-w-full rounded-full border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+        >
+          <div className="inline-flex items-center">
           {tabs.map(({ id, label, badge }) => (
             <button
               key={id}
               type="button"
               onClick={() => setSelected(id)}
-              className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all sm:gap-2 sm:px-5 sm:py-2 sm:text-sm ${BILLING_PLAN_GRID_ORDER[id]} ${
+              className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all sm:gap-2 sm:px-5 sm:py-2 sm:text-sm ${
                 isSelected(id)
                   ? 'bg-brand-500 text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -208,10 +187,11 @@ export function PlanPicker({
               )}
             </button>
           ))}
-        </div>
+          </div>
+        </ScrollArea>
       </div>
 
-      <div className="mx-auto grid max-w-6xl gap-4 overflow-visible sm:gap-6 lg:grid-cols-3 lg:items-center lg:py-6">
+      <div className="mx-auto grid max-w-6xl gap-4 overflow-visible sm:gap-6 lg:grid-cols-3 lg:items-stretch">
         {BILLING_PLAN_ORDER.map((planId) => {
           const plan = BILLING_PLANS[planId];
           const Icon = ICONS[plan.icon];
@@ -221,7 +201,7 @@ export function PlanPicker({
           return (
             <div
               key={planId}
-              className={`relative flex h-full flex-col rounded-3xl border bg-white p-5 transition-all sm:p-7 dark:bg-slate-950 ${BILLING_PLAN_GRID_ORDER[planId]} ${cardClass(planId)} ${cardLayoutClass(planId)} ${
+              className={`relative flex h-full flex-col rounded-3xl border bg-white p-5 transition-all sm:p-7 dark:bg-slate-950 ${cardClass(planId)} ${
                 isSelected(planId)
                   ? 'mx-auto w-full max-w-md lg:mx-0 lg:max-w-none'
                   : 'hidden lg:flex'
@@ -277,6 +257,15 @@ export function PlanPicker({
               </div>
 
               <div className="mb-6">{renderPrice(planId)}</div>
+
+              <div className="mb-4 rounded-xl border border-brand-100 bg-brand-50/60 px-4 py-3 dark:border-brand-900 dark:bg-brand-950/40">
+                <p className="text-sm font-semibold text-brand-700 dark:text-brand-300">
+                  {plan.aiCredits} créditos de IA inclusos
+                </p>
+                <p className="mt-0.5 text-xs text-brand-600/80 dark:text-brand-400/80">
+                  Renovados a cada cobrança do plano
+                </p>
+              </div>
 
               <div className="-mt-4 mb-4 min-h-10">
                 {savings > 0 && planId !== 'monthly' && (

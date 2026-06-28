@@ -79,9 +79,14 @@ const privacySections = [
             plataforma.
           </li>
           <li>
-            <strong>Dados de assinatura:</strong> informações de cobrança processadas pelo Stripe (como
-            status da assinatura e identificadores de pagamento). Não armazenamos dados completos de
-            cartão de crédito.
+            <strong>Dados de assinatura:</strong> informações de cobrança processadas pela Asaas (novas
+            assinaturas) e/ou Stripe (assinaturas legadas), como status da assinatura e identificadores de
+            pagamento. Não armazenamos dados completos de cartão de crédito.
+          </li>
+          <li>
+            <strong>Dados de uso de IA:</strong> mensagens enviadas ao assistente financeiro e metadados
+            de consumo de créditos, processados por provedor de IA contratado (ex.: OpenAI), quando você
+            utiliza essa funcionalidade.
           </li>
           <li>
             <strong>Dados técnicos:</strong> endereço IP, tipo de navegador, data e hora de acesso e
@@ -160,7 +165,13 @@ const privacySections = [
         <p>Podemos compartilhar dados com prestadores de serviço essenciais à operação do Finzup, como:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>
-            <strong>Stripe</strong> — processamento de pagamentos e gestão de assinaturas;
+            <strong>Asaas</strong> — processamento de pagamentos e gestão de assinaturas (novos clientes);
+          </li>
+          <li>
+            <strong>Stripe</strong> — processamento de pagamentos e gestão de assinaturas (clientes legados);
+          </li>
+          <li>
+            <strong>OpenAI</strong> — processamento de mensagens do assistente de IA (quando configurado);
           </li>
           <li>
             <strong>Amazon Web Services (AWS)</strong> — hospedagem do backend, banco de dados e envio de
@@ -177,8 +188,8 @@ const privacySections = [
             <strong>Vercel Analytics</strong> — estatísticas agregadas de acesso e uso do site;
           </li>
           <li>
-            <strong>Mixpanel</strong> — análise de funil e eventos de uso (como cadastro, assinatura e
-            início do teste gratuito), para entender e melhorar a jornada do usuário na plataforma.
+            <strong>Mixpanel</strong> — análise de funil e eventos de uso (como cadastro e assinatura),
+            para entender e melhorar a jornada do usuário na plataforma.
           </li>
         </ul>
         <p>
@@ -310,11 +321,10 @@ const privacySections = [
           </li>
           <li>
             <strong>Analíticos:</strong> Vercel Analytics e Mixpanel, para entender de forma agregada como
-            o site é utilizado e como os usuários percorrem etapas como cadastro e início do teste
-            gratuito;
+            o site é utilizado e como os usuários percorrem etapas como cadastro e assinatura;
           </li>
           <li>
-            <strong>Marketing e medição:</strong> Meta (Facebook Pixel), para medir cadastros, trials e
+            <strong>Marketing e medição:</strong> Meta (Facebook Pixel), para medir cadastros e
             assinaturas originados de campanhas.
           </li>
         </ul>

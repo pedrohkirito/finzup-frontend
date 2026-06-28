@@ -5,7 +5,6 @@ import { useMonthSummary } from '@/hooks/use-month-summary';
 import { SummaryCards } from '@/components/dashboard/summary-cards';
 import { CloseMonthBanner } from '@/components/dashboard/close-month-banner';
 import { OnboardingTour } from '@/components/onboarding/tour';
-
 export default function DashboardPage() {
   const { selectedMonthId } = useMonthStore();
   const { data: summary, isLoading } = useMonthSummary(selectedMonthId);

@@ -1,11 +1,11 @@
-import { CalendarClock, Check, CreditCard, ShieldCheck, Unlock } from 'lucide-react';
-import { TRIAL_DAYS } from '@/constants/billing';
+import { CalendarClock, Check, CreditCard, ShieldCheck } from 'lucide-react';
 import {
   BILLING_PLANS,
   type BillingPlanId,
   formatBRL,
   formatPriceParts,
   monthlyEquivalent,
+  planPriceIntervalSuffix,
 } from '@/constants/billing-plans';
 
 interface CheckoutPlanSummaryProps {
@@ -14,19 +14,19 @@ interface CheckoutPlanSummaryProps {
 
 const timeline = [
   {
-    icon: Unlock,
+    icon: CreditCard,
     title: 'Hoje',
-    description: 'Acesso completo. Nenhuma cobrança no cartão.',
+    description: 'Pagamento confirmado e acesso liberado.',
   },
   {
     icon: CalendarClock,
-    title: `${TRIAL_DAYS} dias grátis`,
-    description: 'Use tudo à vontade. Cancele quando quiser.',
+    title: 'Renovação automática',
+    description: 'Seu plano renova no fim de cada período. Cancele quando quiser.',
   },
   {
-    icon: CreditCard,
-    title: `Após o teste`,
-    description: 'Cobrança automática do plano escolhido.',
+    icon: ShieldCheck,
+    title: 'Sem surpresas',
+    description: 'Preço fixo do plano escolhido. Sem taxas escondidas.',
   },
 ];
 
@@ -34,8 +34,7 @@ export function CheckoutPlanSummary({ planId }: CheckoutPlanSummaryProps) {
   const plan = BILLING_PLANS[planId];
   const monthly = monthlyEquivalent(plan.total, plan.intervalMonths);
   const { int, dec } = formatPriceParts(plan.total);
-  const intervalSuffix =
-    plan.intervalMonths === 1 ? '/mês' : plan.intervalMonths === 6 ? '/semestre' : '/ano';
+  const intervalSuffix = planPriceIntervalSuffix(plan.intervalMonths);
 
   return (
     <div className="space-y-5">
@@ -49,14 +48,8 @@ export function CheckoutPlanSummary({ planId }: CheckoutPlanSummaryProps) {
         </div>
 
         <div className="space-y-0 divide-y divide-slate-100 px-5 dark:divide-slate-800">
-          <div className="flex items-center justify-between py-4">
-            <span className="text-sm text-slate-600 dark:text-slate-400">Cobrança hoje</span>
-            <span className="text-lg font-bold text-brand-green-600 dark:text-brand-green-400">R$ 0,00</span>
-          </div>
           <div className="flex items-center justify-between gap-4 py-4">
-            <div className="min-w-0">
-              <span className="text-sm text-slate-600 dark:text-slate-400">Após o teste gratuito</span>
-            </div>
+            <span className="text-sm text-slate-600 dark:text-slate-400">Total a pagar</span>
             <div className="text-right">
               <div className="flex items-end justify-end gap-0.5">
                 <span className="pb-1 text-xs font-medium text-slate-500 dark:text-slate-400">R$</span>
@@ -77,7 +70,7 @@ export function CheckoutPlanSummary({ planId }: CheckoutPlanSummaryProps) {
       </div>
 
       <div className="rounded-2xl border border-brand-200/80 bg-brand-50/50 p-5 dark:border-brand-900/60 dark:bg-brand-950/20">
-        <p className="mb-4 text-sm font-semibold text-slate-900 dark:text-white">Como funciona o teste</p>
+        <p className="mb-4 text-sm font-semibold text-slate-900 dark:text-white">Como funciona</p>
         <ol className="space-y-4">
           {timeline.map((step, index) => (
             <li key={step.title} className="flex gap-3">
@@ -111,10 +104,6 @@ export function CheckoutPlanSummary({ planId }: CheckoutPlanSummaryProps) {
             {text}
           </li>
         ))}
-        <li className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300">
-          <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-green-500" />
-          Garantia de {TRIAL_DAYS} dias para experimentar
-        </li>
       </ul>
     </div>
   );

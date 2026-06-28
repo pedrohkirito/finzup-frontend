@@ -5,17 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { PlanPicker } from '@/components/billing/plan-picker';
 import { SubscriptionCheckout } from '@/components/billing/subscription-checkout';
-import { TrialTrust } from '@/components/billing/trial-trust';
 import { Button } from '@/components/ui/button';
 import { type BillingPlanId } from '@/constants/billing-plans';
-import { TRIAL_DAYS } from '@/constants/billing';
 import { useAuth, useLogout } from '@/hooks/use-auth';
 import { api } from '@/lib/api';
 import {
   trackCheckoutCanceled,
   trackInitiateCheckout,
   trackSubscriptionPageViewed,
-  trackTrialStarted,
+  trackSubscriptionStarted,
 } from '@/lib/funnel-analytics';
 
 type CheckoutStep = 'plans' | 'checkout' | 'processing';
@@ -30,7 +28,7 @@ type CheckoutSessionStatus = {
   subscriptionStatus: string | null;
 };
 
-const PROCESSING_MESSAGE = 'Tudo certo! Estamos ativando seu teste gratuito...';
+const PROCESSING_MESSAGE = 'Confirmando seu pagamento...';
 const PROCESSING_TIMEOUT_MESSAGE =
   'Pagamento em processamento. Atualize a página em alguns instantes ou entre em contato com o suporte.';
 
@@ -68,7 +66,7 @@ export default function AssinaturaPageContent() {
         const result = await refetch();
         if (result.data?.billing?.hasAccess) {
           clearInterval(interval);
-          trackTrialStarted(result.data.id, result.data.billing);
+          trackSubscriptionStarted(result.data.id, result.data.billing);
           queryClient.invalidateQueries();
           router.replace('/dashboard');
           resolve(true);
@@ -235,11 +233,10 @@ export default function AssinaturaPageContent() {
           Passo 3 de 3
         </p>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {trialExpired ? 'Sua assinatura expirou' : 'Comece seu teste gratuito'}
+          {trialExpired ? 'Sua assinatura expirou' : 'Escolha seu plano'}
         </h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
-          Escolha um plano e inicie os {TRIAL_DAYS} dias grátis. A cobrança só começa após o período de
-          teste.
+          Selecione um plano e pague com cartão. Acesso liberado após a confirmação.
         </p>
       </div>
 
@@ -254,8 +251,6 @@ export default function AssinaturaPageContent() {
           {errorMessage}
         </div>
       )}
-
-      <TrialTrust />
 
       <PlanPicker mode="subscribe" onSelectPlan={handleSelectPlan} loadingPlan={loadingPlan} compactHeader />
 

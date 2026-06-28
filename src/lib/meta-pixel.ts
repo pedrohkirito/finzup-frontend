@@ -70,7 +70,7 @@ export function trackSubscriptionConversion(userId: string, billing: UserBilling
 
   const params = getPlanParams(billing.plan);
 
-  if (billing.inTrial) {
+  if (billing.inTrial && billing.billingProvider === 'stripe') {
     trackMetaEvent('StartTrial', params);
   } else {
     trackMetaEvent('Subscribe', {

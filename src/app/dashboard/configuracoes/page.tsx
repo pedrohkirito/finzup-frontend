@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { changePasswordSchema } from '@/lib/validators';
 import { formatCpf } from '@/lib/cpf';
 import { paymentMethodTypeLabels, paymentMethodTypeStyles } from '@/lib/payment-method-types';
@@ -77,7 +77,7 @@ const methodTypeBars: Record<PaymentMethod['type'], string> = {
 };
 
 function getBillingStatusBadge(status: string, inTrial: boolean, cancelAtPeriodEnd = false) {
-  if (inTrial && cancelAtPeriodEnd) {
+  if (cancelAtPeriodEnd) {
     return {
       label: 'Cancelamento agendado',
       className:
@@ -95,6 +95,16 @@ function getBillingStatusBadge(status: string, inTrial: boolean, cancelAtPeriodE
 }
 
 
+function formatPeriodEnd(date: string | null | undefined) {
+  if (!date) return null;
+  return new Date(date).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+
 export default function ConfiguracoesPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -103,7 +113,9 @@ export default function ConfiguracoesPage() {
   const [deletingMethod, setDeletingMethod] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [billingLoading, setBillingLoading] = useState(false);
-  const { data: user } = useAuth();
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [billingMessage, setBillingMessage] = useState('');
+  const { data: user, refetch: refetchUser } = useAuth();
 
   const { data: methods } = useQuery({
     queryKey: ['payment-methods'],
@@ -115,9 +127,39 @@ export default function ConfiguracoesPage() {
 
   const billingBadge = getBillingStatusBadge(
     user?.billing?.status ?? 'none',
-    !!user?.billing?.inTrial,
+    !!user?.billing?.inTrial && user?.billing?.billingProvider === 'stripe',
     !!user?.billing?.cancelAtPeriodEnd,
   );
+  const periodEndLabel = formatPeriodEnd(user?.billing?.currentPeriodEnd);
+  const billingProvider = user?.billing?.billingProvider;
+  const canCancelAsaas =
+    billingProvider === 'asaas' &&
+    user?.billing?.hasActiveSubscription &&
+    !user?.billing?.cancelAtPeriodEnd;
+
+  const handleCancelSubscription = async () => {
+    setBillingLoading(true);
+    setBillingMessage('');
+    try {
+      await api.post('/billing/cancel-subscription');
+      setCancelDialogOpen(false);
+      setBillingMessage(
+        periodEndLabel
+          ? `Assinatura cancelada. Você mantém acesso até ${periodEndLabel}.`
+          : 'Assinatura cancelada. Você mantém acesso até o fim do período já pago.',
+      );
+      await refetchUser();
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+    } catch (err) {
+      setBillingMessage(
+        err instanceof ApiError
+          ? err.message
+          : 'Não foi possível cancelar a assinatura. Tente novamente.',
+      );
+    } finally {
+      setBillingLoading(false);
+    }
+  };
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
     : null;
@@ -346,11 +388,16 @@ export default function ConfiguracoesPage() {
                 <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold', billingBadge.className)}>
                   {billingBadge.label}
                 </span>
-                {user?.billing?.inTrial && (
+                {user?.billing?.inTrial && user?.billing?.billingProvider === 'stripe' && (
                   <span className="text-xs text-slate-500">
                     {user.billing.cancelAtPeriodEnd
                       ? `${user.billing.daysLeftInTrial} dia${user.billing.daysLeftInTrial === 1 ? '' : 's'} de teste restantes · assinatura cancelada`
                       : `${user.billing.daysLeftInTrial} dia${user.billing.daysLeftInTrial === 1 ? '' : 's'} até a primeira cobrança`}
+                  </span>
+                )}
+                {!user?.billing?.inTrial && user?.billing?.cancelAtPeriodEnd && periodEndLabel && (
+                  <span className="text-xs text-slate-500">
+                    Acesso até {periodEndLabel}
                   </span>
                 )}
               </div>
@@ -365,14 +412,32 @@ export default function ConfiguracoesPage() {
             )}
           </div>
 
+          {billingMessage && (
+            <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-200">
+              {billingMessage}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2">
             {!user?.billing?.hasActiveSubscription ? (
               <Button onClick={() => router.push('/assinatura')}>
                 <Sparkles className="h-4 w-4" />
-                Iniciar teste grátis
+                Assinar agora
               </Button>
+            ) : billingProvider === 'asaas' ? (
+              canCancelAsaas ? (
+                <Button
+                  variant="outline"
+                  disabled={billingLoading}
+                  onClick={() => setCancelDialogOpen(true)}
+                >
+                  Cancelar assinatura
+                </Button>
+              ) : null
             ) : (
-              <Button variant="outline" disabled={billingLoading}
+              <Button
+                variant="outline"
+                disabled={billingLoading}
                 onClick={async () => {
                   setBillingLoading(true);
                   try {
@@ -381,13 +446,35 @@ export default function ConfiguracoesPage() {
                   } finally {
                     setBillingLoading(false);
                   }
-                }}>
+                }}
+              >
                 Gerenciar assinatura
               </Button>
             )}
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar assinatura?</DialogTitle>
+            <DialogDescription>
+              {periodEndLabel
+                ? `Você mantém acesso ao Finzup até ${periodEndLabel}. Depois disso, não haverá novas cobranças.`
+                : 'Você mantém acesso ao Finzup até o fim do período já pago. Depois disso, não haverá novas cobranças.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)} disabled={billingLoading}>
+              Manter assinatura
+            </Button>
+            <Button variant="destructive" onClick={handleCancelSubscription} disabled={billingLoading}>
+              {billingLoading ? 'Cancelando…' : 'Confirmar cancelamento'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

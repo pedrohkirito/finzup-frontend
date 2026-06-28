@@ -1,66 +1,84 @@
-import { Lock, MessagesSquare, ShieldCheck, Star } from 'lucide-react';
-import { TRIAL_DAYS } from '@/constants/billing';
+'use client';
 
-const trustBadges = [
-  { icon: Lock, text: 'Dados criptografados e privados' },
-  { icon: ShieldCheck, text: `Garantia de ${TRIAL_DAYS} dias` },
-  { icon: MessagesSquare, text: 'Suporte personalizado' },
-];
+import { ArrowRight, Star } from 'lucide-react';
+import { type BillingPlanId } from '@/constants/billing-plans';
 
-const testimonials: { quote: string; name: string; role?: string }[] = [
+const testimonials: { quote: string; name: string; detail?: string }[] = [
   {
     quote:
-      'Depois de inúmeros testes, finalmente cheguei numa solução que realmente me ajudou. Agora consigo saber para onde o meu dinheiro está indo.',
+      'Depois de inúmeros testes, finalmente cheguei numa solução que realmente me ajudou. Agora consigo saber exatamente para onde o meu dinheiro está indo — e o melhor: não preciso recomeçar do zero todo mês.',
     name: 'Pedro H.',
+    detail: 'Usuário há 3 meses',
   },
   {
     quote:
-      'Simples, bonito e fácil de usar. O design clean e minimalista fez até o controle financeiro virar prazeroso — pela primeira vez, organizei o dinheiro com vontade.',
+      'Simples, bonito e fácil de usar. O design clean e minimalista fez até o controle financeiro virar prazeroso — pela primeira vez, organizei o dinheiro com vontade e continuo usando.',
     name: 'Raquel R.',
+    detail: 'Usuária há 5 meses',
   },
 ];
 
-export function SocialProof() {
+interface SocialProofProps {
+  onCta?: (plan?: BillingPlanId) => void;
+}
+
+export function SocialProof({ onCta }: SocialProofProps) {
   return (
-    <section className="border-y border-slate-200 bg-white py-14 sm:py-20 dark:border-slate-800 dark:bg-slate-950">
+    <section className="border-y border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap sm:gap-8">
-          {trustBadges.map(({ icon: Icon, text }) => (
-            <div
-              key={text}
-              className="flex items-center gap-2.5 text-sm font-medium text-slate-600 dark:text-slate-300"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-green-100 text-brand-green-700 dark:bg-brand-green-950 dark:text-brand-green-400">
-                <Icon className="h-4 w-4" />
-              </span>
-              {text}
-            </div>
-          ))}
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="mb-3 text-sm font-semibold tracking-widest text-brand-500 uppercase">
+            Resultados reais
+          </p>
+          <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            Veja o que nossos clientes dizem
+          </h2>
+          <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
+            Pessoas reais que pararam de recomeçar do zero todo mês.
+          </p>
         </div>
 
-        <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 sm:gap-6">
-          {testimonials.map((testimonial) => (
+        <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2">
+          {testimonials.map((t) => (
             <figure
-              key={testimonial.name}
-              className="flex h-full flex-col rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+              key={t.name}
+              className="flex h-full flex-col rounded-2xl border border-slate-200 bg-slate-50 p-7 shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
-              <div className="mb-3 flex gap-0.5 text-amber-400">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} className="h-4 w-4 fill-current" />
+              <div className="mb-4 flex gap-0.5 text-amber-400">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-current" />
                 ))}
               </div>
-              <blockquote className="flex-1 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                “{testimonial.quote}”
+              <blockquote className="flex-1 text-base leading-relaxed text-slate-700 dark:text-slate-300">
+                "{t.quote}"
               </blockquote>
-              <figcaption className="mt-4 text-sm">
-                <span className="font-semibold text-slate-900 dark:text-white">{testimonial.name}</span>
-                {testimonial.role && (
-                  <span className="block text-xs text-slate-500 dark:text-slate-400">{testimonial.role}</span>
-                )}
+              <figcaption className="mt-5 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-950 dark:text-brand-300">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-white">{t.name}</p>
+                  {t.detail && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t.detail}</p>
+                  )}
+                </div>
               </figcaption>
             </figure>
           ))}
         </div>
+
+        {onCta && (
+          <div className="mt-12 text-center">
+            <button
+              type="button"
+              onClick={() => onCta()}
+              className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-brand-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-700"
+            >
+              Assinar agora
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

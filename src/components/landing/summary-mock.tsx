@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ChevronRight,
   CreditCard,
@@ -19,6 +21,7 @@ const summaryCards = [
     icon: TrendingUp,
     accent: 'text-emerald-600',
     bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+    delay: '0ms',
   },
   {
     title: 'Despesas',
@@ -27,6 +30,7 @@ const summaryCards = [
     icon: TrendingDown,
     accent: 'text-orange-600',
     bg: 'bg-orange-50 dark:bg-orange-950/60',
+    delay: '100ms',
   },
   {
     title: 'Doações',
@@ -35,6 +39,7 @@ const summaryCards = [
     icon: Heart,
     accent: 'text-sky-600',
     bg: 'bg-sky-50 dark:bg-sky-950/60',
+    delay: '200ms',
   },
   {
     title: 'Saldo',
@@ -43,6 +48,7 @@ const summaryCards = [
     icon: Wallet,
     accent: 'text-emerald-600',
     bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+    delay: '300ms',
   },
   {
     title: 'Fatura Cartão',
@@ -51,6 +57,7 @@ const summaryCards = [
     icon: CreditCard,
     accent: 'text-violet-600',
     bg: 'bg-violet-50 dark:bg-violet-950/60',
+    delay: '400ms',
   },
 ];
 
@@ -68,13 +75,17 @@ export function LandingSummaryMock() {
             Resumo do mês
           </h3>
           <p className="mt-0.5 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
-            Visão geral das suas finanças
+            Demonstração — veja como fica seu controle financeiro
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          {summaryCards.map(({ title, value, itemCount, saldo, icon: Icon, accent, bg }) => (
-            <Card key={title}>
+          {summaryCards.map(({ title, value, itemCount, saldo, icon: Icon, accent, bg, delay }) => (
+            <Card
+              key={title}
+              className="animate-in fade-in slide-in-from-bottom-4 fill-mode-both duration-700"
+              style={{ animationDelay: delay }}
+            >
               <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-500">{title}</CardTitle>
                 <div className={cn('rounded-lg p-2', bg)}>
@@ -101,7 +112,10 @@ export function LandingSummaryMock() {
             </Card>
           ))}
 
-          <Card className="sm:col-span-2 xl:col-span-5">
+          <Card
+            className="animate-in fade-in slide-in-from-bottom-4 fill-mode-both duration-700 sm:col-span-2 xl:col-span-5"
+            style={{ animationDelay: '500ms' }}
+          >
             <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
               <div className="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-950/60">
                 <PiggyBank className="h-4 w-4 text-emerald-600" />
@@ -113,7 +127,6 @@ export function LandingSummaryMock() {
               <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
                 74%
               </span>
-              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
             </CardHeader>
             <CardContent className="space-y-3 p-4 pt-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -124,48 +137,19 @@ export function LandingSummaryMock() {
                   <p className="text-xs text-slate-400">investidos</p>
                 </div>
                 <p className="text-sm text-slate-500 tabular-nums">
-                  Meta:{' '}
-                  <span className="font-medium text-slate-700 dark:text-slate-300">R$ 2.500,00</span>
+                  Meta: <span className="font-medium text-slate-700 dark:text-slate-300">R$ 2.500,00</span>
                 </p>
               </div>
               <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                <div className="h-full w-[74%] rounded-full bg-emerald-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="sm:col-span-2 xl:col-span-5">
-            <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
-              <div className="rounded-lg bg-amber-50 p-2 dark:bg-amber-950/60">
-                <Target className="h-4 w-4 text-amber-600" />
-              </div>
-              <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 p-4 pt-0">
-              <div className="rounded-lg bg-slate-50/80 p-3 dark:bg-slate-800/30">
-                <div className="mb-2.5 flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                  <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-200">
-                    Alimentação
-                    <ChevronRight className="h-3 w-3 text-slate-400" />
-                  </span>
-                  <span className="text-slate-500 tabular-nums">
-                    <span className="font-medium text-slate-700 dark:text-slate-300">R$ 720,00</span>
-                    {' / '}
-                    R$ 1.000,00
-                  </span>
-                </div>
-                <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                  <div className="h-full w-[72%] rounded-full bg-amber-500" />
-                </div>
-                <p className="mt-1.5 text-xs text-slate-400">8 gastos</p>
+                <div className="h-full w-[74%] animate-pulse rounded-full bg-emerald-500" />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      <div className="pointer-events-none absolute -top-6 -right-6 hidden h-32 w-32 rounded-full bg-brand-400/15 blur-2xl sm:block" />
-      <div className="pointer-events-none absolute -bottom-6 -left-6 hidden h-32 w-32 rounded-full bg-brand-green-400/15 blur-2xl sm:block" />
+      <div className="pointer-events-none absolute -top-6 -right-6 hidden h-32 w-32 animate-pulse rounded-full bg-brand-400/15 blur-2xl sm:block" />
+      <div className="pointer-events-none absolute -bottom-6 -left-6 hidden h-32 w-32 animate-pulse rounded-full bg-brand-green-400/15 blur-2xl sm:block" />
     </div>
   );
 }

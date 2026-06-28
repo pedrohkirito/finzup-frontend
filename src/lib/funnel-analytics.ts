@@ -85,17 +85,46 @@ export function trackCheckoutCanceled() {
   trackMixpanelEvent('checkout_canceled');
 }
 
-export function trackTrialStarted(userId: string, billing: UserBilling) {
+export function trackLandingCheckoutModalOpened(plan: BillingPlanId) {
+  trackMixpanelEvent('landing_checkout_modal_opened', {
+    initial_plan: plan,
+  });
+}
+
+export function trackLandingCheckoutAccountCreated(plan: BillingPlanId) {
+  const planConfig = BILLING_PLANS[plan];
+  trackMixpanelEvent('landing_checkout_account_created', {
+    plan,
+    plan_label: planConfig.label,
+  });
+}
+
+export function trackCheckoutCompleted(planId: BillingPlanId) {
+  const plan = BILLING_PLANS[planId];
+  trackMixpanelEvent('subscription_started', {
+    plan: planId,
+    plan_label: plan.label,
+    value_brl: plan.total,
+    source: 'landing_checkout',
+  });
+}
+
+export function trackSubscriptionStarted(userId: string, billing: UserBilling) {
   trackMetaSubscriptionConversion(userId, billing);
 
-  if (!billing.hasAccess || !billing.inTrial) return;
+  if (!billing.hasAccess) return;
 
   const plan = billing.plan ? BILLING_PLANS[billing.plan] : null;
-  trackMixpanelEvent('trial_started', {
+  trackMixpanelEvent('subscription_started', {
     plan: billing.plan,
     plan_label: plan?.label,
     source: 'client',
     user_id: userId,
-    $insert_id: `trial_started_${userId}`,
+    $insert_id: `subscription_started_${userId}`,
   });
+}
+
+/** @deprecated Use trackSubscriptionStarted */
+export function trackTrialStarted(userId: string, billing: UserBilling) {
+  trackSubscriptionStarted(userId, billing);
 }

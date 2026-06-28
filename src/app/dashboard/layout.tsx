@@ -9,6 +9,9 @@ import { MonthPicker } from '@/components/layout/month-picker';
 import { MonthProvider } from '@/hooks/use-month';
 import { useAuth } from '@/hooks/use-auth';
 import { TrialBanner } from '@/components/billing/trial-banner';
+import { AssistantProvider } from '@/providers/assistant-provider';
+import { AssistantHeaderButton } from '@/components/assistant/assistant-header-button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, isError } = useAuth();
@@ -41,6 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <MonthProvider>
+      <AssistantProvider>
       <div className="flex min-h-screen bg-white dark:bg-slate-950 md:h-screen md:overflow-hidden">
         <Sidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
@@ -58,22 +62,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <p className="text-sm font-medium text-brand-600 dark:text-brand-400">Olá,</p>
                   <p className="truncate text-lg font-semibold tracking-tight text-slate-900 dark:text-white">{firstName}</p>
                 </div>
-                <div className="sm:hidden">
+                <div className="flex shrink-0 items-center gap-2 sm:hidden">
+                  <AssistantHeaderButton />
                   <MonthPicker compact />
                 </div>
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden items-center gap-3 sm:flex">
+                <AssistantHeaderButton />
                 <MonthPicker />
               </div>
             </div>
           </header>
-          <main className="min-h-0 flex-1 overflow-y-auto bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
-            <TrialBanner billing={billing} />
-            {children}
+          <main className="min-h-0 flex-1 overflow-hidden">
+            <ScrollArea className="h-full bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
+              <TrialBanner billing={billing} />
+              {children}
+            </ScrollArea>
           </main>
         </div>
         <MobileNav />
       </div>
+      </AssistantProvider>
     </MonthProvider>
   );
 }

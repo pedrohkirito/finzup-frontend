@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('finzup-theme');document.documentElement.classList.toggle('dark',t==='dark')}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('finzup-theme');document.documentElement.classList.toggle('dark',t!=='light')}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
       </head>

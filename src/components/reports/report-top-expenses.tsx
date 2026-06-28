@@ -8,6 +8,7 @@ import { EXPENSE_CATEGORY_LABELS } from './chart-utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const INITIAL_VISIBLE = 3;
 
@@ -76,11 +77,13 @@ function ReportTopExpensesContent({ expenses }: { expenses: SummaryItem[] }) {
             <span className="text-slate-500">Total</span>
             <span className="text-lg font-bold text-orange-600">{formatCurrency(total)}</span>
           </div>
-          <ol className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
+          <ScrollArea className="max-h-[50vh]">
+            <ol className="space-y-2">
             {sortedExpenses.map((expense, index) => (
               <TopExpenseItem key={expense.id} expense={expense} rank={index + 1} />
             ))}
-          </ol>
+            </ol>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>

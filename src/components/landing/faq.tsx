@@ -1,10 +1,15 @@
 import { Plus } from 'lucide-react';
-import { TRIAL_DAYS } from '@/constants/billing';
 
 const faqs = [
   {
-    question: 'Preciso cadastrar cartão para testar?',
-    answer: `Sim, mas você não é cobrado nada durante os ${TRIAL_DAYS} dias de teste. A cobrança só acontece ao fim do período — e se cancelar antes, não paga nada.`,
+    question: 'Quais formas de pagamento são aceitas?',
+    answer:
+      'Aceitamos PIX e cartão de crédito, processados com segurança pela Asaas. Você escolhe entre os planos mensal, semestral ou anual.',
+  },
+  {
+    question: 'Preciso criar conta antes de pagar?',
+    answer:
+      'Não. Você informa nome completo, CPF e email no checkout. Após a confirmação do pagamento, enviamos um link para criar sua senha e acessar o Finzup.',
   },
   {
     question: 'Posso cancelar quando quiser?',
@@ -32,15 +37,15 @@ const faqs = [
       'Não. O Finzup foi feito para ser simples desde o primeiro acesso. Você registra receitas e despesas e a gente cuida de organizar tudo de forma visual.',
   },
   {
-    question: 'Quais formas de pagamento são aceitas?',
+    question: 'Por que não usar só uma planilha?',
     answer:
-      'O pagamento é feito por cartão de crédito de forma segura via Stripe. Você escolhe entre os planos mensal, semestral ou anual.',
+      'Planilha é gratuita, mas exige recomeçar do zero todo mês: você recopia despesas fixas, salário, orçamentos e categorias uma a uma. No Finzup, marque um lançamento como recorrente e ele aparece automaticamente no próximo mês — você só ajusta o que mudou. Menos tempo gasto, mais consistência.',
   },
 ];
 
 export function Faq() {
   return (
-    <section id="faq" className="bg-white py-16 sm:py-24 dark:bg-slate-950">
+    <section id="faq" className="bg-slate-50 py-16 sm:py-24 dark:bg-slate-900">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center sm:mb-14">
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:mb-4 sm:text-4xl dark:text-white">

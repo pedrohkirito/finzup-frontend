@@ -31,7 +31,9 @@ export function SelectContent({ className, children, ...props }: React.Component
         className={cn('z-50 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-900', className)}
         {...props}
       >
-        <SelectPrimitive.Viewport className="p-1">{children}</SelectPrimitive.Viewport>
+        <SelectPrimitive.Viewport className="max-h-[min(var(--radix-select-content-available-height,300px),300px)] p-1 scrollbar-thin">
+          {children}
+        </SelectPrimitive.Viewport>
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
   );

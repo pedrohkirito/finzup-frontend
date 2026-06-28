@@ -10,7 +10,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { CheckoutPlanSummary } from '@/components/billing/checkout-plan-summary';
 import { SupportLink } from '@/components/layout/support-link';
-import { TRIAL_DAYS } from '@/constants/billing';
 import { type BillingPlanId } from '@/constants/billing-plans';
 import { trackCheckoutFormViewed } from '@/lib/funnel-analytics';
 import { stripePromise } from '@/lib/stripe';
@@ -47,6 +46,7 @@ interface SubscriptionCheckoutProps {
   onBack: () => void;
   onSuccess: () => void;
   onError: (message: string) => void;
+  stepLabel?: string;
 }
 
 function SubscriptionCheckoutForm({
@@ -54,6 +54,7 @@ function SubscriptionCheckoutForm({
   onBack,
   onSuccess,
   onError,
+  stepLabel = 'Passo 2 de 2',
 }: Omit<SubscriptionCheckoutProps, 'clientSecret'>) {
   const checkoutState = useCheckoutElements();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,16 +113,13 @@ function SubscriptionCheckoutForm({
 
         <div>
           <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase">
-            Passo 2 de 2
+            {stepLabel}
           </p>
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">
-            Finalize seu teste gratuito
+            Finalize sua assinatura
           </h1>
           <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-400">
-            Comece seus {TRIAL_DAYS} dias grátis com pagamento seguro.{' '}
-            <strong className="font-semibold text-slate-800 dark:text-slate-200">
-              Sem cobrança hoje.
-            </strong>
+            Pagamento seguro via Stripe. A cobrança do plano escolhido é feita hoje.
           </p>
         </div>
       </div>
@@ -162,7 +160,7 @@ function SubscriptionCheckoutForm({
                 Processando com segurança...
               </>
             ) : (
-              'Ativar teste grátis — R$ 0 hoje'
+              'Confirmar assinatura'
             )}
           </Button>
 
@@ -178,7 +176,7 @@ function SubscriptionCheckoutForm({
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-500">
-              Ao continuar, você concorda com a cobrança após o período de teste, caso não cancele.
+              Ao continuar, você concorda com a cobrança recorrente do plano escolhido.
             </p>
           </div>
 
@@ -197,6 +195,7 @@ export function SubscriptionCheckout({
   onBack,
   onSuccess,
   onError,
+  stepLabel,
 }: SubscriptionCheckoutProps) {
   if (!stripePromise) {
     return (
@@ -219,6 +218,7 @@ export function SubscriptionCheckout({
         onBack={onBack}
         onSuccess={onSuccess}
         onError={onError}
+        stepLabel={stepLabel}
       />
     </CheckoutElementsProvider>
   );

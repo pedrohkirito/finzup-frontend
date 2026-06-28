@@ -2,20 +2,12 @@ export type BillingPlanId = 'monthly' | 'semester' | 'annual';
 
 export const BILLING_PLAN_ORDER: BillingPlanId[] = ['monthly', 'semester', 'annual'];
 
-/** Ordem de exibição no mobile: anual → semestral → mensal */
-export const BILLING_PLAN_ORDER_MOBILE: BillingPlanId[] = ['annual', 'semester', 'monthly'];
-
-export const BILLING_PLAN_GRID_ORDER: Record<BillingPlanId, string> = {
-  annual: 'order-1 lg:order-2',
-  semester: 'order-2 lg:order-3',
-  monthly: 'order-3 lg:order-1',
-};
-
 export interface BillingPlanConfig {
   id: BillingPlanId;
   label: string;
   total: number;
   intervalMonths: number;
+  aiCredits: number;
   description: string;
   icon: 'zap' | 'star' | 'sparkles';
 }
@@ -24,35 +16,38 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
   monthly: {
     id: 'monthly',
     label: 'Mensal',
-    total: 13.9,
+    total: 67.9,
     intervalMonths: 1,
+    aiCredits: 250,
     description: 'Sem compromisso de longo prazo',
     icon: 'zap',
   },
   semester: {
     id: 'semester',
     label: 'Semestral',
-    total: 71.4,
+    total: 147.9,
     intervalMonths: 6,
+    aiCredits: 500,
     description: 'Cobrado a cada 6 meses',
     icon: 'star',
   },
   annual: {
     id: 'annual',
     label: 'Anual',
-    total: 106.8,
+    total: 197.9,
     intervalMonths: 12,
+    aiCredits: 750,
     description: 'Cobrado uma vez por ano',
     icon: 'sparkles',
   },
 };
 
 export const BILLING_FEATURES = [
+  'Assistente de IA para suas finanças',
   'Controle de receitas ilimitadas',
   'Gestão de despesas por categoria',
   'Orçamentos mensais personalizados',
   'Acompanhamento de investimentos',
-  'Gestão de doações',
   'Relatórios mensais detalhados',
   'Acesso em todos os dispositivos',
   'Suporte por e-mail',
@@ -69,6 +64,18 @@ export function formatBRL(value: number): string {
 export function formatPriceParts(value: number): { int: string; dec: string } {
   const [int, dec] = value.toFixed(2).split('.');
   return { int, dec };
+}
+
+export function planPriceIntervalSuffix(intervalMonths: number): '/mês' | '/semestre' | '/ano' {
+  if (intervalMonths === 1) return '/mês';
+  if (intervalMonths === 6) return '/semestre';
+  return '/ano';
+}
+
+export function planBillingLabel(intervalMonths: number): string {
+  if (intervalMonths === 1) return 'Cobrado mensalmente';
+  if (intervalMonths === 6) return 'Cobrado a cada 6 meses';
+  return 'Cobrado uma vez por ano';
 }
 
 export function planDiscountPercent(planId: BillingPlanId): number | null {

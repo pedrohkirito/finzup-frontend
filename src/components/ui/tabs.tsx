@@ -2,6 +2,7 @@
 
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from '@/lib/utils';
+import { scrollAreaVariants } from '@/components/ui/scroll-area';
 
 export const Tabs = TabsPrimitive.Root;
 
@@ -9,7 +10,8 @@ export function TabsList({ className, ...props }: React.ComponentProps<typeof Ta
   return (
     <TabsPrimitive.List
       className={cn(
-        'scrollbar-none inline-flex h-auto w-full items-center justify-start gap-1 overflow-x-auto rounded-lg bg-slate-100 p-1 text-slate-500 sm:w-auto sm:justify-center dark:bg-slate-800',
+        scrollAreaVariants({ variant: 'none', orientation: 'horizontal' }),
+        'inline-flex h-auto w-full items-center justify-start gap-1 rounded-lg bg-slate-100 p-1 text-slate-500 sm:w-auto sm:justify-center dark:bg-slate-800',
         className,
       )}
       {...props}

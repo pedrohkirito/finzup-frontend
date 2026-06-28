@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { LegalPageLayout } from '@/components/legal/legal-page-layout';
 import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL, WEBSITE_URL, LGPD_RESPONSE_DAYS } from '@/content/legal/constants';
-import { TRIAL_DAYS } from '@/constants/billing';
 
 export const metadata: Metadata = {
   title: 'Termos de Uso — Finzup',
@@ -22,7 +21,8 @@ const termsSections = [
           .
         </p>
         <p>
-          Ao criar uma conta, você declara ter lido, compreendido e aceito estes Termos de Uso e nossa{' '}
+          Ao assinar um plano e criar sua conta, você declara ter lido, compreendido e aceito estes Termos
+          de Uso e nossa{' '}
           <a
             href="/politica-de-privacidade"
             className="text-emerald-600 hover:underline dark:text-emerald-400"
@@ -57,6 +57,7 @@ const termsSections = [
         <p>Para utilizar o serviço, você deve:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>Ter pelo menos 18 anos de idade;</li>
+          <li>Contratar um plano pago antes de acessar a plataforma (cadastro após confirmação de pagamento);</li>
           <li>Fornecer informações verdadeiras, completas e atualizadas;</li>
           <li>Manter a confidencialidade da sua senha;</li>
           <li>Notificar-nos imediatamente em caso de uso não autorizado da sua conta.</li>
@@ -73,16 +74,19 @@ const termsSections = [
     content: (
       <>
         <p>
-          O Finzup pode oferecer período de teste gratuito de {TRIAL_DAYS} dias, conforme divulgado no
-          site. Durante o teste, você pode utilizar as funcionalidades indicadas na página de assinatura.
-          Ao final do período de teste, o acesso às funcionalidades completas pode exigir assinatura paga.
+          O Finzup é oferecido mediante assinatura paga, sem período de teste gratuito. Os planos e preços
+          estão divulgados no site. O pagamento pode ser feito via PIX ou cartão de crédito, processado com
+          segurança pela <strong>Asaas</strong> (novas assinaturas). Assinaturas contratadas anteriormente
+          podem continuar sendo processadas pela <strong>Stripe</strong>.
         </p>
         <p>
-          Os pagamentos são processados pelo Stripe. Ao assinar um plano pago, você autoriza a cobrança
-          recorrente conforme o plano escolhido (mensal, semestral ou anual), incluindo renovações
-          automáticas até que o cancelamento seja realizado. Você pode cancelar a assinatura a qualquer
-          momento pelo portal de cobrança; o acesso permanece ativo até o fim do período já pago, salvo
-          disposição em contrário na interface.
+          Ao assinar, você autoriza a cobrança recorrente do plano escolhido até o cancelamento. Você pode
+          cancelar a qualquer momento; o acesso permanece ativo até o fim do período já pago.
+        </p>
+        <p>
+          Cada plano inclui créditos de IA para uso das funcionalidades de inteligência artificial da
+          plataforma. Os créditos renovam a cada ciclo de cobrança confirmado, sem acúmulo entre ciclos. O
+          consumo de créditos varia conforme o tipo de uso e está descrito na plataforma.
         </p>
         <p>
           <strong>Direito de arrependimento (CDC):</strong> em contratações realizadas fora do

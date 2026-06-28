@@ -3,6 +3,7 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { scrollAreaVariants } from '@/components/ui/scroll-area';
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
@@ -13,8 +14,10 @@ export function DialogContent({ className, children, ...props }: React.Component
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50" />
       <DialogPrimitive.Content
+        aria-describedby={undefined}
         className={cn(
-          'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-h-[min(85dvh,100%)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-lg sm:p-6 dark:border-slate-800 dark:bg-slate-900',
+          'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-h-[min(85dvh,100%)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-lg sm:p-6 dark:border-slate-800 dark:bg-slate-900',
+          scrollAreaVariants({ orientation: 'vertical' }),
           className,
         )}
         {...props}

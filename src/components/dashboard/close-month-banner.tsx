@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatCurrency } from '@/lib/utils';
 import type { FinancialMonth } from '@/types';
 
@@ -98,7 +99,8 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
             <DialogTitle>Confirmar fechamento do mês</DialogTitle>
           </DialogHeader>
           {preview && (
-            <div className="max-h-64 space-y-3 overflow-y-auto text-sm">
+            <ScrollArea className="max-h-64">
+              <div className="space-y-3 text-sm">
               {preview.incomesToCarry.length > 0 && (
                 <div>
                   <p className="font-medium">Receitas a repetir:</p>
@@ -131,7 +133,8 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
                   </p>
                 </div>
               )}
-            </div>
+              </div>
+            </ScrollArea>
           )}
           <Button onClick={handleClose} disabled={loading} className="w-full sm:w-auto">
             {loading ? 'Fechando...' : 'Confirmar fechamento'}

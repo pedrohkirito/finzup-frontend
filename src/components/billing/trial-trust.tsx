@@ -1,28 +1,27 @@
-import { CalendarClock, Check, CreditCard, Lock, Unlock } from 'lucide-react';
-import { TRIAL_DAYS } from '@/constants/billing';
+import { CalendarClock, Check, CreditCard, Lock, Sparkles } from 'lucide-react';
 
 const timeline = [
   {
-    icon: Unlock,
+    icon: Sparkles,
     title: 'Hoje',
-    description: 'Acesso completo liberado na hora, sem nenhuma cobrança.',
+    description: 'Escolha o plano e pague com PIX ou cartão — acesso liberado na hora.',
   },
   {
     icon: CalendarClock,
-    title: `Durante os ${TRIAL_DAYS} dias`,
-    description: 'Use tudo à vontade. Cancele em 1 clique quando quiser.',
+    title: 'Todo mês',
+    description: 'Receitas, despesas e orçamentos repetem automaticamente, sem recomeçar do zero.',
   },
   {
     icon: CreditCard,
-    title: `Dia ${TRIAL_DAYS}`,
-    description: 'Só então começa a cobrança do plano escolhido.',
+    title: 'Quando quiser',
+    description: 'Cancele em 1 clique. Sem multa, sem burocracia.',
   },
 ];
 
 const badges = [
-  { icon: Check, text: 'Não cobramos hoje' },
-  { icon: Check, text: 'Cancele em 1 clique' },
-  { icon: Lock, text: 'Pagamento seguro via Stripe' },
+  { icon: Check, text: 'PIX ou cartão' },
+  { icon: Check, text: 'Cancele quando quiser' },
+  { icon: Lock, text: 'Pagamento seguro' },
 ];
 
 export function TrialTrust() {

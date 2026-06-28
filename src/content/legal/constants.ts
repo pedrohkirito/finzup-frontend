@@ -1,4 +1,4 @@
-export const LEGAL_LAST_UPDATED = '24 de junho de 2026';
+export const LEGAL_LAST_UPDATED = '27 de junho de 2026';
 export const SUPPORT_EMAIL = 'atendimento@finzup.com.br';
 export const SUPPORT_WHATSAPP_DISPLAY = '(48) 99215-6582';
 export const SUPPORT_WHATSAPP_URL = 'https://wa.me/5548992156582';
