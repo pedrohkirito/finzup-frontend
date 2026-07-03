@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { api, ApiError } from '@/lib/api';
+import { api } from '@/lib/api';
 import { changePasswordSchema } from '@/lib/validators';
 import { formatCpf } from '@/lib/cpf';
 import { paymentMethodTypeLabels, paymentMethodTypeStyles } from '@/lib/payment-method-types';
@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AddPaymentMethodDialog } from '@/components/payment-methods/add-payment-method-dialog';
+import { SupportChannels } from '@/components/layout/support-channels';
 import type { PaymentMethod } from '@/types';
 import {
   ArrowLeftRight,
@@ -112,10 +113,8 @@ export default function ConfiguracoesPage() {
   const [deleteTarget, setDeleteTarget] = useState<PaymentMethod | null>(null);
   const [deletingMethod, setDeletingMethod] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
-  const [billingLoading, setBillingLoading] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [billingMessage, setBillingMessage] = useState('');
-  const { data: user, refetch: refetchUser } = useAuth();
+  const { data: user } = useAuth();
 
   const { data: methods } = useQuery({
     queryKey: ['payment-methods'],
@@ -131,35 +130,10 @@ export default function ConfiguracoesPage() {
     !!user?.billing?.cancelAtPeriodEnd,
   );
   const periodEndLabel = formatPeriodEnd(user?.billing?.currentPeriodEnd);
-  const billingProvider = user?.billing?.billingProvider;
-  const canCancelAsaas =
-    billingProvider === 'asaas' &&
+  const canCancelSubscription =
     user?.billing?.hasActiveSubscription &&
     !user?.billing?.cancelAtPeriodEnd;
 
-  const handleCancelSubscription = async () => {
-    setBillingLoading(true);
-    setBillingMessage('');
-    try {
-      await api.post('/billing/cancel-subscription');
-      setCancelDialogOpen(false);
-      setBillingMessage(
-        periodEndLabel
-          ? `Assinatura cancelada. Você mantém acesso até ${periodEndLabel}.`
-          : 'Assinatura cancelada. Você mantém acesso até o fim do período já pago.',
-      );
-      await refetchUser();
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-    } catch (err) {
-      setBillingMessage(
-        err instanceof ApiError
-          ? err.message
-          : 'Não foi possível cancelar a assinatura. Tente novamente.',
-      );
-    } finally {
-      setBillingLoading(false);
-    }
-  };
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
     : null;
@@ -412,45 +386,17 @@ export default function ConfiguracoesPage() {
             )}
           </div>
 
-          {billingMessage && (
-            <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-200">
-              {billingMessage}
-            </div>
-          )}
-
           <div className="flex flex-wrap gap-2">
             {!user?.billing?.hasActiveSubscription ? (
               <Button onClick={() => router.push('/assinatura')}>
                 <Sparkles className="h-4 w-4" />
                 Assinar agora
               </Button>
-            ) : billingProvider === 'asaas' ? (
-              canCancelAsaas ? (
-                <Button
-                  variant="outline"
-                  disabled={billingLoading}
-                  onClick={() => setCancelDialogOpen(true)}
-                >
-                  Cancelar assinatura
-                </Button>
-              ) : null
-            ) : (
-              <Button
-                variant="outline"
-                disabled={billingLoading}
-                onClick={async () => {
-                  setBillingLoading(true);
-                  try {
-                    const { url } = await api.post<{ url: string }>('/billing/portal-session');
-                    window.location.href = url;
-                  } finally {
-                    setBillingLoading(false);
-                  }
-                }}
-              >
-                Gerenciar assinatura
+            ) : canCancelSubscription ? (
+              <Button variant="outline" onClick={() => setCancelDialogOpen(true)}>
+                Cancelar assinatura
               </Button>
-            )}
+            ) : null}
           </div>
         </CardContent>
       </Card>
@@ -458,19 +404,18 @@ export default function ConfiguracoesPage() {
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancelar assinatura?</DialogTitle>
+            <DialogTitle>Cancelar assinatura</DialogTitle>
             <DialogDescription>
-              {periodEndLabel
-                ? `Você mantém acesso ao Finzup até ${periodEndLabel}. Depois disso, não haverá novas cobranças.`
-                : 'Você mantém acesso ao Finzup até o fim do período já pago. Depois disso, não haverá novas cobranças.'}
+              Para cancelar sua assinatura, entre em contato com nosso time pelo WhatsApp ou e-mail.
+              Nossa equipe vai te ajudar com o processo.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setCancelDialogOpen(false)} disabled={billingLoading}>
-              Manter assinatura
-            </Button>
-            <Button variant="destructive" onClick={handleCancelSubscription} disabled={billingLoading}>
-              {billingLoading ? 'Cancelando…' : 'Confirmar cancelamento'}
+
+          <SupportChannels />
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>

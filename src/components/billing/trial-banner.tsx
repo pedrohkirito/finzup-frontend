@@ -68,7 +68,7 @@ export function TrialBanner({ billing }: TrialBannerProps) {
             href="/dashboard/configuracoes"
             className="shrink-0 rounded-lg border border-brand-300 bg-white px-4 py-2 text-center text-sm font-semibold text-brand-800 hover:bg-brand-100 dark:border-brand-800 dark:bg-slate-900 dark:text-brand-100"
           >
-            Gerenciar assinatura
+            Cancelar assinatura
           </Link>
         )}
       </div>
