@@ -11,7 +11,7 @@ const REGISTRATION_PAGES: PageKey[] = [
   'orcamentos',
 ];
 
-const PAGES_WITH_OPENING_FLOW: PageKey[] = [...REGISTRATION_PAGES, 'relatorios', 'resumo'];
+const PAGES_WITH_OPENING_FLOW: PageKey[] = [...REGISTRATION_PAGES, 'relatorios', 'resumo', 'assistente'];
 
 const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'resumo'];
 
@@ -53,8 +53,8 @@ function noThanks(): PageFlowAction {
   return { label: 'Não, obrigado', message: '', intent: 'dismiss', variant: 'outline' };
 }
 
-function yesSuggest(message: string): PageFlowAction {
-  return { label: 'Sim, quero', message, intent: 'suggest', variant: 'primary' };
+function yesSuggest(label: string, message: string): PageFlowAction {
+  return { label, message, intent: 'suggest', variant: 'primary' };
 }
 
 export function isSuggestOnlyPage(pageKey: PageKey): boolean {
@@ -178,6 +178,7 @@ export function getPageFlow(pathname: string, snapshot: PageSnapshot): PageFlow 
           'Deseja que eu analise seus gastos e veja possíveis pontos de melhoria?',
         openingActions: [
           yesSuggest(
+            'Sim, analisar gastos',
             'Sim, analise meus gastos e indique possíveis pontos de melhoria com base nos relatórios.',
           ),
           noThanks(),
@@ -192,17 +193,48 @@ export function getPageFlow(pathname: string, snapshot: PageSnapshot): PageFlow 
       return {
         ...base,
         openingMessage:
-          'Posso analisar seu mês e sugerir o que priorizar: cadastros pendentes, economia e metas.',
+          'Posso te ajudar a melhorar suas finanças: quitar dívidas, organizar gastos ou investir. O que você quer trabalhar?',
         openingActions: [
           yesSuggest(
-            'Sim, analise meu resumo financeiro e sugira prioridades para este mês.',
+            'Quitar dívidas',
+            'Quero um plano para quitar minhas dívidas e organizar meu dinheiro com base no meu resumo do mês.',
+          ),
+          yesSuggest(
+            'Investir e reserva',
+            'Quero sugestões para investir e criar reserva de emergência com base no meu mês.',
           ),
           noThanks(),
         ],
         suggestionAction: {
-          label: 'Pedir sugestão à IA',
+          label: 'Analisar meu mês',
           message:
-            'Analise meu resumo financeiro deste mês e sugira prioridades: o que cadastrar, onde economizar e próximos passos.',
+            'Analise meu resumo financeiro: dívidas, saldo, orçamentos e o que priorizar neste mês.',
+        },
+      };
+    case 'assistente':
+      return {
+        ...base,
+        openingMessage:
+          'Sou seu coach financeiro no Finzup — foco em sair das dívidas, investir e ter controle do seu dinheiro. Como posso ajudar?',
+        openingActions: [
+          yesSuggest(
+            'Quitar dívidas',
+            'Me ajude a montar um plano para quitar minhas dívidas e organizar meus gastos.',
+          ),
+          yesSuggest(
+            'Investir e reserva',
+            'Quero orientação para investir, criar reserva de emergência e metas de longo prazo.',
+          ),
+          yesSuggest(
+            'Distribuir renda extra',
+            'Tenho uma renda extra chegando (13º, bônus etc.) — me ajude a distribuir em % e valores.',
+          ),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Ver o que você pode fazer por mim',
+          message:
+            'Com base nos meus dados no Finzup, o que você pode me ajudar a fazer? Liste opções concretas.',
         },
       };
     default:
@@ -229,6 +261,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Pense em como organizar doações de forma equilibrada neste mês.`;
     case 'orcamentos':
       return `${avoidRepeat} Pense em limites por categoria que façam sentido para as minhas finanças.`;
+    case 'assistente':
+      return `${avoidRepeat} Foque em dívidas, organização de gastos, investimentos ou distribuição de renda extra.`;
     default:
       return avoidRepeat;
   }

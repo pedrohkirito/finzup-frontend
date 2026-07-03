@@ -75,8 +75,9 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
   '/dashboard/assistente': {
     key: 'assistente',
     label: 'Assistente IA',
-    description: 'Página dedicada do chat com assistente de IA.',
-    guidance: 'Chat geral sobre finanças do Finzup com base nos dados do usuário.',
+    description: 'Coach financeiro do Finzup com base nos dados do usuário.',
+    guidance:
+      'Priorize melhorar a situação financeira: quitar dívidas, organizar gastos, investir (reserva e metas). Pergunte o foco antes de plano completo. Use % e R$ com dados reais.',
   },
 };
 
@@ -87,7 +88,7 @@ export function getAssistantPageContext(pathname: string): AssistantPageContext 
       label: 'Resumo',
       description: 'Página de resumo financeiro do mês selecionado.',
       guidance:
-        'Priorize visão geral: saldo, receitas, despesas, orçamentos estourados e próximos passos. Sugira o que falta cadastrar.',
+        'Priorize dívidas, saldo, orçamentos estourados e plano de quitação + investimento. Pergunte o foco se o pedido for amplo.',
     };
   }
 

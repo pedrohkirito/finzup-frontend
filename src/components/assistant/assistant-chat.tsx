@@ -16,7 +16,6 @@ import {
   buildAnotherSuggestionMessage,
   getPageFlow,
   invalidateQueriesAfterAiActions,
-  isSuggestOnlyPage,
   resolvePageKey,
   type FlowIntent,
   type PageFlow,
@@ -130,8 +129,8 @@ export function AssistantChat({
 
   const sendToApi = async (
     text: string,
-    intent: FlowIntent,
     currentMessages: ChatMessage[],
+    flowIntent?: FlowIntent,
   ) => {
     if (credits <= 0) {
       setError('Seus créditos de IA acabaram. Eles renovam na próxima cobrança do plano.');
@@ -163,7 +162,7 @@ export function AssistantChat({
         pageKey: screen.pageKey,
         monthId: selectedMonthId ?? undefined,
         pageSnapshot: snapshot ?? undefined,
-        flowIntent: intent,
+        ...(flowIntent ? { flowIntent } : {}),
       });
 
       setMessages([...nextMessages, { role: 'assistant', content: result.reply }]);
@@ -200,7 +199,7 @@ export function AssistantChat({
     setFlowStarted(true);
     const userMsg: ChatMessage = { role: 'user', content: action.label };
     setMessages([userMsg]);
-    await sendToApi(action.message, action.intent, []);
+    await sendToApi(action.message, [], action.intent);
   };
 
   const handleFixedSuggestion = async () => {
@@ -210,7 +209,7 @@ export function AssistantChat({
     const userMsg: ChatMessage = { role: 'user', content: label };
     const prevMessages = messages;
     setMessages([...prevMessages, userMsg]);
-    await sendToApi(pageFlow.suggestionAction.message, 'suggest', prevMessages);
+    await sendToApi(pageFlow.suggestionAction.message, prevMessages, 'suggest');
   };
 
   const handleAnotherSuggestion = async () => {
@@ -220,7 +219,7 @@ export function AssistantChat({
     const userMsg: ChatMessage = { role: 'user', content: label };
     const prevMessages = messages;
     setMessages([...prevMessages, userMsg]);
-    await sendToApi(message, 'suggest', prevMessages);
+    await sendToApi(message, prevMessages, 'suggest');
   };
 
   const sendMessage = async (textOverride?: string) => {
@@ -230,17 +229,10 @@ export function AssistantChat({
     if (!flowStarted) setFlowStarted(true);
     if (!textOverride) setInput('');
 
-    const intent: FlowIntent =
-      isSuggestOnlyPage(pageKey) ||
-      text === buildAnotherSuggestionMessage(pageKey) ||
-      (pageFlow?.suggestionAction && text === pageFlow.suggestionAction.message)
-        ? 'suggest'
-        : 'register';
-
     const userMsg: ChatMessage = { role: 'user', content: text };
     const nextMessages = [...messages, userMsg];
     setMessages(nextMessages);
-    await sendToApi(text, intent, messages);
+    await sendToApi(text, messages);
   };
 
   const showOpening = pageFlow && !flowStarted && messages.length === 0 && !summaryLoading;
@@ -275,9 +267,9 @@ export function AssistantChat({
               </div>
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
-                  {pageFlow.openingActions.map((action) => (
+                  {pageFlow.openingActions.map((action, index) => (
                     <Button
-                      key={action.label}
+                      key={`${action.label}-${index}`}
                       type="button"
                       size="sm"
                       variant={action.variant === 'primary' ? 'default' : 'outline'}
