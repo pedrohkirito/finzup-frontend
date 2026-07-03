@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, X, ArrowRight } from 'lucide-react';
+import { Check, X, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { type BillingPlanId, BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
 
@@ -22,7 +22,7 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
     <section className="bg-white py-16 sm:py-24 dark:bg-slate-950">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-14">
-          <p className="mb-3 text-sm font-semibold tracking-widest text-brand-500 uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-widest uppercase brand-gradient-text">
             Faça as contas
           </p>
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -85,10 +85,10 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
                 ))}
 
                 {/* Finzup row - highlighted */}
-                <tr className="bg-brand-50 ring-2 ring-inset ring-brand-500 dark:bg-brand-950/30 dark:ring-brand-700">
+                <tr className="bg-brand-50 ring-2 ring-inset ring-brand-500/40 dark:bg-brand-950/30 dark:ring-brand-700/60">
                   <td className="px-6 py-5">
                     <div>
-                      <p className="text-sm font-bold text-brand-700 dark:text-brand-300">
+                      <p className="text-sm font-bold brand-gradient-text">
                         Finzup (plano anual)
                       </p>
                       <p className="text-xs text-brand-600/70 dark:text-brand-400/70">
@@ -129,10 +129,10 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
           <button
             type="button"
             onClick={() => onCta('annual')}
-            className="group inline-flex items-center gap-2 rounded-full bg-brand-500 px-8 py-3.5 text-sm font-semibold text-white shadow-md shadow-brand-200/60 transition-all hover:-translate-y-0.5 hover:bg-brand-600 hover:shadow-lg dark:shadow-brand-900/50"
+            className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
           >
             Ver planos e assinar
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </button>
         </div>
       </div>

@@ -8,27 +8,20 @@ import { z } from 'zod';
 import Link from 'next/link';
 import {
   X,
-  ArrowRight,
+  ChevronRight,
   Loader2,
   CheckCircle2,
   Check,
-  Sparkles,
-  Star,
-  Zap,
   Copy,
   Lock,
+  CreditCard,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   BILLING_PLANS,
-  BILLING_PLAN_ORDER,
   type BillingPlanId,
-  formatPriceParts,
-  planDiscountPercent,
-  planPriceIntervalSuffix,
   formatBRL,
 } from '@/constants/billing-plans';
 import { api, ApiError } from '@/lib/api';
@@ -40,42 +33,45 @@ import {
   trackCheckoutCompleted,
 } from '@/lib/funnel-analytics';
 
-type ModalStep = 'plan' | 'checkout' | 'pix' | 'success';
+type ModalStep = 'checkout' | 'pix' | 'waiting' | 'success';
 type PaymentMethod = 'pix' | 'credit_card';
-
-const PLAN_ICONS: Record<BillingPlanId, typeof Zap> = {
-  monthly: Zap,
-  semester: Star,
-  annual: Sparkles,
-};
 
 const checkoutSchema = z
   .object({
-    name: fullNameSchema,
-    cpf: cpfSchema,
-    email: emailSchema,
-    acceptedTerms: z.boolean().refine((v) => v === true, {
-      message: 'Você precisa aceitar os Termos de Uso e a Política de Privacidade',
-    }),
+    name: z.string().optional(),
+    cpf: z.string().optional(),
+    email: z.string().optional(),
     paymentMethod: z.enum(['pix', 'credit_card']),
-    cardNumber: z.string().optional(),
-    expiryMonth: z.string().optional(),
-    expiryYear: z.string().optional(),
-    ccv: z.string().optional(),
-    postalCode: z.string().optional(),
-    addressNumber: z.string().optional(),
-    phone: z.string().optional(),
-    installmentCount: z.number().int().min(1).max(12).optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.paymentMethod !== 'credit_card') return;
-    if (!data.cardNumber?.replace(/\s/g, '').match(/^\d{13,19}$/)) ctx.addIssue({ code: 'custom', message: 'Número do cartão inválido', path: ['cardNumber'] });
-    if (!data.expiryMonth?.match(/^\d{2}$/)) ctx.addIssue({ code: 'custom', message: 'Mês inválido', path: ['expiryMonth'] });
-    if (!data.expiryYear?.match(/^\d{4}$/)) ctx.addIssue({ code: 'custom', message: 'Ano inválido', path: ['expiryYear'] });
-    if (!data.ccv?.match(/^\d{3,4}$/)) ctx.addIssue({ code: 'custom', message: 'CVV inválido', path: ['ccv'] });
-    if (!data.postalCode?.replace(/\D/g, '').match(/^\d{8}$/)) ctx.addIssue({ code: 'custom', message: 'CEP inválido', path: ['postalCode'] });
-    if (!data.addressNumber?.trim()) ctx.addIssue({ code: 'custom', message: 'Número obrigatório', path: ['addressNumber'] });
-    if (!data.phone?.replace(/\D/g, '').match(/^\d{10,11}$/)) ctx.addIssue({ code: 'custom', message: 'Telefone inválido', path: ['phone'] });
+    if (data.paymentMethod !== 'pix') return;
+
+    const nameResult = fullNameSchema.safeParse(data.name);
+    if (!nameResult.success) {
+      ctx.addIssue({
+        code: 'custom',
+        message: nameResult.error.issues[0]?.message ?? 'Nome inválido',
+        path: ['name'],
+      });
+    }
+
+    const cpfResult = cpfSchema.safeParse(data.cpf);
+    if (!cpfResult.success) {
+      ctx.addIssue({
+        code: 'custom',
+        message: cpfResult.error.issues[0]?.message ?? 'CPF inválido',
+        path: ['cpf'],
+      });
+    }
+
+    const emailResult = emailSchema.safeParse(data.email);
+    if (!emailResult.success) {
+      ctx.addIssue({
+        code: 'custom',
+        message: emailResult.error.issues[0]?.message ?? 'E-mail inválido',
+        path: ['email'],
+      });
+    }
   });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -85,8 +81,9 @@ type CheckoutStartResponse = {
   status: 'awaiting_payment' | 'paid';
   amount: number;
   planLabel: string;
-  email: string;
+  email?: string;
   needsPasswordSetup?: boolean;
+  checkoutUrl?: string;
   pix?: { encodedImage: string; payload: string; expirationDate: string };
 };
 
@@ -94,16 +91,16 @@ interface LandingCheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialPlan?: BillingPlanId;
-  skipPlanStep?: boolean;
+  returnOrderId?: string | null;
 }
 
 export function LandingCheckoutModal({
   isOpen,
   onClose,
   initialPlan = 'annual',
-  skipPlanStep = false,
+  returnOrderId = null,
 }: LandingCheckoutModalProps) {
-  const [step, setStep] = useState<ModalStep>(skipPlanStep ? 'checkout' : 'plan');
+  const [step, setStep] = useState<ModalStep>('checkout');
   const [selectedPlan, setSelectedPlan] = useState<BillingPlanId>(initialPlan);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [pixData, setPixData] = useState<CheckoutStartResponse['pix'] | null>(null);
@@ -114,61 +111,66 @@ export function LandingCheckoutModal({
   const [copiedPix, setCopiedPix] = useState(false);
   const trackedOpenRef = useRef(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setStep(skipPlanStep ? 'checkout' : 'plan');
-      setSelectedPlan(initialPlan);
-      setOrderId(null);
-      setPixData(null);
-      setCheckoutError(null);
-      setSuccessEmail('');
-      setNeedsPasswordSetup(true);
-      if (!trackedOpenRef.current) {
-        trackedOpenRef.current = true;
-        trackLandingCheckoutModalOpened(initialPlan);
-      }
-    } else {
-      trackedOpenRef.current = false;
-      if (pollRef.current) clearInterval(pollRef.current);
-    }
-  }, [isOpen, initialPlan, skipPlanStep]);
+  const selectedPlanRef = useRef(selectedPlan);
+  selectedPlanRef.current = selectedPlan;
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       paymentMethod: 'pix',
-      acceptedTerms: false,
-      installmentCount: 1,
     },
   });
-
-  const paymentMethod = form.watch('paymentMethod');
 
   const startPolling = useCallback((id: string, email: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       try {
-        const status = await api.get<{ status: string; needsPasswordSetup?: boolean }>(
+        const status = await api.get<{ status: string; email?: string; needsPasswordSetup?: boolean }>(
           `/billing/checkout/${id}/status`,
         );
         if (status.status === 'paid') {
           if (pollRef.current) clearInterval(pollRef.current);
-          setSuccessEmail(email);
+          setSuccessEmail(email || status.email || '');
           setNeedsPasswordSetup(status.needsPasswordSetup ?? true);
           setStep('success');
-          trackCheckoutCompleted(selectedPlan);
+          trackCheckoutCompleted(selectedPlanRef.current);
         }
       } catch {
         // continua polling
       }
     }, 3000);
-  }, [selectedPlan]);
+  }, []);
 
-  const handlePlanSelect = (plan: BillingPlanId) => {
-    setSelectedPlan(plan);
+  useEffect(() => {
+    if (!isOpen) {
+      trackedOpenRef.current = false;
+      if (pollRef.current) clearInterval(pollRef.current);
+      return;
+    }
+
+    if (returnOrderId) {
+      setOrderId(returnOrderId);
+      setStep('waiting');
+      setCheckoutError(null);
+      startPolling(returnOrderId, '');
+      return;
+    }
+
     setStep('checkout');
-  };
+    setSelectedPlan(initialPlan);
+    setOrderId(null);
+    setPixData(null);
+    setCheckoutError(null);
+    setSuccessEmail('');
+    setNeedsPasswordSetup(true);
+    form.reset({ paymentMethod: 'pix' });
+    if (!trackedOpenRef.current) {
+      trackedOpenRef.current = true;
+      trackLandingCheckoutModalOpened(initialPlan);
+    }
+  }, [isOpen, initialPlan, returnOrderId, startPolling]);
+
+  const paymentMethod = form.watch('paymentMethod');
 
   const onSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
@@ -176,51 +178,44 @@ export function LandingCheckoutModal({
     trackInitiateCheckout(selectedPlan);
 
     try {
-      const body: Record<string, unknown> = {
-        name: data.name.trim(),
-        cpf: data.cpf,
-        email: data.email,
-        plan: selectedPlan,
-        paymentMethod: data.paymentMethod,
-        acceptedTerms: true,
-      };
+      const payload =
+        data.paymentMethod === 'pix'
+          ? {
+              name: data.name?.trim(),
+              cpf: data.cpf,
+              email: data.email,
+              plan: selectedPlan,
+              paymentMethod: data.paymentMethod,
+              acceptedTerms: true,
+              marketingOptIn: true,
+            }
+          : {
+              plan: selectedPlan,
+              paymentMethod: data.paymentMethod,
+              acceptedTerms: true,
+              marketingOptIn: true,
+            };
 
-      if (data.paymentMethod === 'credit_card') {
-        body.creditCard = {
-          holderName: data.name.trim(),
-          number: data.cardNumber?.replace(/\s/g, ''),
-          expiryMonth: data.expiryMonth,
-          expiryYear: data.expiryYear,
-          ccv: data.ccv,
-        };
-        body.creditCardHolderInfo = {
-          name: data.name.trim(),
-          email: data.email,
-          cpfCnpj: data.cpf,
-          postalCode: data.postalCode?.replace(/\D/g, ''),
-          addressNumber: data.addressNumber,
-          phone: data.phone?.replace(/\D/g, ''),
-        };
-        if (data.installmentCount && data.installmentCount > 1) {
-          body.installmentCount = data.installmentCount;
-        }
-      }
-
-      const result = await api.post<CheckoutStartResponse>('/billing/checkout/start', body);
+      const result = await api.post<CheckoutStartResponse>('/billing/checkout/start', payload);
       setOrderId(result.orderId);
 
       if (result.status === 'paid') {
-        setSuccessEmail(result.email);
+        setSuccessEmail(result.email ?? '');
         setNeedsPasswordSetup(result.needsPasswordSetup ?? true);
         setStep('success');
         trackCheckoutCompleted(selectedPlan);
         return;
       }
 
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
+
       if (result.pix) {
         setPixData(result.pix);
         setStep('pix');
-        startPolling(result.orderId, result.email);
+        startPolling(result.orderId, result.email ?? '');
       }
     } catch (err) {
       setCheckoutError(err instanceof ApiError ? err.message : 'Erro ao processar. Tente novamente.');
@@ -237,7 +232,6 @@ export function LandingCheckoutModal({
   };
 
   const plan = BILLING_PLANS[selectedPlan];
-  const isCompactStep = step === 'checkout' || step === 'pix' || step === 'success';
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -245,9 +239,7 @@ export function LandingCheckoutModal({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
         <Dialog.Content
           aria-describedby={undefined}
-          className={`fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-full -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl focus:outline-none dark:border-slate-800 dark:bg-slate-950 ${
-            isCompactStep ? 'max-w-md' : 'max-w-2xl'
-          }`}
+          className="fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl focus:outline-none dark:border-slate-800 dark:bg-slate-950"
         >
           <Dialog.Title className="sr-only">Assinar Finzup</Dialog.Title>
 
@@ -259,10 +251,6 @@ export function LandingCheckoutModal({
 
           <ScrollArea className="flex-1">
             <div className="p-5 sm:p-6">
-            {step === 'plan' && (
-              <PlanStep selectedPlan={selectedPlan} onSelect={handlePlanSelect} />
-            )}
-
             {step === 'checkout' && (
               <CheckoutStep
                 form={form}
@@ -270,8 +258,6 @@ export function LandingCheckoutModal({
                 paymentMethod={paymentMethod}
                 error={checkoutError}
                 isSubmitting={isSubmitting}
-                showBack={!skipPlanStep}
-                onBack={() => setStep('plan')}
                 onSubmit={onSubmit}
               />
             )}
@@ -286,6 +272,8 @@ export function LandingCheckoutModal({
               />
             )}
 
+            {step === 'waiting' && <WaitingStep />}
+
             {step === 'success' && (
               <SuccessStep email={successEmail} needsPasswordSetup={needsPasswordSetup} onClose={onClose} />
             )}
@@ -294,62 +282,6 @@ export function LandingCheckoutModal({
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  );
-}
-
-function PlanStep({ selectedPlan, onSelect }: { selectedPlan: BillingPlanId; onSelect: (p: BillingPlanId) => void }) {
-  return (
-    <div>
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Escolha seu plano</h2>
-        <p className="mt-1 text-sm text-slate-500">Pagamento seguro · cancele quando quiser</p>
-      </div>
-      <div className="space-y-3">
-        {BILLING_PLAN_ORDER.map((planId) => {
-          const p = BILLING_PLANS[planId];
-          const Icon = PLAN_ICONS[planId];
-          const discount = planDiscountPercent(planId);
-          const { int, dec } = formatPriceParts(p.total);
-          const intervalSuffix = planPriceIntervalSuffix(p.intervalMonths);
-          return (
-            <button
-              key={planId}
-              type="button"
-              onClick={() => onSelect(planId)}
-              className={`relative w-full rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5 sm:p-5 ${
-                selectedPlan === planId
-                  ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-500 dark:bg-brand-950/30'
-                  : 'border-slate-200 bg-white hover:border-brand-300 dark:border-slate-700 dark:bg-slate-900'
-              }`}
-            >
-              {planId === 'annual' && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-500 px-3 py-0.5 text-xs font-semibold text-white">Mais popular</span>
-              )}
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-950">
-                    <Icon className="h-4 w-4 text-brand-600" />
-                  </span>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">{p.label}</p>
-                    <p className="text-xs text-slate-500">{p.description}</p>
-                    <p className="mt-1 text-xs font-medium text-brand-600">{p.aiCredits} créditos de IA</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {discount != null && discount > 0 && (
-                    <span className="mb-1 inline-block rounded-full bg-brand-green-100 px-2 py-0.5 text-xs font-bold text-brand-green-700">-{discount}%</span>
-                  )}
-                  <p className="text-lg font-extrabold text-slate-900 dark:text-white">
-                    R$ {int},{dec}<span className="text-sm font-normal text-slate-500">{intervalSuffix}</span>
-                  </p>
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
   );
 }
 
@@ -367,8 +299,6 @@ function CheckoutStep({
   paymentMethod,
   error,
   isSubmitting,
-  showBack,
-  onBack,
   onSubmit,
 }: {
   form: ReturnType<typeof useForm<CheckoutFormData>>;
@@ -376,27 +306,19 @@ function CheckoutStep({
   paymentMethod: PaymentMethod;
   error: string | null;
   isSubmitting: boolean;
-  showBack: boolean;
-  onBack: () => void;
   onSubmit: () => void;
 }) {
   const planConfig = BILLING_PLANS[plan];
-  const { register, setValue, watch, formState: { errors } } = form;
-  const acceptedTerms = watch('acceptedTerms');
-  const installmentCount = watch('installmentCount');
-  const maxInstallments = plan === 'annual' ? 12 : plan === 'semester' ? 6 : 1;
-  const showInstallments = paymentMethod === 'credit_card' && maxInstallments > 1;
+  const { register, setValue, formState: { errors } } = form;
 
   return (
     <div>
-      {showBack && (
-        <button type="button" onClick={onBack} className="mb-4 text-xs text-slate-400 hover:text-slate-600">
-          ← Trocar plano
-        </button>
-      )}
-
       <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Você selecionou</p>
-      <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">Plano {planConfig.label}</h2>
+      <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">
+        Plano {planConfig.label}
+        <span className="mx-2 font-normal text-slate-400 dark:text-white">·</span>
+        R$ {formatBRL(planConfig.total)}
+      </h2>
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
@@ -407,148 +329,138 @@ function CheckoutStep({
                 key={method}
                 type="button"
                 onClick={() => setValue('paymentMethod', method, { shouldValidate: true })}
-                className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
+                className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${
                   paymentMethod === method
                     ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500 dark:bg-brand-950/40'
                     : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                 }`}
               >
-                <span className="block text-sm font-semibold text-slate-900 dark:text-white">
-                  {method === 'pix' ? 'PIX' : 'Cartão'}
-                </span>
-                <span className="text-xs text-slate-500">
-                  {method === 'pix' ? 'Na hora' : 'Renova auto'}
+                {method === 'pix' ? (
+                  <PixIcon />
+                ) : (
+                  <CreditCard className="h-5 w-5 shrink-0 text-slate-600 dark:text-slate-300" />
+                )}
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-slate-900 dark:text-white">
+                    {method === 'pix' ? 'PIX' : 'Cartão'}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {method === 'pix' ? 'Aprovação instantânea' : 'Renovação automática'}
+                  </span>
                 </span>
               </button>
             ))}
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Input
-            id="checkout-name"
-            placeholder="Seu nome completo"
-            className={leanInputClass}
-            {...register('name')}
-          />
-          <FieldError message={errors.name?.message} />
-
-          <Input
-            id="checkout-email"
-            type="email"
-            placeholder="Seu e-mail (será seu login)"
-            className={leanInputClass}
-            {...register('email')}
-          />
-          <FieldError message={errors.email?.message} />
-
-          <Input
-            id="checkout-cpf"
-            placeholder="CPF"
-            className={leanInputClass}
-            {...register('cpf', {
-              onChange: (event) => {
-                event.target.value = maskCpfInput(event.target.value);
-              },
-            })}
-          />
-          <FieldError message={errors.cpf?.message} />
-        </div>
-
-        {paymentMethod === 'credit_card' && (
-          <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-            {showInstallments && (
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setValue('installmentCount', 1)}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-semibold ${
-                    (installmentCount ?? 1) === 1
-                      ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-950/40'
-                      : 'border-slate-200 text-slate-500 dark:border-slate-700'
-                  }`}
-                >
-                  À vista
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setValue('installmentCount', maxInstallments)}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-semibold ${
-                    (installmentCount ?? 1) > 1
-                      ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-950/40'
-                      : 'border-slate-200 text-slate-500 dark:border-slate-700'
-                  }`}
-                >
-                  Até {maxInstallments}x
-                </button>
-              </div>
-            )}
+        {paymentMethod === 'pix' ? (
+          <div className="space-y-2">
             <Input
-              id="cardNumber"
-              placeholder="Número do cartão"
+              id="checkout-name"
+              placeholder="Seu nome completo"
               className={leanInputClass}
-              {...register('cardNumber')}
+              {...register('name')}
             />
-            <FieldError message={errors.cardNumber?.message} />
-            <div className="grid grid-cols-3 gap-2">
-              <Input id="expiryMonth" placeholder="MM" maxLength={2} className={leanInputClass} {...register('expiryMonth')} />
-              <Input id="expiryYear" placeholder="AAAA" maxLength={4} className={leanInputClass} {...register('expiryYear')} />
-              <Input id="ccv" placeholder="CVV" maxLength={4} className={leanInputClass} {...register('ccv')} />
-            </div>
-            <Input id="phone" placeholder="Telefone" className={leanInputClass} {...register('phone')} />
-            <FieldError message={errors.phone?.message} />
-            <div className="grid grid-cols-2 gap-2">
-              <Input id="postalCode" placeholder="CEP" className={leanInputClass} {...register('postalCode')} />
-              <Input id="addressNumber" placeholder="Número" className={leanInputClass} {...register('addressNumber')} />
-            </div>
-            <FieldError message={errors.postalCode?.message ?? errors.addressNumber?.message} />
-          </div>
-        )}
+            <FieldError message={errors.name?.message} />
 
-        <label htmlFor="terms" className="flex cursor-pointer items-start gap-2.5">
-          <Checkbox
-            id="terms"
-            checked={acceptedTerms === true}
-            className="mt-0.5"
-            onCheckedChange={(v) => setValue('acceptedTerms', v === true, { shouldValidate: true })}
-          />
-          <span className="text-xs leading-relaxed text-slate-500">
-            Li e aceito os{' '}
-            <Link href="/termos-de-uso" target="_blank" className="text-brand-600 hover:underline">Termos</Link>
-            {' '}e a{' '}
-            <Link href="/politica-de-privacidade" target="_blank" className="text-brand-600 hover:underline">Privacidade</Link>
-          </span>
-        </label>
-        <FieldError message={errors.acceptedTerms?.message} />
+            <Input
+              id="checkout-email"
+              type="email"
+              placeholder="Seu e-mail (será seu login)"
+              className={leanInputClass}
+              {...register('email')}
+            />
+            <FieldError message={errors.email?.message} />
+
+            <Input
+              id="checkout-cpf"
+              placeholder="CPF"
+              className={leanInputClass}
+              {...register('cpf', {
+                onChange: (event) => {
+                  event.target.value = maskCpfInput(event.target.value);
+                },
+              })}
+            />
+            <FieldError message={errors.cpf?.message} />
+          </div>
+        ) : null}
+
+        <CheckoutConsentNotice />
 
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">{error}</div>
         )}
 
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-sm font-medium text-slate-500">Total</span>
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">R$ {formatBRL(planConfig.total)}</span>
-        </div>
-
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-12 w-full rounded-xl bg-brand-500 text-base font-bold hover:bg-brand-600"
+          className="btn-brand-gradient relative h-14 w-full rounded-xl text-base font-bold"
         >
           {isSubmitting ? (
             <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Processando...</>
           ) : paymentMethod === 'pix' ? (
-            'Gerar PIX'
+            <>
+              Gerar PIX
+              <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
+            </>
           ) : (
-            'Pagar agora'
+            <>
+              Continuar pagamento
+              <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
+            </>
           )}
         </Button>
 
         <p className="flex items-center justify-center gap-1.5 pb-1 text-[11px] text-slate-400">
           <Lock className="h-3 w-3" />
-          Pagamento processado com segurança pela Asaas
+          Pagamento processado com segurança via Asaas
         </p>
       </form>
+    </div>
+  );
+}
+
+function PixIcon() {
+  return (
+    <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center">
+      <img
+        src="/images/pix-logo.svg"
+        alt=""
+        aria-hidden
+        width={20}
+        height={20}
+        className="h-5 w-5 object-contain"
+        draggable={false}
+      />
+    </span>
+  );
+}
+
+function CheckoutConsentNotice() {
+  return (
+    <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center text-[11px] leading-relaxed text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+      Ao continuar, você concorda com os{' '}
+      <Link href="/termos-de-uso" target="_blank" className="text-brand-600 hover:underline">
+        Termos de Uso
+      </Link>
+      {' '}e a{' '}
+      <Link href="/politica-de-privacidade" target="_blank" className="text-brand-600 hover:underline">
+        Política de Privacidade
+      </Link>
+      , e em receber comunicações por e-mail e WhatsApp sobre sua conta, suporte e novidades do Finzup. Prometemos zero spam!
+    </p>
+  );
+}
+
+function WaitingStep() {
+  return (
+    <div className="py-8 text-center">
+      <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-brand-500" />
+      <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-white">Confirmando pagamento</h2>
+      <p className="text-sm text-slate-500">
+        Aguarde enquanto confirmamos seu pagamento. Isso pode levar alguns segundos.
+      </p>
     </div>
   );
 }
@@ -616,10 +528,10 @@ function SuccessStep({
       <Link
         href={needsPasswordSetup ? '/ativar-acesso' : '/login'}
         onClick={onClose}
-        className="inline-flex items-center gap-2 rounded-full bg-brand-500 px-8 py-3 text-sm font-semibold text-white hover:bg-brand-600"
+        className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
       >
         {needsPasswordSetup ? 'Já recebi o email — Ativar acesso' : 'Entrar no Finzup'}
-        <ArrowRight className="h-4 w-4" />
+        <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
       </Link>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, XCircle, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, XCircle, CheckCircle2 } from 'lucide-react';
 import { type BillingPlanId } from '@/constants/billing-plans';
 
 const painPoints = [
@@ -31,14 +31,12 @@ export function PainTruthSection({ onCta }: PainTruthSectionProps) {
     <section className="bg-slate-900 py-16 sm:py-24 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-widest text-brand-green-400 uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-widest uppercase brand-gradient-text-light">
             A verdade que ninguém te conta
           </p>
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             Por que controlar finanças é tão{' '}
-            <span className="bg-gradient-to-r from-brand-400 to-brand-green-400 bg-clip-text text-transparent">
-              difícil na prática
-            </span>
+            <span className="brand-gradient-text-light">difícil na prática</span>
           </h2>
           <p className="mt-4 text-base text-slate-400 sm:text-lg">
             Não é falta de disciplina. É falta de sistema automático. Veja o que acontece na vida real.
@@ -67,10 +65,10 @@ export function PainTruthSection({ onCta }: PainTruthSectionProps) {
           <button
             type="button"
             onClick={() => onCta()}
-            className="group inline-flex items-center gap-2 rounded-full bg-brand-green-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-green-900/50 transition-all hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-xl"
+            className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-base font-semibold"
           >
             Quero parar de recomeçar do zero
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </button>
           <p className="mt-3 text-sm text-slate-500">Cancele quando quiser · PIX ou cartão</p>
         </div>

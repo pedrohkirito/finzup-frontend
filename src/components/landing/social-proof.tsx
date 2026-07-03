@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Star } from 'lucide-react';
+import { ChevronRight, Star } from 'lucide-react';
 import { type BillingPlanId } from '@/constants/billing-plans';
 
 const testimonials: { quote: string; name: string; detail?: string }[] = [
@@ -27,7 +27,7 @@ export function SocialProof({ onCta }: SocialProofProps) {
     <section className="border-y border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-widest text-brand-500 uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-widest uppercase brand-gradient-text">
             Resultados reais
           </p>
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -72,10 +72,10 @@ export function SocialProof({ onCta }: SocialProofProps) {
             <button
               type="button"
               onClick={() => onCta()}
-              className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-brand-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-700"
+              className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
             >
               Assinar agora
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
             </button>
           </div>
         )}

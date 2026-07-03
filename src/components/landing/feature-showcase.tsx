@@ -179,7 +179,7 @@ export function FeatureShowcase() {
               <Tabs.Trigger
                 key={id}
                 value={id}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:border-brand-300 hover:text-brand-600 data-[state=active]:border-brand-500 data-[state=active]:bg-brand-500 data-[state=active]:text-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:data-[state=active]:border-brand-700 dark:data-[state=active]:bg-brand-900 dark:data-[state=active]:text-brand-200"
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:border-brand-300 hover:text-brand-600 data-[state=active]:border-transparent data-[state=active]:brand-gradient-bg-r data-[state=active]:text-white data-[state=active]:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
               >
                 <Icon className="h-4 w-4" />
                 <span className="hidden sm:inline">{label}</span>

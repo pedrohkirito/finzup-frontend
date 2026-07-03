@@ -50,7 +50,7 @@ export const BILLING_FEATURES = [
   'Acompanhamento de investimentos',
   'Relatórios mensais detalhados',
   'Acesso em todos os dispositivos',
-  'Suporte por e-mail',
+  'Suporte por e-mail e WhatsApp',
 ] as const;
 
 export function monthlyEquivalent(total: number, intervalMonths: number): number {
@@ -72,10 +72,12 @@ export function planPriceIntervalSuffix(intervalMonths: number): '/mês' | '/sem
   return '/ano';
 }
 
-export function planBillingLabel(intervalMonths: number): string {
-  if (intervalMonths === 1) return 'Cobrado mensalmente';
-  if (intervalMonths === 6) return 'Cobrado a cada 6 meses';
-  return 'Cobrado uma vez por ano';
+export function planBillingLabel(planId: BillingPlanId): string {
+  const plan = BILLING_PLANS[planId];
+  if (plan.intervalMonths === 1) return 'Cobrado mensalmente. Sem fidelidade.';
+  const equiv = formatBRL(monthlyEquivalent(plan.total, plan.intervalMonths));
+  if (plan.intervalMonths === 6) return `Equivale a ~R$${equiv}/mês no semestre`;
+  return `Equivale a ~R$${equiv}/mês no ano`;
 }
 
 export function planDiscountPercent(planId: BillingPlanId): number | null {
@@ -86,8 +88,9 @@ export function planDiscountPercent(planId: BillingPlanId): number | null {
   return Math.round(((monthly - equiv) / monthly) * 100);
 }
 
-export function planSavingsVsMonthly(planId: BillingPlanId): number {
-  const monthly = BILLING_PLANS.monthly;
+/** Total que o usuário pagaria no mesmo período escolhendo o plano mensal. */
+export function planMonthlyEquivalentTotal(planId: BillingPlanId): number | null {
   const plan = BILLING_PLANS[planId];
-  return monthly.total * plan.intervalMonths - plan.total;
+  if (plan.intervalMonths === 1) return null;
+  return BILLING_PLANS.monthly.total * plan.intervalMonths;
 }

@@ -1,4 +1,4 @@
-import { Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
 
 export function HeroSection() {
@@ -18,16 +18,14 @@ export function HeroSection() {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 dark:border-brand-800 dark:bg-brand-950 dark:text-brand-300">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200/80 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-500/10 dark:border-brand-800 dark:bg-brand-950 dark:text-brand-300 dark:ring-brand-500/20">
             <Sparkles className="h-3.5 w-3.5" />
             A partir de R$ {priceLabel}/mês · cancele quando quiser
           </div>
 
           <h1 className="mb-5 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
             Pare de recomeçar do zero{' '}
-            <span className="bg-gradient-to-r from-brand-500 to-brand-green-500 bg-clip-text text-transparent">
-              todo mês
-            </span>
+            <span className="brand-gradient-text">todo mês</span>
           </h1>
 
           <p className="mb-8 text-lg leading-relaxed text-slate-600 sm:mb-10 sm:text-xl dark:text-slate-400">
@@ -38,10 +36,10 @@ export function HeroSection() {
 
           <a
             href="#pricing"
-            className="group inline-flex items-center gap-2 rounded-full bg-brand-500 px-10 py-4 text-base font-semibold text-white shadow-lg shadow-brand-200/60 transition-all hover:-translate-y-0.5 hover:bg-brand-600 hover:shadow-xl hover:shadow-brand-300/50 dark:shadow-brand-900/50"
+            className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-10 py-5 pr-14 text-base font-semibold"
           >
             Começar agora
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <span className="btn-arrow-bg absolute right-3.5"><ChevronRight className="h-4 w-4" /></span>
           </a>
 
           <p className="mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-slate-500 dark:text-slate-400">

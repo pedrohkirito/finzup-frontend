@@ -40,7 +40,7 @@ export function HowItWorks() {
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-600 dark:bg-brand-950 dark:text-brand-400">
                 <step.icon className="h-7 w-7" />
               </div>
-              <span className="mb-2 inline-block text-sm font-bold text-brand-500 dark:text-brand-400">
+              <span className="mb-2 inline-block text-sm font-bold brand-gradient-text">
                 Passo {index + 1}
               </span>
               <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">{step.title}</h3>

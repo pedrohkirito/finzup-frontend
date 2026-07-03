@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { HeroSection } from '@/components/landing/hero-section';
 import { LandingSummaryMock } from '@/components/landing/summary-mock';
@@ -23,10 +23,10 @@ import { trackLead } from '@/lib/funnel-analytics';
 interface ModalState {
   isOpen: boolean;
   initialPlan: BillingPlanId;
-  skipPlanStep: boolean;
+  returnOrderId?: string | null;
 }
 
-const CLOSED: ModalState = { isOpen: false, initialPlan: 'annual', skipPlanStep: false };
+const CLOSED: ModalState = { isOpen: false, initialPlan: 'annual', returnOrderId: null };
 
 export function LandingPageClient() {
   return (
@@ -36,20 +36,37 @@ export function LandingPageClient() {
   );
 }
 
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
+  e.preventDefault();
+  scrollTo(id);
+}
+
 function LandingPageClientInner() {
   const searchParams = useSearchParams();
   const [modal, setModal] = useState<ModalState>(CLOSED);
 
-  const openCheckout = useCallback((plan?: BillingPlanId, skipPlanStep = false) => {
+  const openCheckout = useCallback((plan?: BillingPlanId) => {
     trackLead('Landing CTA', { plan });
-    setModal({ isOpen: true, initialPlan: plan ?? 'annual', skipPlanStep });
+    setModal({ isOpen: true, initialPlan: plan ?? 'annual', returnOrderId: null });
   }, []);
 
   const closeModal = useCallback(() => setModal(CLOSED), []);
 
   useEffect(() => {
-    if (searchParams.get('checkout') === '1') {
-      openCheckout('annual', true);
+    const checkoutParam = searchParams.get('checkout');
+    const orderId = searchParams.get('orderId');
+
+    if (checkoutParam === 'success' && orderId) {
+      setModal({ isOpen: true, initialPlan: 'annual', returnOrderId: orderId });
+      return;
+    }
+
+    if (checkoutParam === '1') {
+      openCheckout('annual');
     }
   }, [searchParams, openCheckout]);
 
@@ -64,16 +81,16 @@ function LandingPageClientInner() {
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#como-funciona" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+            <a href="#pricing" onClick={(e) => handleAnchorClick(e, 'pricing')} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+              Planos
+            </a>
+            <a href="#como-funciona" onClick={(e) => handleAnchorClick(e, 'como-funciona')} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
               Como funciona
             </a>
-            <a href="#features" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+            <a href="#features" onClick={(e) => handleAnchorClick(e, 'features')} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
               Recursos
             </a>
-            <a href="#pricing" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-              Preços
-            </a>
-            <a href="#faq" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+            <a href="#faq" onClick={(e) => handleAnchorClick(e, 'faq')} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
               FAQ
             </a>
           </nav>
@@ -87,9 +104,11 @@ function LandingPageClientInner() {
             </Link>
             <a
               href="#pricing"
-              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-200/50 sm:px-5 dark:hover:shadow-brand-900/50"
+              onClick={(e) => handleAnchorClick(e, 'pricing')}
+              className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-4 py-2.5 pr-9 text-sm font-semibold sm:px-5 sm:py-3 sm:pr-10"
             >
               Começar agora
+              <span className="btn-arrow-bg absolute right-2 sm:right-2.5"><ChevronRight className="h-3.5 w-3.5" /></span>
             </a>
           </div>
         </div>
@@ -134,22 +153,39 @@ function LandingPageClientInner() {
       <Faq />
 
       {/* 13. CTA final */}
-      <section className="bg-gradient-to-br from-brand-500 to-brand-green-500 py-16 sm:py-20">
+      <section className="relative overflow-hidden bg-slate-950 py-20 sm:py-28">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/20 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] translate-y-1/2 -translate-x-1/4 rounded-full bg-brand-green-500/15 blur-3xl" />
+          <div className="absolute right-0 bottom-0 h-[400px] w-[400px] translate-y-1/2 translate-x-1/4 rounded-full bg-brand-400/15 blur-3xl" />
+        </div>
+
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Seu dinheiro não precisa sumir no escuro
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-sm font-medium text-brand-300">
+            Comece hoje mesmo
+          </div>
+
+          <h2 className="mb-5 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+            Seu dinheiro não precisa{' '}
+            <span className="brand-gradient-text">sumir no escuro</span>
           </h2>
-          <p className="mb-8 text-base text-white/90 sm:text-lg">
-            Assine hoje e pare de recomeçar do zero todo mês. Cancele quando quiser.
+
+          <p className="mb-10 text-lg text-slate-400 sm:text-xl">
+            Assine hoje e pare de recomeçar do zero todo mês.{' '}
+            <span className="font-semibold text-slate-200">Cancele quando quiser.</span>
           </p>
-          <button
-            type="button"
-            onClick={() => openCheckout()}
-            className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-brand-600 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            Assinar agora
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </button>
+
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={() => openCheckout()}
+              className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-base font-semibold"
+            >
+              Assinar agora
+              <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
+            </button>
+            <p className="text-sm text-slate-500">Sem taxa de cancelamento · Acesso imediato</p>
+          </div>
         </div>
       </section>
 
@@ -184,10 +220,10 @@ function LandingPageClientInner() {
         <button
           type="button"
           onClick={() => openCheckout()}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brand-200/60 transition-colors hover:bg-brand-600 dark:shadow-brand-900/50"
+          className="btn-brand-gradient relative flex w-full items-center justify-center rounded-full px-6 py-4 pr-12 text-base font-semibold"
         >
           Assinar agora
-          <ArrowRight className="h-4 w-4" />
+          <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
         </button>
       </div>
 
@@ -196,7 +232,7 @@ function LandingPageClientInner() {
         isOpen={modal.isOpen}
         onClose={closeModal}
         initialPlan={modal.initialPlan}
-        skipPlanStep={modal.skipPlanStep}
+        returnOrderId={modal.returnOrderId}
       />
     </div>
   );

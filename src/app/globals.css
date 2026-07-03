@@ -7,11 +7,13 @@
   --foreground: #0f172a;
   --mobile-nav-height: 5.75rem;
   --mobile-nav-extra: 1rem;
+  --card-surface: #ffffff;
 }
 
 .dark {
   --background: #020617;
   --foreground: #f1f5f9;
+  --card-surface: #020617; /* slate-950 — fundo dos cards em dark mode */
 }
 
 @theme inline {
@@ -46,6 +48,10 @@
   --color-brand-green-800: #0e4b31;
   --color-brand-green-900: #072618;
   --color-brand-green-950: #04130c;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -116,6 +122,134 @@ body {
       background-color: rgb(56 196 235 / 0.55);
     }
   }
+}
+
+/* Degradê de marca Finzup — cyan → verde (padrão visual da landing)
+   Cores em hex explícito: o compilador do Tailwind v4 inverte stops com var(--color-*). */
+@utility brand-gradient-text {
+  background-image: linear-gradient(90deg, #03b6e6 0%, #22bd7b 100%);
+  background-clip: text;
+  color: transparent;
+}
+
+@utility brand-gradient-text-light {
+  background-image: linear-gradient(90deg, #38c4eb 0%, #4fcf97 100%);
+  background-clip: text;
+  color: transparent;
+}
+
+@utility brand-gradient-bg {
+  background-image: linear-gradient(135deg, #03b6e6 0%, #22bd7b 100%);
+}
+
+@utility brand-gradient-bg-r {
+  background-image: linear-gradient(90deg, #03b6e6 0%, #22bd7b 100%);
+}
+
+@keyframes btn-cta-pulse {
+  0%, 100% {
+    box-shadow:
+      0 10px 15px -3px rgb(3 182 230 / 0.25),
+      0 4px 6px -4px rgb(3 182 230 / 0.15);
+  }
+  50% {
+    box-shadow:
+      0 10px 30px -3px rgb(3 182 230 / 0.55),
+      0 4px 14px -4px rgb(34 189 123 / 0.35),
+      0 0 40px 0px rgb(3 182 230 / 0.2);
+  }
+}
+
+@keyframes btn-cta-shimmer {
+  0% { background-position: -250% center; }
+  60%, 100% { background-position: 250% center; }
+}
+
+@utility btn-brand-gradient {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(90deg, #03b6e6 0%, #22bd7b 100%);
+  color: white;
+  animation: btn-cta-pulse 2.8s ease-in-out infinite;
+  box-shadow:
+    0 10px 15px -3px rgb(3 182 230 / 0.25),
+    0 4px 6px -4px rgb(3 182 230 / 0.15);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  /* Shimmer highlight */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+      105deg,
+      transparent 35%,
+      rgb(255 255 255 / 0.28) 50%,
+      transparent 65%
+    );
+    background-size: 250% 100%;
+    background-position: -250% center;
+    animation: btn-cta-shimmer 3.5s ease-in-out infinite 0.8s;
+    pointer-events: none;
+  }
+
+  &:hover:not(:disabled) {
+    /* Mantém o mesmo gradiente — sem escurecimento */
+    transform: translateY(-2px) scale(1.02);
+    animation-play-state: paused;
+    box-shadow:
+      0 20px 35px -5px rgb(3 182 230 / 0.4),
+      0 8px 15px -6px rgb(34 189 123 / 0.3);
+  }
+
+  &:active:not(:disabled) {
+    /* Sem escurecimento no clique */
+    transform: translateY(0px) scale(0.98);
+    animation-play-state: paused;
+    box-shadow:
+      0 6px 12px -3px rgb(3 182 230 / 0.3),
+      0 3px 6px -4px rgb(3 182 230 / 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    animation: none;
+  }
+
+  @variant dark {
+    box-shadow:
+      0 10px 15px -3px rgb(3 182 230 / 0.15),
+      0 4px 6px -4px rgb(34 189 123 / 0.1);
+
+    &:hover:not(:disabled) {
+      box-shadow:
+        0 20px 35px -5px rgb(3 182 230 / 0.3),
+        0 8px 15px -6px rgb(34 189 123 / 0.2);
+    }
+  }
+}
+
+/* Borda com degradê — usa background-clip trick; requer --card-surface no :root/.dark */
+@utility brand-gradient-border {
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(var(--card-surface, #fff), var(--card-surface, #fff)),
+    linear-gradient(135deg, #03b6e6 0%, #22bd7b 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Bolinha de fundo transparente para o ícone de seta nos CTAs */
+@utility btn-arrow-bg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: rgb(255 255 255 / 0.2);
+  padding: 0.25rem;
 }
 
 button {
