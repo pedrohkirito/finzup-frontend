@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isValidCpf, normalizeCpf } from './cpf';
+import { isValidCpfOrCnpj, normalizeCpf } from './cpf';
 
 export const emailSchema = z.string().email('Email inválido');
 
@@ -37,10 +37,10 @@ export const fullNameSchema = nameSchema.refine(
 
 export const cpfSchema = z
   .string()
-  .min(1, 'CPF obrigatório')
+  .min(1, 'CPF ou CNPJ obrigatório')
   .transform((v) => normalizeCpf(v))
-  .refine((v) => /^\d{11}$/.test(v), 'CPF deve ter 11 dígitos')
-  .refine(isValidCpf, 'CPF inválido');
+  .refine((v) => /^\d{11}$/.test(v) || /^\d{14}$/.test(v), 'CPF ou CNPJ inválido')
+  .refine(isValidCpfOrCnpj, 'CPF ou CNPJ inválido');
 
 export const loginSchema = z.object({
   email: emailSchema,

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '@/lib/api';
 import { changePasswordSchema } from '@/lib/validators';
-import { formatCpf } from '@/lib/cpf';
+import { formatTaxId } from '@/lib/cpf';
 import { paymentMethodTypeLabels, paymentMethodTypeStyles } from '@/lib/payment-method-types';
 import { useAuth } from '@/hooks/use-auth';
 import { PasswordRequirements } from '@/components/auth/password-requirements';
@@ -177,8 +177,8 @@ export default function ConfiguracoesPage() {
           {/* Campos de detalhe */}
           <div className="grid divide-y divide-slate-100 text-sm sm:grid-cols-2 sm:divide-x sm:divide-y-0 dark:divide-slate-800">
             <div className="px-5 py-4">
-              <p className="mb-0.5 text-xs font-medium text-slate-400">CPF</p>
-              <p className="font-medium text-slate-800 dark:text-slate-200">{user?.cpf ? formatCpf(user.cpf) : '—'}</p>
+              <p className="mb-0.5 text-xs font-medium text-slate-400">CPF/CNPJ</p>
+              <p className="font-medium text-slate-800 dark:text-slate-200">{user?.cpf ? formatTaxId(user.cpf) : '—'}</p>
             </div>
             {memberSince && (
               <div className="px-5 py-4">

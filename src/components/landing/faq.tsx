@@ -9,7 +9,7 @@ const faqs = [
   {
     question: 'Preciso criar conta antes de pagar?',
     answer:
-      'Não. Você informa nome completo, CPF e email no checkout. Após a confirmação do pagamento, enviamos um link para criar sua senha e acessar o Finzup.',
+      'Não. Você informa nome completo, CPF ou CNPJ e email no checkout. Após a confirmação do pagamento, enviamos um link para criar sua senha e acessar o Finzup.',
   },
   {
     question: 'Posso cancelar quando quiser?',

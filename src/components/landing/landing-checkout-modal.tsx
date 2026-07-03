@@ -59,7 +59,7 @@ const checkoutSchema = z
     if (!cpfResult.success) {
       ctx.addIssue({
         code: 'custom',
-        message: cpfResult.error.issues[0]?.message ?? 'CPF inválido',
+        message: cpfResult.error.issues[0]?.message ?? 'CPF ou CNPJ inválido',
         path: ['cpf'],
       });
     }
@@ -374,7 +374,7 @@ function CheckoutStep({
 
             <Input
               id="checkout-cpf"
-              placeholder="CPF"
+              placeholder="CPF ou CNPJ"
               className={leanInputClass}
               {...register('cpf', {
                 onChange: (event) => {
