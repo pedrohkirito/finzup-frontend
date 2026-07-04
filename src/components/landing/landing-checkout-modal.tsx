@@ -20,8 +20,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  ANNUAL_INSTALLMENT,
   BILLING_PLANS,
   type BillingPlanId,
+  type CardChargeMode,
   formatBRL,
 } from '@/constants/billing-plans';
 import { api, ApiError } from '@/lib/api';
@@ -42,6 +44,7 @@ const checkoutSchema = z
     cpf: z.string().optional(),
     email: z.string().optional(),
     paymentMethod: z.enum(['pix', 'credit_card']),
+    cardChargeMode: z.enum(['recurrent', 'installment']),
   })
   .superRefine((data, ctx) => {
     if (data.paymentMethod !== 'pix') return;
@@ -118,6 +121,7 @@ export function LandingCheckoutModal({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       paymentMethod: 'pix',
+      cardChargeMode: 'recurrent',
     },
   });
 
@@ -163,7 +167,7 @@ export function LandingCheckoutModal({
     setCheckoutError(null);
     setSuccessEmail('');
     setNeedsPasswordSetup(true);
-    form.reset({ paymentMethod: 'pix' });
+    form.reset({ paymentMethod: 'pix', cardChargeMode: 'recurrent' });
     if (!trackedOpenRef.current) {
       trackedOpenRef.current = true;
       trackLandingCheckoutModalOpened(initialPlan);
@@ -171,6 +175,7 @@ export function LandingCheckoutModal({
   }, [isOpen, initialPlan, returnOrderId, startPolling]);
 
   const paymentMethod = form.watch('paymentMethod');
+  const cardChargeMode = form.watch('cardChargeMode') ?? 'recurrent';
 
   const onSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
@@ -178,6 +183,11 @@ export function LandingCheckoutModal({
     trackInitiateCheckout(selectedPlan);
 
     try {
+      const cardChargeModePayload =
+        selectedPlan === 'annual' && data.paymentMethod === 'credit_card'
+          ? data.cardChargeMode
+          : 'recurrent';
+
       const payload =
         data.paymentMethod === 'pix'
           ? {
@@ -192,6 +202,7 @@ export function LandingCheckoutModal({
           : {
               plan: selectedPlan,
               paymentMethod: data.paymentMethod,
+              cardChargeMode: cardChargeModePayload,
               acceptedTerms: true,
               marketingOptIn: true,
             };
@@ -256,6 +267,7 @@ export function LandingCheckoutModal({
                 form={form}
                 plan={selectedPlan}
                 paymentMethod={paymentMethod}
+                cardChargeMode={cardChargeMode}
                 error={checkoutError}
                 isSubmitting={isSubmitting}
                 onSubmit={onSubmit}
@@ -297,6 +309,7 @@ function CheckoutStep({
   form,
   plan,
   paymentMethod,
+  cardChargeMode,
   error,
   isSubmitting,
   onSubmit,
@@ -304,12 +317,15 @@ function CheckoutStep({
   form: ReturnType<typeof useForm<CheckoutFormData>>;
   plan: BillingPlanId;
   paymentMethod: PaymentMethod;
+  cardChargeMode: CardChargeMode;
   error: string | null;
   isSubmitting: boolean;
   onSubmit: () => void;
 }) {
   const planConfig = BILLING_PLANS[plan];
   const { register, setValue, formState: { errors } } = form;
+  const showCardChargeModes = plan === 'annual' && paymentMethod === 'credit_card';
+  const isInstallment = showCardChargeModes && cardChargeMode === 'installment';
 
   return (
     <div>
@@ -328,7 +344,12 @@ function CheckoutStep({
               <button
                 key={method}
                 type="button"
-                onClick={() => setValue('paymentMethod', method, { shouldValidate: true })}
+                onClick={() => {
+                  setValue('paymentMethod', method, { shouldValidate: true });
+                  if (method !== 'credit_card') {
+                    setValue('cardChargeMode', 'recurrent');
+                  }
+                }}
                 className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${
                   paymentMethod === method
                     ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500 dark:bg-brand-950/40'
@@ -352,6 +373,51 @@ function CheckoutStep({
             ))}
           </div>
         </div>
+
+        {showCardChargeModes ? (
+          <div>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                onClick={() => setValue('cardChargeMode', 'recurrent')}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
+                  cardChargeMode === 'recurrent'
+                    ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500 dark:bg-brand-950/40'
+                    : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
+                }`}
+              >
+                <span className="block text-sm font-semibold text-slate-900 dark:text-white">
+                  À vista · R${formatBRL(planConfig.total)}/ano
+                </span>
+                <span className="text-xs text-slate-500">Renovação automática</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setValue('cardChargeMode', 'installment')}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
+                  cardChargeMode === 'installment'
+                    ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500 dark:bg-brand-950/40'
+                    : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
+                }`}
+              >
+                <span className="block text-sm font-semibold text-slate-900 dark:text-white">
+                  Em até {ANNUAL_INSTALLMENT.count}x de R${formatBRL(ANNUAL_INSTALLMENT.value)}
+                </span>
+                <span className="text-xs text-slate-500">
+                  Total: R${formatBRL(ANNUAL_INSTALLMENT.total)} · Compra única
+                </span>
+              </button>
+            </div>
+            {isInstallment ? (
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                Compra única em até {ANNUAL_INSTALLMENT.count}x de R$
+                {formatBRL(ANNUAL_INSTALLMENT.value)} (total R${formatBRL(ANNUAL_INSTALLMENT.total)})
+                — você escolhe as parcelas na próxima tela. Sem renovação automática; as parcelas
+                seguem na fatura do cartão até quitar o total.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {paymentMethod === 'pix' ? (
           <div className="space-y-2">

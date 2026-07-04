@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { trackLead } from '@/lib/funnel-analytics';
 import {
+  ANNUAL_INSTALLMENT,
   BILLING_FEATURES,
   BILLING_PLAN_ORDER,
   BILLING_PLANS,
@@ -79,6 +80,15 @@ export function PlanPicker({
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
           {planBillingLabel(planId)}
         </p>
+        {planId === 'annual' && (
+          <p className="mt-1.5 text-sm font-medium text-slate-600 dark:text-slate-300">
+            ou{' '}
+            <span className="font-bold text-slate-900 dark:text-white">
+              {ANNUAL_INSTALLMENT.count}x de R${formatBRL(ANNUAL_INSTALLMENT.value)}
+            </span>{' '}
+            no cartão
+          </p>
+        )}
       </>
     );
   };
