@@ -5,10 +5,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { type BillingPlanId, BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
 
 const alternatives = [
-  { name: 'Planilha manual', cost: 'R$ 0 + horas perdidas', hasAuto: false, hasVisual: false, hasHistory: false },
-  { name: 'Apps genéricos', cost: '~R$ 20–40/mês', hasAuto: false, hasVisual: true, hasHistory: true },
-  { name: 'Consultor financeiro', cost: '~R$ 200+/mês', hasAuto: false, hasVisual: true, hasHistory: true },
+  { name: 'Planilha manual', cost: 'R$ 0 + horas perdidas', hasAuto: false, hasVisual: false, hasHistory: false, hasAi: false },
+  { name: 'Apps genéricos', cost: '~R$ 30–40/mês', hasAuto: false, hasVisual: true, hasHistory: true, hasAi: false },
+  { name: 'Consultor financeiro', cost: '~R$ 200+/mês', hasAuto: false, hasVisual: true, hasHistory: true, hasAi: false },
 ];
+
+function FeatureCell({ ok }: { ok: boolean }) {
+  return ok ? (
+    <Check className="mx-auto h-5 w-5 text-brand-green-500" />
+  ) : (
+    <X className="mx-auto h-5 w-5 text-red-400" />
+  );
+}
 
 interface CostComparisonSectionProps {
   onCta: (plan?: BillingPlanId) => void;
@@ -35,7 +43,7 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-md dark:border-slate-800">
           <ScrollArea orientation="horizontal">
-            <table className="w-full min-w-[560px]">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -53,33 +61,27 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
                   <th className="px-4 py-4 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Histórico
                   </th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Assistente de IA
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-950">
-                {alternatives.map(({ name, cost, hasAuto, hasVisual, hasHistory }) => (
+                {alternatives.map(({ name, cost, hasAuto, hasVisual, hasHistory, hasAi }) => (
                   <tr key={name} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50">
                     <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">{name}</td>
                     <td className="px-4 py-4 text-center text-sm text-slate-600 dark:text-slate-400">{cost}</td>
                     <td className="px-4 py-4 text-center">
-                      {hasAuto ? (
-                        <Check className="mx-auto h-5 w-5 text-brand-green-500" />
-                      ) : (
-                        <X className="mx-auto h-5 w-5 text-red-400" />
-                      )}
+                      <FeatureCell ok={hasAuto} />
                     </td>
                     <td className="px-4 py-4 text-center">
-                      {hasVisual ? (
-                        <Check className="mx-auto h-5 w-5 text-brand-green-500" />
-                      ) : (
-                        <X className="mx-auto h-5 w-5 text-red-400" />
-                      )}
+                      <FeatureCell ok={hasVisual} />
                     </td>
                     <td className="px-4 py-4 text-center">
-                      {hasHistory ? (
-                        <Check className="mx-auto h-5 w-5 text-brand-green-500" />
-                      ) : (
-                        <X className="mx-auto h-5 w-5 text-red-400" />
-                      )}
+                      <FeatureCell ok={hasHistory} />
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <FeatureCell ok={hasAi} />
                     </td>
                   </tr>
                 ))}
@@ -103,13 +105,16 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
                     <p className="text-xs text-brand-600/70 dark:text-brand-400/70">por mês</p>
                   </td>
                   <td className="px-4 py-5 text-center">
-                    <Check className="mx-auto h-5 w-5 text-brand-green-500" />
+                    <FeatureCell ok />
                   </td>
                   <td className="px-4 py-5 text-center">
-                    <Check className="mx-auto h-5 w-5 text-brand-green-500" />
+                    <FeatureCell ok />
                   </td>
                   <td className="px-4 py-5 text-center">
-                    <Check className="mx-auto h-5 w-5 text-brand-green-500" />
+                    <FeatureCell ok />
+                  </td>
+                  <td className="px-4 py-5 text-center">
+                    <FeatureCell ok />
                   </td>
                 </tr>
               </tbody>
@@ -120,9 +125,9 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
         <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
           Tudo reunido por{' '}
           <span className="font-semibold text-slate-700 dark:text-slate-300">
-            menos que um café por mês
+            menos que um lanche por mês
           </span>{' '}
-          — com recorrência automática que planilha nunca vai te dar.
+          — com recorrência automática e Assistente de IA que planilha nunca vai te dar.
         </p>
 
         <div className="mt-8 text-center">

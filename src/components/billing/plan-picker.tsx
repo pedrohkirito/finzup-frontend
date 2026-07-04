@@ -80,15 +80,21 @@ export function PlanPicker({
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
           {planBillingLabel(planId)}
         </p>
-        {planId === 'annual' && (
-          <p className="mt-1.5 text-sm font-medium text-slate-600 dark:text-slate-300">
-            ou{' '}
-            <span className="font-bold text-slate-900 dark:text-white">
-              {ANNUAL_INSTALLMENT.count}x de R${formatBRL(ANNUAL_INSTALLMENT.value)}
-            </span>{' '}
-            no cartão
-          </p>
-        )}
+        {/* Mesma altura em todos os cards para manter o alinhamento do grid */}
+        <p
+          className={`mt-1.5 text-sm font-medium ${
+            planId === 'annual'
+              ? 'text-slate-600 dark:text-slate-300'
+              : 'invisible select-none'
+          }`}
+          aria-hidden={planId !== 'annual'}
+        >
+          ou{' '}
+          <span className="font-bold text-slate-900 dark:text-white">
+            {ANNUAL_INSTALLMENT.count}x de R${formatBRL(ANNUAL_INSTALLMENT.value)}
+          </span>{' '}
+          no cartão
+        </p>
       </>
     );
   };
@@ -268,7 +274,18 @@ export function PlanPicker({
                 {BILLING_FEATURES.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5">
                     <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-green-500" />
-                    <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
+                      {feature.startsWith('Assistente de IA') ? (
+                        <>
+                          <strong className="font-extrabold text-slate-900 dark:text-white">
+                            Assistente de IA
+                          </strong>
+                          {feature.slice('Assistente de IA'.length)}
+                        </>
+                      ) : (
+                        feature
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>

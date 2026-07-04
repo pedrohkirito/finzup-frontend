@@ -7,14 +7,14 @@ const faqs = [
       'Aceitamos PIX e cartão de crédito, processados com segurança pela Asaas. Você escolhe entre os planos mensal, semestral ou anual.',
   },
   {
-    question: 'Preciso criar conta antes de pagar?',
-    answer:
-      'Não. Você informa nome completo, CPF ou CNPJ e email no checkout. Após a confirmação do pagamento, enviamos um link para criar sua senha e acessar o Finzup.',
-  },
-  {
     question: 'Posso cancelar quando quiser?',
     answer:
-      'Pode. O cancelamento é feito em poucos cliques, sem taxa e sem precisar falar com ninguém. Você mantém o acesso até o fim do período já pago.',
+      'Pode. O cancelamento é feito de forma rápida e sem burocracia. Você mantém o acesso até o fim do período já pago.',
+  },
+  {
+    question: 'Tenho direito a reembolso?',
+    answer:
+      'Sim. Nos primeiros 7 dias após a contratação, você tem direito de arrependimento com reembolso integral. É só falar com a gente por e-mail ou WhatsApp que a gente resolve na hora.',
   },
   {
     question: 'Meus dados financeiros estão seguros?',
@@ -34,12 +34,22 @@ const faqs = [
   {
     question: 'Preciso entender de finanças para usar?',
     answer:
-      'Não. O Finzup foi feito para ser simples desde o primeiro acesso. Você registra receitas e despesas e a gente cuida de organizar tudo de forma visual.',
+      'Não. O Finzup foi feito para ser simples desde o primeiro acesso. Você registra receitas e despesas, a gente organiza tudo de forma visual, e o Assistente de IA responde suas dúvidas sobre o dinheiro.',
+  },
+  {
+    question: 'O que o Assistente de IA faz?',
+    answer:
+      'É um assistente que responde suas dúvidas sobre o dinheiro — com base nos seus lançamentos — e sobre como usar o Finzup. Ele também monta planejamentos, sugere orçamentos, aponta onde economizar e ajuda a organizar metas e prioridades do mês.',
+  },
+  {
+    question: 'Como funcionam os créditos de IA?',
+    answer:
+      'Os créditos são consumidos conforme o uso da IA. Os créditos vêm inclusos no seu plano (250 no mensal, 500 no semestral e 750 no anual) e renovam a cada ciclo de cobrança. Quando acabam, o assistente fica indisponível até a próxima renovação. Pode ficar tranquilo que os créditos duram muito.',
   },
   {
     question: 'Por que não usar só uma planilha?',
     answer:
-      'Planilha é gratuita, mas exige recomeçar do zero todo mês: você recopia despesas fixas, salário, orçamentos e categorias uma a uma. No Finzup, marque um lançamento como recorrente e ele aparece automaticamente no próximo mês — você só ajusta o que mudou. Menos tempo gasto, mais consistência.',
+      'Planilha é gratuita, mas exige recomeçar do zero todo mês: você recopia despesas fixas, salário, orçamentos e categorias uma a uma. No Finzup, marque um lançamento como recorrente e ele aparece automaticamente no próximo mês — você só ajusta o que mudou. Menos tempo gasto, mais consistência, e ainda conta com o Assistente de IA.',
   },
 ];
 
@@ -60,13 +70,13 @@ export function Faq() {
           {faqs.map((faq) => (
             <details
               key={faq.question}
-              className="group rounded-2xl border border-slate-200 bg-slate-50 p-5 transition-colors open:bg-white dark:border-slate-800 dark:bg-slate-900 dark:open:bg-slate-900"
+              className="group rounded-2xl border border-slate-200 bg-slate-50 transition-colors open:bg-white dark:border-slate-800 dark:bg-slate-900 dark:open:bg-slate-900"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-slate-900 dark:text-white">
+              <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-4 p-5 text-left text-base font-semibold text-slate-900 marker:content-none dark:text-white [&::-webkit-details-marker]:hidden">
                 {faq.question}
                 <Plus className="h-5 w-5 flex-shrink-0 text-brand-500 transition-transform group-open:rotate-45" />
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{faq.answer}</p>
+              <p className="px-5 pb-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{faq.answer}</p>
             </details>
           ))}
         </div>

@@ -1,7 +1,26 @@
 'use client';
 
-import { ChevronRight, XCircle, CheckCircle2 } from 'lucide-react';
+import { type ReactNode } from 'react';
+import { ChevronRight, X, Check } from 'lucide-react';
 import { type BillingPlanId } from '@/constants/billing-plans';
+
+const AI_LABEL = 'Assistente de IA';
+
+function withBoldAi(text: string, strongClassName: string): ReactNode {
+  if (!text.includes(AI_LABEL)) return text;
+
+  const parts = text.split(AI_LABEL);
+  return parts.flatMap((part, index) =>
+    index === 0
+      ? [part]
+      : [
+          <strong key={index} className={strongClassName}>
+            {AI_LABEL}
+          </strong>,
+          part,
+        ],
+  );
+}
 
 const painPoints = [
   {
@@ -18,7 +37,8 @@ const painPoints = [
   },
   {
     pain: 'Você já tentou vários aplicativos e nenhum resolveu o problema de verdade.',
-    solution: 'O Finzup foi feito para quem quer sistema automático, não mais uma planilha digital.',
+    solution:
+      'O Finzup foi feito para quem quer sistema automático, não mais uma planilha digital.',
   },
 ];
 
@@ -28,36 +48,57 @@ interface PainTruthSectionProps {
 
 export function PainTruthSection({ onCta }: PainTruthSectionProps) {
   return (
-    <section className="bg-slate-900 py-16 sm:py-24 dark:bg-slate-950">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
+    <section className="relative bg-slate-900 py-16 pb-20 sm:py-24 sm:pb-28">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-slate-600/60 to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -bottom-6 h-6 bg-gradient-to-b from-slate-900/40 to-transparent dark:from-slate-900/60"
+      />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-14">
           <p className="mb-3 text-sm font-semibold tracking-widest uppercase brand-gradient-text-light">
             A verdade que ninguém te conta
           </p>
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             Por que controlar finanças é tão{' '}
-            <span className="brand-gradient-text-light">difícil na prática</span>
+            <span className="brand-gradient-text-light whitespace-nowrap">difícil na prática</span>
           </h2>
           <p className="mt-4 text-base text-slate-400 sm:text-lg">
-            Não é falta de disciplina. É falta de sistema automático. Veja o que acontece na vida real.
+            {withBoldAi(
+              'Não é falta de disciplina. É falta de sistema automático e de um Assistente de IA que responda suas dúvidas sobre o dinheiro.',
+              'font-extrabold text-white',
+            )}
           </p>
         </div>
 
-        <div className="mx-auto grid max-w-5xl gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="mx-auto grid max-w-5xl gap-5 sm:gap-6 md:grid-cols-2">
           {painPoints.map(({ pain, solution }, i) => (
-            <div
+            <article
               key={i}
-              className="rounded-2xl border border-slate-800 bg-slate-800/50 p-6"
+              className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] px-6 py-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-md transition-[border-color,background-color,box-shadow] duration-500 ease-in-out hover:border-brand-400/20 hover:bg-white/[0.05] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] sm:px-7 sm:py-7"
             >
-              <div className="mb-3 flex items-start gap-3">
-                <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" />
-                <p className="text-sm leading-relaxed text-slate-300">{pain}</p>
+              <div className="flex gap-3.5 px-4">
+                <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-500/10 ring-1 ring-red-400/20">
+                  <X className="h-3.5 w-3.5 text-red-400" strokeWidth={2.5} />
+                </span>
+                <p className="text-[15px] leading-relaxed text-red-400">{pain}</p>
               </div>
-              <div className="flex items-start gap-3 rounded-xl bg-brand-green-950/40 px-4 py-3">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-green-400" />
-                <p className="text-sm leading-relaxed text-brand-green-200">{solution}</p>
+
+              <div className="mt-5 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-sm">
+                <div className="flex gap-3.5">
+                  <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full brand-gradient-bg shadow-md shadow-brand-green-500/15">
+                    <Check className="h-3.5 w-3.5 text-white" strokeWidth={2.75} />
+                  </span>
+                    <p className="text-[15px] font-medium leading-relaxed text-brand-300">
+                      {solution}
+                    </p>
+                </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
 
@@ -70,7 +111,6 @@ export function PainTruthSection({ onCta }: PainTruthSectionProps) {
             Quero parar de recomeçar do zero
             <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </button>
-          <p className="mt-3 text-sm text-slate-500">Cancele quando quiser · PIX ou cartão</p>
         </div>
       </div>
     </section>

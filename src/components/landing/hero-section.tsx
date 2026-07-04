@@ -1,4 +1,4 @@
-import { Sparkles, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ChevronRight } from 'lucide-react';
 import { BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
 
 export function HeroSection() {
@@ -9,7 +9,7 @@ export function HeroSection() {
   const priceLabel = annualEquiv.toFixed(2).replace('.', ',');
 
   return (
-    <section className="relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-24">
+    <section className="relative overflow-hidden pt-24 pb-10 sm:pt-32 sm:pb-12">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-brand-green-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900" />
         <div className="absolute top-0 right-0 h-[700px] w-[700px] -translate-y-1/3 translate-x-1/4 rounded-full bg-brand-400/10 blur-3xl" />
@@ -29,9 +29,10 @@ export function HeroSection() {
           </h1>
 
           <p className="mb-8 text-lg leading-relaxed text-slate-600 sm:mb-10 sm:text-xl dark:text-slate-400">
-            Cadastre receitas, despesas fixas e orçamentos{' '}
-            <span className="font-semibold text-slate-900 dark:text-white">uma única vez.</span>{' '}
-            O Finzup repete tudo no mês seguinte — sem planilha, sem esforço, sem surpresa no fim do mês.
+            <span className="font-semibold text-slate-900 dark:text-white">Assistente de IA</span>{' '}
+            que responde suas dúvidas sobre o seu dinheiro.
+            <br />
+            Cadastre uma vez — o Finzup repete tudo no mês seguinte.
           </p>
 
           <a
@@ -41,23 +42,6 @@ export function HeroSection() {
             Começar agora
             <span className="btn-arrow-bg absolute right-3.5"><ChevronRight className="h-4 w-4" /></span>
           </a>
-
-          <p className="mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-brand-green-500" />
-              PIX ou cartão
-            </span>
-            <span className="text-slate-300 dark:text-slate-600">·</span>
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-brand-green-500" />
-              Cancele quando quiser
-            </span>
-            <span className="text-slate-300 dark:text-slate-600">·</span>
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-brand-green-500" />
-              Pagamento seguro via Asaas
-            </span>
-          </p>
         </div>
       </div>
     </section>

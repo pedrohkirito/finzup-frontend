@@ -2,6 +2,20 @@
 
 import * as Tabs from '@radix-ui/react-tabs';
 import { BarChart3, PiggyBank, RefreshCw, Target, TrendingUp, Check } from 'lucide-react';
+import { ReportIncomeCompositionChart } from '@/components/reports/report-income-composition-chart';
+import { CHART_COLORS } from '@/components/reports/chart-utils';
+
+const EXPENSE_DISTRIBUTION_DEMO = [
+  { label: 'Avulsas', value: 1200, pct: 28.6 },
+  { label: 'Fixas', value: 1800, pct: 42.9 },
+  { label: 'Parceladas', value: 550, pct: 13.1 },
+  { label: 'Assinaturas', value: 450, pct: 10.7 },
+  { label: 'Financiamentos', value: 200, pct: 4.8 },
+].map((item, index) => ({
+  ...item,
+  color: CHART_COLORS[index % CHART_COLORS.length],
+}));
+
 
 const tabs = [
   {
@@ -84,35 +98,11 @@ const tabs = [
       'Despesas fixas vs variáveis',
     ],
     visual: (
-      <div className="space-y-3">
-        <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
-          <p className="mb-3 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">Resumo de Junho</p>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            {[
-              { label: 'Receitas', value: 'R$ 8.500', color: 'text-brand-green-600' },
-              { label: 'Despesas', value: 'R$ 4.200', color: 'text-red-500' },
-              { label: 'Saldo', value: 'R$ 4.300', color: 'text-brand-500' },
-            ].map(({ label, value, color }) => (
-              <div key={label}>
-                <p className={`text-sm font-bold ${color}`}>{value}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="flex gap-2">
-          {[
-            { cat: 'Alimentação', pct: '30%', color: 'bg-brand-500' },
-            { cat: 'Transporte', pct: '15%', color: 'bg-sky-500' },
-            { cat: 'Outros', pct: '55%', color: 'bg-violet-500' },
-          ].map(({ cat, pct, color }) => (
-            <div key={cat} className="flex-1 rounded-lg bg-slate-50 p-2 text-center dark:bg-slate-800">
-              <div className={`mx-auto mb-1 h-2 w-8 rounded-full ${color}`} />
-              <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{pct}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{cat}</p>
-            </div>
-          ))}
-        </div>
+      <div>
+        <p className="mb-4 text-sm font-semibold text-slate-600 dark:text-slate-300">
+          Distribuição das despesas
+        </p>
+        <ReportIncomeCompositionChart items={EXPENSE_DISTRIBUTION_DEMO} />
       </div>
     ),
   },

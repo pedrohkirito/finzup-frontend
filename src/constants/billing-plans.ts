@@ -45,8 +45,8 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
 /** Parcelamento no cartão do plano anual (compra única, sem renovação). */
 export const ANNUAL_INSTALLMENT = {
   count: 12,
-  value: 29.9,
-  total: 358.8,
+  value: 27.9,
+  total: 334.8,
 } as const;
 
 export type CardChargeMode = 'recurrent' | 'installment';
