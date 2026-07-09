@@ -258,3 +258,81 @@ export interface MonthReport {
   alerts: { type: string; message: string; budgetId?: string }[];
   items: MonthSummary['items'];
 }
+
+export interface FinancialPlan {
+  id: string;
+  name: string;
+  description?: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlanIncomeItem {
+  id: string;
+  planId: string;
+  name: string;
+  amount: string | number;
+  sortOrder: number;
+}
+
+export interface PlanDonationItem {
+  id: string;
+  planId: string;
+  name: string;
+  amount: string | number;
+  sortOrder: number;
+}
+
+export interface PlanInvestmentItem {
+  id: string;
+  planId: string;
+  name: string;
+  amount: string | number;
+  notes?: string | null;
+  sortOrder: number;
+}
+
+export interface PlanBudgetAllocation {
+  templateId: string;
+  name: string;
+  defaultLimit: number;
+  estimatedAmount: number;
+}
+
+export type PlanExpenseType =
+  | 'fixed'
+  | 'installment'
+  | 'subscription'
+  | 'variable'
+  | 'financing'
+  | 'debt';
+
+export interface PlanExpenseItem {
+  id: string;
+  planId: string;
+  type: PlanExpenseType;
+  name: string;
+  amount: string | number;
+  notes?: string | null;
+  sortOrder: number;
+}
+
+export interface PlanSummary {
+  plan: { id: string; name: string; description?: string | null };
+  totalIncome: number;
+  totalExpenses: number;
+  totalDonations: number;
+  totalInvestments: number;
+  balance: number;
+  savingsRate: number;
+  expenseRatio: number;
+  investmentRatio: number;
+  expensesByType: {
+    type: PlanExpenseType;
+    total: number;
+    items: { id: string; name: string; amount: number; notes?: string | null; incomeShare: number }[];
+  }[];
+  investmentsByBox: { id: string; name: string; amount: number; notes?: string | null; incomeShare: number }[];
+  alerts: { type: string; message: string }[];
+}

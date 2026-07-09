@@ -5,6 +5,7 @@ export type PageKey =
   | 'investimentos'
   | 'doacoes'
   | 'orcamentos'
+  | 'planejamento'
   | 'relatorios'
   | 'configuracoes'
   | 'assistente'
@@ -45,6 +46,13 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Orçamentos',
     description: 'Página de orçamentos por categoria com limites mensais.',
     guidance: 'Priorize definir limites por categoria e identificar estouros.',
+  },
+  '/dashboard/planejamento': {
+    key: 'planejamento',
+    label: 'Planejamento',
+    description: 'Página de simulação com cenários de receitas, despesas, doações e investimentos.',
+    guidance:
+      'Priorize ajudar a montar e comparar cenários de planejamento. Não altera o mês real. Sugira nomes de cenários e distribuição por categoria.',
   },
   '/dashboard/investimentos': {
     key: 'investimentos',

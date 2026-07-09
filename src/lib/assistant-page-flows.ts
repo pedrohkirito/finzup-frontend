@@ -11,7 +11,7 @@ const REGISTRATION_PAGES: PageKey[] = [
   'orcamentos',
 ];
 
-const PAGES_WITH_OPENING_FLOW: PageKey[] = [...REGISTRATION_PAGES, 'relatorios', 'resumo', 'assistente'];
+const PAGES_WITH_OPENING_FLOW: PageKey[] = [...REGISTRATION_PAGES, 'planejamento', 'relatorios', 'resumo', 'assistente'];
 
 const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'resumo'];
 
@@ -116,6 +116,23 @@ export function getPageFlow(pathname: string, snapshot: PageSnapshot): PageFlow 
           label: 'Pedir sugestão à IA',
           message:
             'Sugira orçamentos ideais com base nas minhas receitas e despesas, incluindo lazer.',
+        },
+      };
+    case 'planejamento':
+      return {
+        ...base,
+        openingMessage: 'Quer ajuda para montar um cenário de planejamento financeiro?',
+        openingActions: [
+          yesSuggest(
+            'Sim, montar cenário',
+            'Me ajude a montar um cenário de planejamento com receitas, despesas por categoria, doações e caixinhas de investimento.',
+          ),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Comparar cenários',
+          message:
+            'Sugira dois cenários de planejamento (conservador e ideal) para eu comparar antes de decidir.',
         },
       };
     case 'receitas':
@@ -261,6 +278,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Pense em como organizar doações de forma equilibrada neste mês.`;
     case 'orcamentos':
       return `${avoidRepeat} Pense em limites por categoria que façam sentido para as minhas finanças.`;
+    case 'planejamento':
+      return `${avoidRepeat} Pense em cenários de planejamento, distribuição por categoria e caixinhas de investimento.`;
     case 'assistente':
       return `${avoidRepeat} Foque em dívidas, organização de gastos, investimentos ou distribuição de renda extra.`;
     default:
@@ -357,6 +376,8 @@ export function invalidateQueriesForPage(pageKey: PageKey): string[][] {
       return [['months'], ['donations']];
     case 'orcamentos':
       return [['months'], ['budgets'], ['budget-templates']];
+    case 'planejamento':
+      return [['plans']];
     default:
       return [['months']];
   }
