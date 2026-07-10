@@ -7,6 +7,7 @@ const REGISTRATION_PAGES: PageKey[] = [
   'receitas',
   'despesas',
   'investimentos',
+  'simulador_investimentos',
   'doacoes',
   'orcamentos',
 ];
@@ -41,12 +42,18 @@ export type PageFlow = {
   suggestionAction: { label: string; message: string } | null;
 };
 
-export function resolvePageKey(pathname: string): PageKey {
+export function resolvePageKey(pathname: string, investmentTab?: 'aportes' | 'simulador'): PageKey {
+  if (pathname.startsWith('/dashboard/investimentos') && investmentTab === 'simulador') {
+    return 'simulador_investimentos';
+  }
   return getAssistantPageContext(pathname).key;
 }
 
-function yesRegister(message: string): PageFlowAction {
-  return { label: 'Sim, quero ajuda', message, intent: 'register', variant: 'primary' };
+function yesRegister(labelOrMessage: string, message?: string): PageFlowAction {
+  if (message) {
+    return { label: labelOrMessage, message, intent: 'register', variant: 'primary' };
+  }
+  return { label: 'Sim, quero ajuda', message: labelOrMessage, intent: 'register', variant: 'primary' };
 }
 
 function noThanks(): PageFlowAction {
@@ -65,8 +72,12 @@ export function pageSupportsRegistration(pageKey: PageKey): boolean {
   return REGISTRATION_PAGES.includes(pageKey);
 }
 
-export function getPageFlow(pathname: string, snapshot: PageSnapshot): PageFlow | null {
-  const pageKey = resolvePageKey(pathname);
+export function getPageFlow(
+  pathname: string,
+  snapshot: PageSnapshot,
+  investmentTab?: 'aportes' | 'simulador',
+): PageFlow | null {
+  const pageKey = resolvePageKey(pathname, investmentTab);
   if (!PAGES_WITH_OPENING_FLOW.includes(pageKey)) return null;
 
   const ctx = getAssistantPageContext(pathname);
@@ -188,6 +199,27 @@ export function getPageFlow(pathname: string, snapshot: PageSnapshot): PageFlow 
           message: 'Me ajude a montar um plano de investimentos.',
         },
       };
+    case 'simulador_investimentos':
+      return {
+        ...base,
+        openingMessage: 'Quer planejar uma meta de investimento? Vou te fazer algumas perguntas para entender seu objetivo.',
+        openingActions: [
+          yesRegister(
+            'Sim, planejar meta',
+            'Quero planejar uma meta de investimento. Me faça perguntas para entender meu objetivo antes de montar o plano.',
+          ),
+          yesRegister(
+            'Ajustar simulação',
+            'Quero ajustar a simulação atual. Me pergunte o que ainda falta definir antes de recalcular.',
+          ),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Planejar meta com IA',
+          message:
+            'Quero planejar uma meta de investimento. Me faça perguntas uma de cada vez para entender meu objetivo antes de montar o plano.',
+        },
+      };
     case 'relatorios':
       return {
         ...base,
@@ -274,6 +306,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Pense em renda, planejamento e equilíbrio financeiro do mês.`;
     case 'investimentos':
       return `${avoidRepeat} Pense em metas, aportes e hábito de guardar dinheiro com base na minha renda.`;
+    case 'simulador_investimentos':
+      return `${avoidRepeat} Pense em metas de longo prazo, aportes mensais, rentabilidade educativa (mín. 12% a.a.) e tempo para atingir a meta.`;
     case 'doacoes':
       return `${avoidRepeat} Pense em como organizar doações de forma equilibrada neste mês.`;
     case 'orcamentos':
@@ -319,7 +353,7 @@ export function isAwaitingConfirmation(assistantContent: string): boolean {
   const lower = trimmed.toLowerCase();
 
   if (
-    /cadastrar o seguinte|vou cadastrar|posso cadastrar|posso registrar|deseja confirmar|quer confirmar|confirmar o cadastro|confirmar\?\s*$|confirma\?\s*$|confirme\b|confirma para|pode cadastrar|posso prosseguir|está correto|está certo|esta correto|esta certo|posso adicionar|deseja adicionar|quer adicionar|posso incluir|para eu registrar|para registrar/i.test(
+    /cadastrar o seguinte|vou cadastrar|posso cadastrar|posso registrar|deseja confirmar|quer confirmar|confirmar o cadastro|confirmar\?\s*$|confirma\?\s*$|confirme\b|confirma para|pode cadastrar|posso prosseguir|está correto|está certo|esta correto|esta certo|posso adicionar|deseja adicionar|quer adicionar|posso incluir|para eu registrar|para registrar|salvar a simula|salvar simula|deseja salvar|quer salvar/i.test(
       lower,
     )
   ) {
@@ -330,7 +364,7 @@ export function isAwaitingConfirmation(assistantContent: string): boolean {
     /\*\*resumo\*\*|^#{1,3}\s*resumo\b|^resumo\b/m.test(lower);
 
   const asksToProceed =
-    /cadastrar|registrar|registre|confirmar|confirme|confirma|prosseguir|registro|adicionar|incluir|correto|certo|aporte|aportes/i.test(
+    /cadastrar|registrar|registre|confirmar|confirme|confirma|prosseguir|registro|adicionar|incluir|correto|certo|salvar simula|salvar a simula/i.test(
       lower,
     );
 
@@ -348,7 +382,7 @@ export function isAwaitingConfirmation(assistantContent: string): boolean {
   if (
     hasListItem &&
     endsWithQuestion &&
-    /correto|certo|confirm|cadastr|registr|adicion|incluir|aporte/i.test(lower)
+    /correto|certo|confirm|cadastr|registr|adicion|incluir|salvar simula/i.test(lower)
   ) {
     return true;
   }
@@ -372,6 +406,8 @@ export function invalidateQueriesForPage(pageKey: PageKey): string[][] {
       ];
     case 'investimentos':
       return [['months'], ['investments'], ['investment-goal']];
+    case 'simulador_investimentos':
+      return [['investment-simulations']];
     case 'doacoes':
       return [['months'], ['donations']];
     case 'orcamentos':
@@ -387,6 +423,7 @@ export type AiExecutedAction = {
   type: string;
   name: string;
   amount?: number;
+  simulationId?: string;
 };
 
 const ACTION_QUERY_KEYS: Record<string, string[][]> = {
@@ -401,6 +438,8 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   create_investment: [['investments'], ['months']],
   set_investment_goal: [['investment-goal'], ['months']],
   create_budget: [['budgets'], ['budget-templates'], ['months']],
+  create_investment_simulation: [['investment-simulations']],
+  update_investment_simulation: [['investment-simulations']],
 };
 
 function dedupeQueryKeys(keys: string[][]): string[][] {
@@ -424,6 +463,15 @@ export function invalidateQueriesAfterAiActions(
   for (const action of actions) {
     const actionKeys = ACTION_QUERY_KEYS[action.type];
     if (actionKeys) keys.push(...actionKeys);
+  }
+  if (
+    actions.some(
+      (action) =>
+        action.type === 'create_investment_simulation' ||
+        action.type === 'update_investment_simulation',
+    )
+  ) {
+    keys.push(['investment-simulations']);
   }
   return dedupeQueryKeys(keys);
 }

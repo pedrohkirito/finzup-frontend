@@ -336,3 +336,54 @@ export interface PlanSummary {
   investmentsByBox: { id: string; name: string; amount: number; notes?: string | null; incomeShare: number }[];
   alerts: { type: string; message: string }[];
 }
+
+export interface InvestmentSimulation {
+  id: string;
+  userId: string;
+  name: string;
+  purpose: string | null;
+  initialAmount: number;
+  monthlyContribution: number;
+  annualYieldPercent: number;
+  annualContributionIncreasePercent: number;
+  annualAdditionalContribution: number;
+  goalAmount: number | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SimulationYearProjection {
+  year: number;
+  balance: number;
+  totalContributed: number;
+  interestEarned: number;
+  monthlyContribution: number;
+  monthlyInterest: number;
+}
+
+export interface SimulationMonthProjection {
+  month: number;
+  balance: number;
+  monthlyInterest: number;
+}
+
+export interface SimulationProjection {
+  yearly: SimulationYearProjection[];
+  monthly: SimulationMonthProjection[];
+  monthsToGoal: number | null;
+  goalReachedLabel: string | null;
+  finalBalance: number;
+  totalContributed: number;
+  totalInterest: number;
+}
+
+export interface InvestmentSimulationDetail {
+  simulation: InvestmentSimulation;
+  projection: SimulationProjection;
+}
+
+export interface SimulationSuggestions {
+  suggestedInitialAmount: number;
+  suggestedMonthlyContribution: number;
+}

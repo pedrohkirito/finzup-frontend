@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,8 +15,17 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
+import { InvestmentSimulatorTab } from '@/components/investimentos/investment-simulator-tab';
+import { InvestmentPageProvider, type InvestmentTab } from '@/providers/investment-page-provider';
+import {
+  getInvestmentPageBridgeState,
+  subscribeInvestmentPageBridgeState,
+  syncInvestmentPageBridgeState,
+} from '@/lib/investment-page-bridge';
 import { formatCurrency } from '@/lib/utils';
-import type { InvestmentEntry } from '@/types';
+import type { InvestmentSimulation } from '@/types';
 import { Plus, Trash2 } from 'lucide-react';
 
 const goalSchema = z.object({ targetAmount: z.coerce.number().nonnegative() });
@@ -25,7 +35,7 @@ const entrySchema = z.object({
   notes: z.string().optional(),
 });
 
-export default function InvestimentosPage() {
+function InvestmentAportesTab() {
   const { selectedMonthId } = useMonthStore();
   const { data: months } = useMonths();
   const selectedMonth = months?.find((m) => m.id === selectedMonthId);
@@ -41,7 +51,9 @@ export default function InvestimentosPage() {
 
   const { data: entries } = useQuery({
     queryKey: ['investments', selectedMonthId],
-    queryFn: () => api.get<InvestmentEntry[]>(`/months/${selectedMonthId}/investments`),
+    queryFn: () => api.get<{ id: string; name: string; amount: string | number; notes?: string | null }[]>(
+      `/months/${selectedMonthId}/investments`,
+    ),
     enabled: !!selectedMonthId,
   });
 
@@ -60,32 +72,29 @@ export default function InvestimentosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold sm:text-2xl">Investimentos</h1>
-        <p className="text-sm text-slate-500">Meta mensal e aportes realizados</p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Meta do mês</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {isMonthOpen ? (
-          <form
-            onSubmit={goalForm.handleSubmit(async (data) => {
-              await api.put(`/months/${selectedMonthId}/investments/goal`, data);
-              await queryClient.invalidateQueries({ queryKey: ['investment-goal', selectedMonthId] });
-              await queryClient.invalidateQueries({ queryKey: ['months'] });
-            })}
-            className="flex flex-col gap-2 sm:flex-row"
-          >
-            <FormCurrencyInput
-              control={goalForm.control}
-              name="targetAmount"
-              placeholder="Quanto quer guardar este mês?"
-            />
-            <Button type="submit" className="w-full sm:w-auto sm:shrink-0">Salvar meta</Button>
-          </form>
+            <form
+              onSubmit={goalForm.handleSubmit(async (data) => {
+                await api.put(`/months/${selectedMonthId}/investments/goal`, data);
+                await queryClient.invalidateQueries({ queryKey: ['investment-goal', selectedMonthId] });
+                await queryClient.invalidateQueries({ queryKey: ['months'] });
+              })}
+              className="flex flex-col gap-2 sm:flex-row"
+            >
+              <FormCurrencyInput
+                control={goalForm.control}
+                name="targetAmount"
+                placeholder="Quanto quer guardar este mês?"
+              />
+              <Button type="submit" className="w-full sm:w-auto sm:shrink-0">
+                Salvar meta
+              </Button>
+            </form>
           ) : (
             <p className="text-sm text-slate-500">Meta: {formatCurrency(target)}</p>
           )}
@@ -103,12 +112,16 @@ export default function InvestimentosPage() {
         <h2 className="text-lg font-semibold">Aportes do mês</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           {isMonthOpen && (
-          <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Novo aporte</Button>
-          </DialogTrigger>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Plus className="h-4 w-4" /> Novo aporte
+              </Button>
+            </DialogTrigger>
           )}
           <DialogContent>
-            <DialogHeader><DialogTitle>Novo investimento</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Novo investimento</DialogTitle>
+            </DialogHeader>
             <form
               onSubmit={entryForm.handleSubmit(async (data) => {
                 await api.post(`/months/${selectedMonthId}/investments`, data);
@@ -118,10 +131,21 @@ export default function InvestimentosPage() {
               })}
               className="space-y-4"
             >
-              <div className="space-y-2"><Label>Nome</Label><Input placeholder="Ex: Tesouro Direto" {...entryForm.register('name')} /></div>
-              <div className="space-y-2"><Label>Valor</Label><FormCurrencyInput control={entryForm.control} name="amount" placeholder="0,00" /></div>
-              <div className="space-y-2"><Label>Notas (opcional)</Label><Input {...entryForm.register('notes')} /></div>
-              <Button type="submit" className="w-full">Salvar</Button>
+              <div className="space-y-2">
+                <Label>Nome</Label>
+                <Input placeholder="Ex: Tesouro Direto" {...entryForm.register('name')} />
+              </div>
+              <div className="space-y-2">
+                <Label>Valor</Label>
+                <FormCurrencyInput control={entryForm.control} name="amount" placeholder="0,00" />
+              </div>
+              <div className="space-y-2">
+                <Label>Notas (opcional)</Label>
+                <Input {...entryForm.register('notes')} />
+              </div>
+              <Button type="submit" className="w-full">
+                Salvar
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -136,14 +160,20 @@ export default function InvestimentosPage() {
                 {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
               </div>
               <div className="flex items-center justify-end gap-2">
-                <span className="font-semibold text-emerald-600">{formatCurrency(Number(entry.amount))}</span>
+                <span className="font-semibold text-emerald-600">
+                  {formatCurrency(Number(entry.amount))}
+                </span>
                 {isMonthOpen && (
-                <Button variant="ghost" size="icon" onClick={async () => {
-                  await api.delete(`/months/${selectedMonthId}/investments/${entry.id}`);
-                  await queryClient.invalidateQueries();
-                }}>
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={async () => {
+                      await api.delete(`/months/${selectedMonthId}/investments/${entry.id}`);
+                      await queryClient.invalidateQueries();
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
                 )}
               </div>
             </CardContent>
@@ -151,5 +181,107 @@ export default function InvestimentosPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function InvestimentosPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<InvestmentTab>('aportes');
+  const { data: simulations } = useQuery({
+    queryKey: ['investment-simulations'],
+    queryFn: () => api.get<InvestmentSimulation[]>('/investment-simulations'),
+  });
+  const [selectedSimulationId, setSelectedSimulationId] = useState<string | null>(null);
+  const handleSelectSimulation = useCallback((id: string) => {
+    const nextId = id || null;
+    setSelectedSimulationId(nextId);
+    syncInvestmentPageBridgeState({ selectedSimulationId: nextId });
+  }, []);
+
+  const handleTabChange = useCallback(
+    (tab: InvestmentTab) => {
+      setActiveTab(tab);
+      syncInvestmentPageBridgeState({ activeTab: tab });
+
+      const params = new URLSearchParams(searchParams.toString());
+      if (tab === 'simulador') {
+        params.set('tab', 'simulador');
+      } else {
+        params.delete('tab');
+        params.delete('simulation');
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'simulador') {
+      setActiveTab('simulador');
+      syncInvestmentPageBridgeState({ activeTab: 'simulador' });
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const simulationFromUrl = searchParams.get('simulation');
+    if (simulationFromUrl) {
+      setSelectedSimulationId(simulationFromUrl);
+      syncInvestmentPageBridgeState({ selectedSimulationId: simulationFromUrl });
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    return subscribeInvestmentPageBridgeState(() => {
+      const bridge = getInvestmentPageBridgeState();
+      setActiveTab(bridge.activeTab);
+      if (bridge.selectedSimulationId) {
+        setSelectedSimulationId(bridge.selectedSimulationId);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (simulations?.length && !selectedSimulationId) {
+      setSelectedSimulationId(simulations[0].id);
+    }
+  }, [simulations, selectedSimulationId]);
+
+  return (
+    <InvestmentPageProvider activeTab={activeTab} selectedSimulationId={selectedSimulationId}>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-bold sm:text-2xl">Investimentos</h1>
+          <p className="text-sm text-slate-500">
+            Aportes do mês e simulações de longo prazo
+          </p>
+        </div>
+
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => handleTabChange(v as InvestmentTab)}
+          className="w-full"
+        >
+          <TabsList>
+            <TabsTrigger value="aportes">Aportes</TabsTrigger>
+            <TabsTrigger value="simulador" className="gap-2">
+              Simulador
+              <NewFeatureBadge />
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="aportes">
+            <InvestmentAportesTab />
+          </TabsContent>
+          <TabsContent value="simulador">
+            <InvestmentSimulatorTab
+              selectedSimulationId={selectedSimulationId}
+              onSelectSimulation={handleSelectSimulation}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </InvestmentPageProvider>
   );
 }

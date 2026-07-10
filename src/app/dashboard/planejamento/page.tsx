@@ -15,6 +15,7 @@ import {
   INVESTMENT_CHART_COLOR,
 } from '@/components/planejamento/plan-expense-config';
 import { CalendarRange } from 'lucide-react';
+import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import type {
   FinancialPlan,
   PlanDonationItem,
@@ -115,7 +116,10 @@ export default function PlanejamentoPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-bold sm:text-2xl">Planejamento</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-xl font-bold sm:text-2xl">Planejamento</h1>
+          <NewFeatureBadge />
+        </div>
         <p className="text-sm text-slate-500">Simule como distribuir sua renda antes de aplicar no mês</p>
       </div>
 

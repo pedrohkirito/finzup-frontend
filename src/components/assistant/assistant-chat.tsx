@@ -21,7 +21,14 @@ import {
   type PageFlow,
   type PageSnapshot,
 } from '@/lib/assistant-page-flows';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useInvestmentPageOptional } from '@/providers/investment-page-provider';
+import {
+  getInvestmentPageBridgeState,
+  resolveInvestmentTabFromUrl,
+  subscribeInvestmentPageBridgeState,
+  syncInvestmentPageBridgeState,
+} from '@/lib/investment-page-bridge';
 import {
   getAssistantChatSessionKey,
   readAssistantChatSession,
@@ -45,18 +52,36 @@ export function AssistantChat({
   onCreditsChange,
 }: AssistantChatProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const investmentPage = useInvestmentPageOptional();
+  const [investmentBridge, setInvestmentBridge] = useState(getInvestmentPageBridgeState);
   const { selectedMonthId } = useMonthStore();
   const { data: summary, isLoading: summaryLoading } = useMonthSummary(selectedMonthId);
   const queryClient = useQueryClient();
   const { data: user } = useAuth();
 
+  const investmentTab =
+    resolveInvestmentTabFromUrl(pathname, searchParams.get('tab')) ??
+    investmentBridge.activeTab ??
+    investmentPage.activeTab;
+  const selectedSimulationId =
+    investmentBridge.selectedSimulationId ?? investmentPage.selectedSimulationId;
+
+  useEffect(() => subscribeInvestmentPageBridgeState(() => {
+    setInvestmentBridge(getInvestmentPageBridgeState());
+  }), []);
+
   const snapshot: PageSnapshot | null = summary
     ? buildSnapshotFromSummary(summary)
     : null;
   const pageFlow: PageFlow | null =
-    snapshot !== null ? getPageFlow(pathname, snapshot) : null;
-  const pageKey = resolvePageKey(pathname);
-  const screen = buildPageContextPayload(pathname);
+    snapshot !== null
+      ? getPageFlow(pathname, snapshot, investmentTab)
+      : null;
+  const pageKey = resolvePageKey(pathname, investmentTab);
+  const screen = buildPageContextPayload(pathname, {
+    pageKey: pageKey === 'simulador_investimentos' ? 'simulador_investimentos' : undefined,
+  });
   const sessionKey = getAssistantChatSessionKey(pathname, selectedMonthId);
 
   const [messages, setMessages] = useState<ChatMessage[]>(
@@ -137,7 +162,7 @@ export function AssistantChat({
       return;
     }
 
-    if (!selectedMonthId && !['configuracoes', 'generic'].includes(pageKey)) {
+    if (!selectedMonthId && !['configuracoes', 'generic', 'simulador_investimentos'].includes(pageKey)) {
       setError('Selecione um mês para continuar.');
       return;
     }
@@ -153,7 +178,7 @@ export function AssistantChat({
         creditsRemaining: number;
         creditsDebited: number;
         awaitingConfirmation?: boolean;
-        actionsExecuted?: { type: string; name: string; amount?: number }[];
+        actionsExecuted?: { type: string; name: string; amount?: number; simulationId?: string }[];
       }>('/ai/chat', {
         message: text,
         history: currentMessages,
@@ -161,6 +186,7 @@ export function AssistantChat({
         pageLabel: screen.pageLabel,
         pageKey: screen.pageKey,
         monthId: selectedMonthId ?? undefined,
+        simulationId: selectedSimulationId ?? undefined,
         pageSnapshot: snapshot ?? undefined,
         ...(flowIntent ? { flowIntent } : {}),
       });
@@ -171,6 +197,19 @@ export function AssistantChat({
       onCreditsChange?.(result.creditsRemaining);
 
       if (result.actionsExecuted?.length) {
+        const createdSimulation = result.actionsExecuted.find(
+          (action) =>
+            action.type === 'create_investment_simulation' ||
+            action.type === 'update_investment_simulation',
+        );
+
+        if (createdSimulation?.simulationId) {
+          syncInvestmentPageBridgeState({
+            activeTab: 'simulador',
+            selectedSimulationId: createdSimulation.simulationId,
+          });
+        }
+
         for (const key of invalidateQueriesAfterAiActions(pageKey, result.actionsExecuted)) {
           await queryClient.invalidateQueries({ queryKey: key, refetchType: 'all' });
         }
@@ -209,7 +248,9 @@ export function AssistantChat({
     const userMsg: ChatMessage = { role: 'user', content: label };
     const prevMessages = messages;
     setMessages([...prevMessages, userMsg]);
-    await sendToApi(pageFlow.suggestionAction.message, prevMessages, 'suggest');
+    const intent: FlowIntent =
+      pageKey === 'simulador_investimentos' ? 'register' : 'suggest';
+    await sendToApi(pageFlow.suggestionAction.message, prevMessages, intent);
   };
 
   const handleAnotherSuggestion = async () => {

@@ -3,6 +3,7 @@ export type PageKey =
   | 'receitas'
   | 'despesas'
   | 'investimentos'
+  | 'simulador_investimentos'
   | 'doacoes'
   | 'orcamentos'
   | 'planejamento'
@@ -60,6 +61,13 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     description: 'Página de meta mensal e aportes de investimento.',
     guidance: 'Priorize meta mensal e registro de aportes. Não recomende ativos específicos.',
   },
+  '/dashboard/investimentos/simulador': {
+    key: 'simulador_investimentos',
+    label: 'Simulador de investimentos',
+    description: 'Simulação de patrimônio com juros compostos, metas e projeção em 30 anos.',
+    guidance:
+      'Intake primeiro: uma pergunta por vez (finalidade, meta/prazo, patrimônio, aportes). Plano com números só após intake completo. Salvar simulação após confirmação. Sem aportes do mês.',
+  },
   '/dashboard/doacoes': {
     key: 'doacoes',
     label: 'Doações',
@@ -107,15 +115,32 @@ export function getAssistantPageContext(pathname: string): AssistantPageContext 
   return match ? match[1] : DEFAULT_CONTEXT;
 }
 
-export function buildPageContextPayload(pathname: string): {
+export function buildPageContextPayload(
+  pathname: string,
+  overrides?: { pageKey?: PageKey },
+): {
   pageKey: PageKey;
   pageLabel: string;
   pageContext: string;
 } {
   const ctx = getAssistantPageContext(pathname);
+  const pageKey = overrides?.pageKey ?? ctx.key;
+  const label =
+    pageKey === 'simulador_investimentos' && ctx.key === 'investimentos'
+      ? 'Simulador de investimentos'
+      : ctx.label;
+  const description =
+    pageKey === 'simulador_investimentos' && ctx.key === 'investimentos'
+      ? 'Simulação de patrimônio com juros compostos, metas e projeção em 30 anos.'
+      : ctx.description;
+  const guidance =
+    pageKey === 'simulador_investimentos' && ctx.key === 'investimentos'
+      ? 'Intake primeiro: uma pergunta por vez. Plano com números só após entender finalidade, meta, prazo e aportes. Salvar simulação após confirmação.'
+      : ctx.guidance;
+
   return {
-    pageKey: ctx.key,
-    pageLabel: ctx.label,
-    pageContext: `${ctx.description}\n\nComo ajudar nesta tela: ${ctx.guidance}`,
+    pageKey,
+    pageLabel: label,
+    pageContext: `${description}\n\nComo ajudar nesta tela: ${guidance}`,
   };
 }

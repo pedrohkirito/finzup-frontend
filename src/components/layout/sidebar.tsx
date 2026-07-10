@@ -21,6 +21,7 @@ import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SupportLink } from '@/components/layout/support-link';
+import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -30,7 +31,7 @@ const links = [
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
-  { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange },
+  { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange, isNew: true },
   { href: '/dashboard/investimentos', label: 'Investimentos', icon: PiggyBank },
   { href: '/dashboard/doacoes', label: 'Doações', icon: Heart },
   { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },
@@ -51,7 +52,7 @@ export function Sidebar() {
 
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-1 pr-2">
-            {links.map(({ href, label, icon: Icon }) => (
+            {links.map(({ href, label, icon: Icon, isNew }) => (
               <Link
                 key={href}
                 href={href}
@@ -62,8 +63,11 @@ export function Sidebar() {
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900',
                 )}
               >
-                <Icon className="h-4 w-4" />
-                {label}
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="flex min-w-0 flex-1 items-center gap-2">
+                  <span className="truncate">{label}</span>
+                  {isNew && <NewFeatureBadge />}
+                </span>
               </Link>
             ))}
           </nav>

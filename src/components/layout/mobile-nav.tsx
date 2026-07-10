@@ -22,6 +22,7 @@ import {
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SupportLink } from '@/components/layout/support-link';
+import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
@@ -35,7 +36,7 @@ const primaryLinks = [
 
 const moreLinks = [
   { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
-  { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento' },
+  { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento', isNew: true },
   { href: '/dashboard/assistente', icon: Sparkles, label: 'Assistente IA (tela cheia)' },
   { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },
@@ -149,7 +150,7 @@ export function MobileNav() {
             <DialogTitle>Mais opções</DialogTitle>
           </DialogHeader>
           <div className="space-y-1">
-            {moreLinks.map(({ href, icon: Icon, label }) => {
+            {moreLinks.map(({ href, icon: Icon, label, isNew }) => {
               const active = isNavLinkActive(pathname, href);
               return (
                 <Link
@@ -163,8 +164,11 @@ export function MobileNav() {
                       : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50',
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  {label}
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="flex min-w-0 flex-1 items-center gap-2">
+                    <span className="truncate">{label}</span>
+                    {isNew && <NewFeatureBadge />}
+                  </span>
                 </Link>
               );
             })}
