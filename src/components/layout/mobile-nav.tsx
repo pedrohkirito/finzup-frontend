@@ -18,6 +18,7 @@ import {
   BarChart3,
   Sparkles,
   CalendarRange,
+  Footprints,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 import { useAssistant } from '@/providers/assistant-provider';
+import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
 const primaryLinks = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Resumo' },
@@ -35,8 +37,11 @@ const primaryLinks = [
 ];
 
 const moreLinks = [
+  ...(BABY_STEPS_ENABLED
+    ? [{ href: '/dashboard/metodo', icon: Footprints, label: 'Método', isNew: true }]
+    : []),
   { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
-  { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento', isNew: true },
+  { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento' },
   { href: '/dashboard/assistente', icon: Sparkles, label: 'Assistente IA (tela cheia)' },
   { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },

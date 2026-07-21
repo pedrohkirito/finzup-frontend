@@ -20,6 +20,7 @@ import { SortableList } from '@/components/despesas/sortable-list';
 import { formatCurrency } from '@/lib/utils';
 import type { IncomeEntry } from '@/types';
 import { Plus, TrendingUp, RefreshCw } from 'lucide-react';
+import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatório'),
@@ -152,6 +153,8 @@ export default function ReceitasPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <BabyStepPageHint pageKey="receitas" />
 
       {/* Card de total */}
       <Card className="border-emerald-100 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30">

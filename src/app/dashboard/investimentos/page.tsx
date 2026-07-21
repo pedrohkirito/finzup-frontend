@@ -21,12 +21,18 @@ import { InvestmentSimulatorTab } from '@/components/investimentos/investment-si
 import { InvestmentPageProvider, type InvestmentTab } from '@/providers/investment-page-provider';
 import {
   getInvestmentPageBridgeState,
+  resolveInvestmentTabFromUrl,
   subscribeInvestmentPageBridgeState,
   syncInvestmentPageBridgeState,
 } from '@/lib/investment-page-bridge';
 import { formatCurrency } from '@/lib/utils';
 import type { InvestmentSimulation } from '@/types';
 import { Plus, Trash2 } from 'lucide-react';
+import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
+import { EmergencyFundCard } from '@/components/baby-steps/emergency-fund-card';
+import { HouseDownPaymentCard } from '@/components/baby-steps/house-down-payment-card';
+import { useBabySteps } from '@/hooks/use-baby-steps';
+import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
 const goalSchema = z.object({ targetAmount: z.coerce.number().nonnegative() });
 const entrySchema = z.object({
@@ -188,7 +194,9 @@ export default function InvestimentosPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<InvestmentTab>('aportes');
+  const { data: babySteps } = useBabySteps();
+  const tabFromUrl = resolveInvestmentTabFromUrl(pathname, searchParams.get('tab'));
+  const [activeTab, setActiveTab] = useState<InvestmentTab>(tabFromUrl ?? 'aportes');
   const { data: simulations } = useQuery({
     queryKey: ['investment-simulations'],
     queryFn: () => api.get<InvestmentSimulation[]>('/investment-simulations'),
@@ -206,11 +214,14 @@ export default function InvestimentosPage() {
       syncInvestmentPageBridgeState({ activeTab: tab });
 
       const params = new URLSearchParams(searchParams.toString());
-      if (tab === 'simulador') {
-        params.set('tab', 'simulador');
-      } else {
+      if (tab === 'aportes') {
         params.delete('tab');
         params.delete('simulation');
+      } else {
+        params.set('tab', tab);
+        if (tab !== 'simulador') {
+          params.delete('simulation');
+        }
       }
       const query = params.toString();
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
@@ -219,11 +230,15 @@ export default function InvestimentosPage() {
   );
 
   useEffect(() => {
-    if (searchParams.get('tab') === 'simulador') {
-      setActiveTab('simulador');
-      syncInvestmentPageBridgeState({ activeTab: 'simulador' });
+    const tab = resolveInvestmentTabFromUrl(pathname, searchParams.get('tab'));
+    if (tab) {
+      setActiveTab(tab);
+      syncInvestmentPageBridgeState({ activeTab: tab });
+    } else if (!searchParams.get('tab')) {
+      setActiveTab('aportes');
+      syncInvestmentPageBridgeState({ activeTab: 'aportes' });
     }
-  }, [searchParams]);
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     const simulationFromUrl = searchParams.get('simulation');
@@ -255,26 +270,54 @@ export default function InvestimentosPage() {
         <div>
           <h1 className="text-xl font-bold sm:text-2xl">Investimentos</h1>
           <p className="text-sm text-slate-500">
-            Aportes do mês e simulações de longo prazo
+            {BABY_STEPS_ENABLED
+              ? 'Reserva, aportes, entrada da casa e simulações'
+              : 'Aportes do mês e simulações de longo prazo'}
           </p>
         </div>
+
+        <BabyStepPageHint pageKey="investimentos" />
 
         <Tabs
           value={activeTab}
           onValueChange={(v) => handleTabChange(v as InvestmentTab)}
           className="w-full"
         >
-          <TabsList>
+          <TabsList className="flex h-auto flex-wrap gap-1">
+            {BABY_STEPS_ENABLED && <TabsTrigger value="reserva">Reserva</TabsTrigger>}
             <TabsTrigger value="aportes">Aportes</TabsTrigger>
+            {BABY_STEPS_ENABLED && <TabsTrigger value="casa">Casa</TabsTrigger>}
             <TabsTrigger value="simulador" className="gap-2">
               Simulador
               <NewFeatureBadge />
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="aportes">
+          {BABY_STEPS_ENABLED && (
+            <TabsContent value="reserva" className="mt-4">
+              {babySteps ? (
+                <EmergencyFundCard state={babySteps} />
+              ) : (
+                <div className="flex h-32 items-center justify-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
+                </div>
+              )}
+            </TabsContent>
+          )}
+          <TabsContent value="aportes" className="mt-4">
             <InvestmentAportesTab />
           </TabsContent>
-          <TabsContent value="simulador">
+          {BABY_STEPS_ENABLED && (
+            <TabsContent value="casa" className="mt-4">
+              {babySteps ? (
+                <HouseDownPaymentCard state={babySteps} />
+              ) : (
+                <div className="flex h-32 items-center justify-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
+                </div>
+              )}
+            </TabsContent>
+          )}
+          <TabsContent value="simulador" className="mt-4">
             <InvestmentSimulatorTab
               selectedSimulationId={selectedSimulationId}
               onSelectSimulation={handleSelectSimulation}

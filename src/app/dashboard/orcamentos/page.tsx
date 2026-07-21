@@ -25,6 +25,7 @@ import {
   RotateCcw, Save,
 } from 'lucide-react';
 import { CurrencyInput } from '@/components/ui/currency-input';
+import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 
 const templateSchema = z.object({
   name: z.string().min(1, 'Informe um nome'),
@@ -304,6 +305,8 @@ export default function OrcamentosPage() {
           Novo orçamento
         </Button>
       </div>
+
+      <BabyStepPageHint pageKey="orcamentos" />
 
       {/* Empty state */}
       {!budgets?.length && (

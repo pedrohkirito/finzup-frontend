@@ -22,6 +22,7 @@ import { SortableList } from '@/components/despesas/sortable-list';
 import { formatCurrency } from '@/lib/utils';
 import type { DonationEntry, PaymentMethod, BudgetTemplate } from '@/types';
 import { Heart, Plus, RefreshCw } from 'lucide-react';
+import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 
 const entrySchema = z.object({
   name: z.string().min(1),
@@ -169,6 +170,8 @@ export default function DoacoesPage() {
         <h1 className="text-xl font-bold sm:text-2xl">Doações</h1>
         <p className="text-sm text-slate-500">Registre suas contribuições e doações do mês</p>
       </div>
+
+      <BabyStepPageHint pageKey="doacoes" />
 
       <Card className="border-sky-100 bg-sky-50 dark:border-sky-900/40 dark:bg-sky-950/30">
         <CardContent className="flex items-center gap-4 p-5">

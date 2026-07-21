@@ -15,6 +15,7 @@ import {
   Target,
   BarChart3,
   CalendarRange,
+  Footprints,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -24,14 +25,18 @@ import { SupportLink } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
+import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
 const links = [
   { href: '/dashboard', label: 'Resumo', icon: LayoutDashboard },
+  ...(BABY_STEPS_ENABLED
+    ? [{ href: '/dashboard/metodo', label: 'Método', icon: Footprints, isNew: true }]
+    : []),
   { href: '/dashboard/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
-  { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange, isNew: true },
+  { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange },
   { href: '/dashboard/investimentos', label: 'Investimentos', icon: PiggyBank },
   { href: '/dashboard/doacoes', label: 'Doações', icon: Heart },
   { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },

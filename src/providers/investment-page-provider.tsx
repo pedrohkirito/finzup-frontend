@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect } from 'react';
 import { syncInvestmentPageBridgeState } from '@/lib/investment-page-bridge';
 
-export type InvestmentTab = 'aportes' | 'simulador';
+export type InvestmentTab = 'reserva' | 'aportes' | 'casa' | 'simulador';
 
 type InvestmentPageContextValue = {
   activeTab: InvestmentTab;

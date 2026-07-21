@@ -6,17 +6,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAiSuggestionActions, useAiSuggestions } from '@/hooks/use-ai-suggestions';
 import { useAssistant } from '@/providers/assistant-provider';
+import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
+
+const METHOD_TRIGGER_KEYS = new Set([
+  'onboarding_discover_method',
+  'onboarding_welcome_plan',
+]);
 
 export function AiSuggestionsPanel() {
   const { data: suggestions, isLoading } = useAiSuggestions();
   const { dismiss, act } = useAiSuggestionActions();
   const { openAssistant } = useAssistant();
+  const visibleSuggestions = BABY_STEPS_ENABLED
+    ? suggestions
+    : suggestions?.filter(
+        (suggestion) =>
+          !suggestion.triggerKey.startsWith('baby_step_') &&
+          !METHOD_TRIGGER_KEYS.has(suggestion.triggerKey),
+      );
 
-  if (isLoading || !suggestions?.length) return null;
+  if (isLoading || !visibleSuggestions?.length) return null;
 
   return (
     <div className="space-y-3">
-      {suggestions.map((suggestion) => (
+      {visibleSuggestions.map((suggestion) => (
         <Card
           key={suggestion.id}
           className={

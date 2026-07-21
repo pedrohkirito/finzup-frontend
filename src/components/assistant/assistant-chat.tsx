@@ -11,6 +11,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { useMonthStore } from '@/hooks/use-month';
 import { useMonthSummary } from '@/hooks/use-month-summary';
 import { buildPageContextPayload } from '@/lib/assistant-page-context';
+import { getBabyStepPageGuidance } from '@/lib/baby-step-page-guidance';
+import { useBabySteps } from '@/hooks/use-baby-steps';
 import {
   buildSnapshotFromSummary,
   buildAnotherSuggestionMessage,
@@ -57,6 +59,7 @@ export function AssistantChat({
   const [investmentBridge, setInvestmentBridge] = useState(getInvestmentPageBridgeState);
   const { selectedMonthId } = useMonthStore();
   const { data: summary, isLoading: summaryLoading } = useMonthSummary(selectedMonthId);
+  const { data: babySteps } = useBabySteps();
   const queryClient = useQueryClient();
   const { data: user } = useAuth();
 
@@ -81,7 +84,15 @@ export function AssistantChat({
   const pageKey = resolvePageKey(pathname, investmentTab);
   const screen = buildPageContextPayload(pathname, {
     pageKey: pageKey === 'simulador_investimentos' ? 'simulador_investimentos' : undefined,
+    babyStep: babySteps?.currentStep,
   });
+  if (babySteps?.currentStep) {
+    const stepGuidance = getBabyStepPageGuidance(screen.pageKey, babySteps.currentStep);
+    if (stepGuidance) {
+      screen.pageContext += `\n\nFoco do Baby Step ${babySteps.currentStep} nesta tela: ${stepGuidance}`;
+      screen.pageContext += `\nPróxima ação do método: ${babySteps.nextAction.label}`;
+    }
+  }
   const sessionKey = getAssistantChatSessionKey(pathname, selectedMonthId);
 
   const [messages, setMessages] = useState<ChatMessage[]>(

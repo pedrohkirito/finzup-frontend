@@ -16,6 +16,7 @@ import {
 } from '@/components/planejamento/plan-expense-config';
 import { CalendarRange } from 'lucide-react';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
+import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 import type {
   FinancialPlan,
   PlanDonationItem,
@@ -122,6 +123,8 @@ export default function PlanejamentoPage() {
         </div>
         <p className="text-sm text-slate-500">Simule como distribuir sua renda antes de aplicar no mês</p>
       </div>
+
+      <BabyStepPageHint pageKey="planejamento" />
 
       <PlanSelector
         plans={plans ?? []}

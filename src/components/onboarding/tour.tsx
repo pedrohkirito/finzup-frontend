@@ -4,26 +4,37 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
 const steps = [
   {
     title: 'Cadastre suas receitas',
-    description: 'Adicione salário, freelances e outras fontes de renda. Marque "Repetir todo mês" para copiar automaticamente.',
+    description:
+      'Adicione salário, freelances e outras fontes de renda. Marque "Repetir todo mês" para copiar automaticamente.',
     href: '/dashboard/receitas',
     cta: 'Ir para Receitas',
   },
   {
-    title: 'Ajuste despesas fixas',
-    description: 'Já criamos sugestões como aluguel, luz e internet. Preencha os valores que se aplicam a você.',
+    title: 'Ajuste suas despesas',
+    description:
+      'Preencha despesas fixas e cadastre parcelamentos para ter uma visão real do seu mês.',
     href: '/dashboard/despesas',
     cta: 'Ir para Despesas',
   },
-  {
-    title: 'Defina sua meta de investimento',
-    description: 'Quanto você quer guardar este mês? Acompanhe o progresso no resumo.',
-    href: '/dashboard/investimentos',
-    cta: 'Ir para Investimentos',
-  },
+  ...(BABY_STEPS_ENABLED
+    ? [{
+        title: 'Descubra seu Baby Step',
+        description:
+          'Informe sua reserva e veja em qual passo do Método Finzup você está — e qual a próxima ação.',
+        href: '/dashboard/metodo',
+        cta: 'Ver o Método',
+      }]
+    : [{
+        title: 'Defina sua meta de investimento',
+        description: 'Quanto você quer guardar este mês? Acompanhe o progresso no resumo.',
+        href: '/dashboard/investimentos',
+        cta: 'Ir para Investimentos',
+      }]),
 ];
 
 export function OnboardingTour() {

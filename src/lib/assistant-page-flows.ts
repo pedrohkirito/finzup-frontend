@@ -1,4 +1,5 @@
 import { getAssistantPageContext, type PageKey } from '@/lib/assistant-page-context';
+import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
 export type { PageKey };
 export type FlowIntent = 'register' | 'suggest';
@@ -12,9 +13,16 @@ const REGISTRATION_PAGES: PageKey[] = [
   'orcamentos',
 ];
 
-const PAGES_WITH_OPENING_FLOW: PageKey[] = [...REGISTRATION_PAGES, 'planejamento', 'relatorios', 'resumo', 'assistente'];
+const PAGES_WITH_OPENING_FLOW: PageKey[] = [
+  ...REGISTRATION_PAGES,
+  'planejamento',
+  'relatorios',
+  'resumo',
+  'assistente',
+  'metodo',
+];
 
-const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'resumo'];
+const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'resumo', 'metodo'];
 
 export type PageSnapshot = {
   incomeCount: number;
@@ -42,7 +50,7 @@ export type PageFlow = {
   suggestionAction: { label: string; message: string } | null;
 };
 
-export function resolvePageKey(pathname: string, investmentTab?: 'aportes' | 'simulador'): PageKey {
+export function resolvePageKey(pathname: string, investmentTab?: string): PageKey {
   if (pathname.startsWith('/dashboard/investimentos') && investmentTab === 'simulador') {
     return 'simulador_investimentos';
   }
@@ -75,7 +83,7 @@ export function pageSupportsRegistration(pageKey: PageKey): boolean {
 export function getPageFlow(
   pathname: string,
   snapshot: PageSnapshot,
-  investmentTab?: 'aportes' | 'simulador',
+  investmentTab?: string,
 ): PageFlow | null {
   const pageKey = resolvePageKey(pathname, investmentTab);
   if (!PAGES_WITH_OPENING_FLOW.includes(pageKey)) return null;
@@ -241,23 +249,41 @@ export function getPageFlow(
     case 'resumo':
       return {
         ...base,
-        openingMessage:
-          'Posso te ajudar a melhorar suas finanças: quitar dívidas, organizar gastos ou investir. O que você quer trabalhar?',
-        openingActions: [
-          yesSuggest(
-            'Quitar dívidas',
-            'Quero um plano para quitar minhas dívidas e organizar meu dinheiro com base no meu resumo do mês.',
-          ),
-          yesSuggest(
-            'Investir e reserva',
-            'Quero sugestões para investir e criar reserva de emergência com base no meu mês.',
-          ),
-          noThanks(),
-        ],
+        openingMessage: BABY_STEPS_ENABLED
+          ? 'Posso te orientar pelo Método Finzup: seu Baby Step atual, dívidas, reserva ou investimentos. O que você quer trabalhar?'
+          : 'Posso te ajudar a melhorar suas finanças: quitar dívidas, organizar gastos ou investir. O que você quer trabalhar?',
+        openingActions: BABY_STEPS_ENABLED
+          ? [
+              yesSuggest(
+                'Meu Baby Step',
+                'Em qual Baby Step estou e o que devo fazer agora com base nos meus dados?',
+              ),
+              yesSuggest(
+                'Quitar dívidas',
+                'Quero um plano para quitar minhas dívidas (bola de neve) com base no meu resumo do mês.',
+              ),
+              yesSuggest(
+                'Reserva e investir',
+                'Quero sugestões para reserva de emergência e investir conforme o meu Baby Step.',
+              ),
+              noThanks(),
+            ]
+          : [
+              yesSuggest(
+                'Quitar dívidas',
+                'Quero um plano para quitar minhas dívidas e organizar meu dinheiro com base no meu resumo do mês.',
+              ),
+              yesSuggest(
+                'Investir e reserva',
+                'Quero sugestões para investir e criar reserva de emergência com base no meu mês.',
+              ),
+              noThanks(),
+            ],
         suggestionAction: {
           label: 'Analisar meu mês',
-          message:
-            'Analise meu resumo financeiro: dívidas, saldo, orçamentos e o que priorizar neste mês.',
+          message: BABY_STEPS_ENABLED
+            ? 'Analise meu resumo financeiro alinhado ao meu Baby Step: dívidas, saldo, orçamentos e o que priorizar.'
+            : 'Analise meu resumo financeiro: dívidas, saldo, orçamentos e o que priorizar neste mês.',
         },
       };
     case 'assistente':
@@ -286,6 +312,24 @@ export function getPageFlow(
             'Com base nos meus dados no Finzup, o que você pode me ajudar a fazer? Liste opções concretas.',
         },
       };
+    case 'metodo':
+      return {
+        ...base,
+        openingMessage:
+          'Quer que eu explique seu Baby Step atual e monte o próximo passo do Método Finzup?',
+        openingActions: [
+          yesSuggest(
+            'Sim, me oriente',
+            'Com base no meu Baby Step atual, me diga exatamente o que fazer agora com números reais.',
+          ),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Plano do meu passo',
+          message:
+            'Estou na tela do Método Finzup. Monte um plano curto para o meu Baby Step atual com R$ e %.',
+        },
+      };
     default:
       return null;
   }
@@ -310,6 +354,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Pense em metas de longo prazo, aportes mensais, rentabilidade educativa (mín. 12% a.a.) e tempo para atingir a meta.`;
     case 'doacoes':
       return `${avoidRepeat} Pense em como organizar doações de forma equilibrada neste mês.`;
+    case 'metodo':
+      return `${avoidRepeat} Foque no meu Baby Step atual, progresso e próxima ação do método.`;
     case 'orcamentos':
       return `${avoidRepeat} Pense em limites por categoria que façam sentido para as minhas finanças.`;
     case 'planejamento':
@@ -414,8 +460,10 @@ export function invalidateQueriesForPage(pageKey: PageKey): string[][] {
       return [['months'], ['budgets'], ['budget-templates']];
     case 'planejamento':
       return [['plans']];
+    case 'metodo':
+      return [['baby-steps']];
     default:
-      return [['months']];
+      return [['months'], ['baby-steps']];
   }
 }
 
@@ -430,13 +478,13 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   create_expense: [['expenses'], ['fixed-templates'], ['months']],
   update_expense: [['expenses'], ['fixed-templates'], ['months']],
   create_fixed_expense: [['fixed-templates'], ['expenses'], ['months']],
-  create_installment_plan: [['installments'], ['expenses'], ['months']],
+  create_installment_plan: [['installments'], ['expenses'], ['months'], ['baby-steps']],
   create_subscription: [['subscriptions'], ['months']],
-  create_financing: [['financings'], ['months']],
-  create_income: [['incomes'], ['months']],
-  create_donation: [['donations'], ['months']],
-  create_investment: [['investments'], ['months']],
-  set_investment_goal: [['investment-goal'], ['months']],
+  create_financing: [['financings'], ['months'], ['baby-steps']],
+  create_income: [['incomes'], ['months'], ['baby-steps']],
+  create_donation: [['donations'], ['months'], ['baby-steps']],
+  create_investment: [['investments'], ['months'], ['baby-steps']],
+  set_investment_goal: [['investment-goal'], ['months'], ['baby-steps']],
   create_budget: [['budgets'], ['budget-templates'], ['months']],
   create_investment_simulation: [['investment-simulations']],
   update_investment_simulation: [['investment-simulations']],

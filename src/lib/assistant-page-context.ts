@@ -10,6 +10,7 @@ export type PageKey =
   | 'relatorios'
   | 'configuracoes'
   | 'assistente'
+  | 'metodo'
   | 'generic';
 
 export type AssistantPageContext = {
@@ -23,7 +24,7 @@ const DEFAULT_CONTEXT: AssistantPageContext = {
   key: 'generic',
   label: 'Finzup',
   description: 'O usuário está no painel financeiro do Finzup.',
-  guidance: 'Ajude com finanças pessoais e uso do app. Indique a página correta se precisar cadastrar algo.',
+  guidance: 'Ajude com finanças pessoais e uso do app. Indique a página correta se precisar cadastrar algo. Conecte a orientação ao Baby Step atual.',
 };
 
 const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
@@ -32,7 +33,7 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Receitas',
     description: 'Página de cadastro de receitas do mês selecionado.',
     guidance:
-      'Priorize ajudar a cadastrar e organizar fontes de renda. Aceite listas. Pergunte "repetir todo mês" quando relevante.',
+      'Priorize ajudar a cadastrar e organizar fontes de renda. Aceite listas. Pergunte "repetir todo mês" quando relevante. Direcione renda extra conforme o Baby Step atual.',
   },
   '/dashboard/despesas': {
     key: 'despesas',
@@ -40,26 +41,28 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     description:
       'Página de despesas: avulsas, fixas, parcelamentos, assinaturas e financiamentos.',
     guidance:
-      'Priorize cadastro de despesas (avulsas, fixas com valor 0, parcelamentos). Aceite listas livres.',
+      'Priorize cadastro de despesas (avulsas, fixas com valor 0, parcelamentos). Aceite listas livres. No Passo 2, destaque dívidas da bola de neve.',
   },
   '/dashboard/orcamentos': {
     key: 'orcamentos',
     label: 'Orçamentos',
     description: 'Página de orçamentos por categoria com limites mensais.',
-    guidance: 'Priorize definir limites por categoria e identificar estouros.',
+    guidance:
+      'Priorize definir limites por categoria e identificar estouros. Alinhe ao Baby Step e aos princípios (10% lazer, 10% dízimo, 15% investir).',
   },
   '/dashboard/planejamento': {
     key: 'planejamento',
     label: 'Planejamento',
     description: 'Página de simulação com cenários de receitas, despesas, doações e investimentos.',
     guidance:
-      'Priorize ajudar a montar e comparar cenários de planejamento. Não altera o mês real. Sugira nomes de cenários e distribuição por categoria.',
+      'Priorize ajudar a montar e comparar cenários. Sugira cenário "completar meu Baby Step atual". Não altera o mês real.',
   },
   '/dashboard/investimentos': {
     key: 'investimentos',
     label: 'Investimentos',
     description: 'Página de meta mensal e aportes de investimento.',
-    guidance: 'Priorize meta mensal e registro de aportes. Não recomende ativos específicos.',
+    guidance:
+      'Priorize meta mensal e registro de aportes. Não recomende ativos específicos. Se o usuário ainda está nos Passos 1–2, avise que investir 15% ainda não é o foco.',
   },
   '/dashboard/investimentos/simulador': {
     key: 'simulador_investimentos',
@@ -72,14 +75,22 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     key: 'doacoes',
     label: 'Doações',
     description: 'Página de doações do mês selecionado.',
-    guidance: 'Priorize cadastro de doações com nome e valor.',
+    guidance:
+      'Priorize cadastro de doações com nome e valor. Proteja o dízimo de 10% em qualquer Baby Step.',
+  },
+  '/dashboard/metodo': {
+    key: 'metodo',
+    label: 'Método Finzup',
+    description: 'Mapa dos Baby Steps, reserva, bola de neve e meta da casa.',
+    guidance:
+      'Ajude com o passo atual: progresso, próxima ação, reserva, dívidas ou entrada da casa. Não pule etapas.',
   },
   '/dashboard/relatorios': {
     key: 'relatorios',
     label: 'Relatórios',
     description: 'Página de relatórios e análises financeiras detalhadas.',
     guidance:
-      'Priorize explicar gráficos, categorias, tendências e comparativos com base nos dados. Não cadastre itens aqui.',
+      'Priorize explicar gráficos, categorias, tendências e comparativos com base nos dados. Relacione insights ao Baby Step atual. Não cadastre itens aqui.',
   },
   '/dashboard/configuracoes': {
     key: 'configuracoes',
@@ -93,7 +104,7 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Assistente IA',
     description: 'Coach financeiro do Finzup com base nos dados do usuário.',
     guidance:
-      'Priorize melhorar a situação financeira: quitar dívidas, organizar gastos, investir (reserva e metas). Pergunte o foco antes de plano completo. Use % e R$ com dados reais.',
+      'Priorize o Baby Step atual do usuário. Pergunte o foco antes de plano completo. Use % e R$ com dados reais.',
   },
 };
 
@@ -104,7 +115,7 @@ export function getAssistantPageContext(pathname: string): AssistantPageContext 
       label: 'Resumo',
       description: 'Página de resumo financeiro do mês selecionado.',
       guidance:
-        'Priorize dívidas, saldo, orçamentos estourados e plano de quitação + investimento. Pergunte o foco se o pedido for amplo.',
+        'Priorize o Baby Step atual, próxima ação do método, dívidas, saldo e orçamentos. Pergunte o foco se o pedido for amplo.',
     };
   }
 
@@ -117,7 +128,7 @@ export function getAssistantPageContext(pathname: string): AssistantPageContext 
 
 export function buildPageContextPayload(
   pathname: string,
-  overrides?: { pageKey?: PageKey },
+  overrides?: { pageKey?: PageKey; babyStep?: 1 | 2 | 3 | 4 | 5 | 6 },
 ): {
   pageKey: PageKey;
   pageLabel: string;
@@ -133,10 +144,15 @@ export function buildPageContextPayload(
     pageKey === 'simulador_investimentos' && ctx.key === 'investimentos'
       ? 'Simulação de patrimônio com juros compostos, metas e projeção em 30 anos.'
       : ctx.description;
-  const guidance =
+  let guidance =
     pageKey === 'simulador_investimentos' && ctx.key === 'investimentos'
       ? 'Intake primeiro: uma pergunta por vez. Plano com números só após entender finalidade, meta, prazo e aportes. Salvar simulação após confirmação.'
       : ctx.guidance;
+
+  if (overrides?.babyStep) {
+    // Lazy import avoided — guidance appended by caller via getBabyStepPageGuidance when available
+    guidance += `\nBaby Step atual informado pelo app: ${overrides.babyStep}. Conecte a ajuda a este passo.`;
+  }
 
   return {
     pageKey,

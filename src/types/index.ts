@@ -387,3 +387,74 @@ export interface SimulationSuggestions {
   suggestedInitialAmount: number;
   suggestedMonthlyContribution: number;
 }
+
+export type BabyStepNumber = 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface BabyStepDebtItem {
+  id: string;
+  name: string;
+  kind: 'installment' | 'credit_card' | 'financing_consumer';
+  remainingBalance: number;
+  installmentAmount: number;
+  remainingInstallments: number;
+}
+
+export interface BabyStepNextAction {
+  label: string;
+  href: string;
+  chatPrompt?: string;
+}
+
+export interface BabyStepDefinition {
+  step: BabyStepNumber;
+  title: string;
+  shortTitle: string;
+  description: string;
+  status: 'completed' | 'current' | 'locked';
+  progressPercent: number;
+}
+
+export interface BabyStepState {
+  currentStep: BabyStepNumber;
+  progressPercent: number;
+  nextAction: BabyStepNextAction;
+  steps: BabyStepDefinition[];
+  metrics: {
+    emergencyFundBalance: number;
+    emergencyFundTarget: number;
+    step1Min: number;
+    step1Ideal: number;
+    monthlyCostOfLiving: number;
+    reserveMonths: number;
+    reserveTargetMonths: number;
+    hasConsumerDebt: boolean;
+    totalConsumerDebt: number;
+    snowballDebts: BabyStepDebtItem[];
+    targetDebt: BabyStepDebtItem | null;
+    totalIncome: number;
+    totalInvested: number;
+    investmentPercentOfIncome: number;
+    investmentTarget15: number;
+    donationsTotal: number;
+    tithePercentOfIncome: number;
+    houseDownPaymentTarget: number | null;
+    houseDownPaymentSaved: number;
+    houseDownPaymentProgress: number;
+    hasHomeFinancing: boolean;
+    homeFinancings: Array<{
+      id: string;
+      name: string;
+      remainingBalance: number;
+      installmentAmount: number;
+    }>;
+    needsDataSetup: boolean;
+  };
+  blockers: string[];
+}
+
+export interface BabyStepSettingsInput {
+  emergencyFundBalance?: number;
+  emergencyFundTarget?: number | null;
+  houseDownPaymentTarget?: number | null;
+  houseDownPaymentSaved?: number;
+}

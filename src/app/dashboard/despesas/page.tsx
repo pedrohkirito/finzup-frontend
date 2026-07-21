@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,6 +36,9 @@ import type {
   MonthSummary,
 } from '@/types';
 import { Plus, RefreshCw, TrendingDown } from 'lucide-react';
+import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
+import { SnowballDebtsCard } from '@/components/baby-steps/snowball-debts-card';
+import { useBabySteps } from '@/hooks/use-baby-steps';
 
 function getExpenseAmountColor(isCredit: boolean, isPaid: boolean) {
   return isCredit && !isPaid ? 'text-violet-600' : 'text-orange-600 dark:text-orange-400';
@@ -122,8 +126,32 @@ export default function DespesasPage() {
   const isMonthOpen = selectedMonth?.status === 'open';
   const queryClient = useQueryClient();
   const reorder = useReorder();
+  const searchParams = useSearchParams();
+  const { data: babySteps } = useBabySteps();
+  const tabParam = searchParams.get('tab');
+  const initialTab =
+    tabParam === 'parceladas' ||
+    tabParam === 'fixas' ||
+    tabParam === 'assinaturas' ||
+    tabParam === 'financiamentos' ||
+    tabParam === 'avulsas'
+      ? tabParam
+      : 'avulsas';
+  const [expenseTab, setExpenseTab] = useState(initialTab);
   const [dialog, setDialog] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<{ type: EditType; id: string } | null>(null);
+
+  useEffect(() => {
+    if (
+      tabParam === 'parceladas' ||
+      tabParam === 'fixas' ||
+      tabParam === 'assinaturas' ||
+      tabParam === 'financiamentos' ||
+      tabParam === 'avulsas'
+    ) {
+      setExpenseTab(tabParam);
+    }
+  }, [tabParam]);
 
   const invalidate = () => queryClient.invalidateQueries();
 
@@ -239,6 +267,16 @@ export default function DespesasPage() {
         <p className="text-sm text-slate-500">Avulsas, fixas, parceladas, assinaturas e financiamentos</p>
       </div>
 
+      <BabyStepPageHint pageKey="despesas" />
+
+      {babySteps && (
+        <SnowballDebtsCard
+          state={babySteps}
+          hideWhenEmpty
+          manageHref="/dashboard/despesas?tab=parceladas"
+        />
+      )}
+
       <Card className="border-orange-100 bg-orange-50 dark:border-orange-900/40 dark:bg-orange-950/30">
         <CardContent className="flex items-center gap-4 p-5">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/60 dark:text-orange-400">
@@ -255,7 +293,7 @@ export default function DespesasPage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="avulsas">
+      <Tabs value={expenseTab} onValueChange={setExpenseTab}>
         <TabsList>
           <TabsTrigger value="avulsas">Avulsas</TabsTrigger>
           <TabsTrigger value="fixas">Fixas</TabsTrigger>

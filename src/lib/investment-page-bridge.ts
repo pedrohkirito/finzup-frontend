@@ -1,4 +1,5 @@
 import type { InvestmentTab } from '@/providers/investment-page-provider';
+import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
 type InvestmentPageBridgeState = {
   activeTab: InvestmentTab;
@@ -36,5 +37,7 @@ export function resolveInvestmentTabFromUrl(
   if (!pathname.startsWith('/dashboard/investimentos')) return undefined;
   if (tabParam === 'simulador') return 'simulador';
   if (tabParam === 'aportes') return 'aportes';
+  if (BABY_STEPS_ENABLED && tabParam === 'reserva') return 'reserva';
+  if (BABY_STEPS_ENABLED && tabParam === 'casa') return 'casa';
   return undefined;
 }
