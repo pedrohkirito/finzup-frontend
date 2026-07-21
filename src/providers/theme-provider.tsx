@@ -31,7 +31,7 @@ function subscribeToTheme(callback: () => void) {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLandingPage = pathname === '/';
-  const storedTheme = useSyncExternalStore(subscribeToTheme, getStoredTheme, () => 'dark');
+  const storedTheme = useSyncExternalStore<Theme>(subscribeToTheme, getStoredTheme, () => 'dark');
   const theme: Theme = isLandingPage ? 'dark' : storedTheme;
 
   useEffect(() => {
