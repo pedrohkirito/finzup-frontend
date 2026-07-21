@@ -38,7 +38,7 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
             Quanto você pagaria por cada alternativa?
           </h2>
           <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
-            Compare as opções disponíveis e veja onde o Finzup se encaixa.
+            Compare as opções disponíveis e veja onde a Finzup se encaixa.
           </p>
         </div>
 

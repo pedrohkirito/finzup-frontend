@@ -27,7 +27,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-16">
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:mb-4 sm:text-4xl dark:text-white">
-            Configure uma vez. O Finzup cuida do resto.
+            Configure uma vez. A Finzup cuida do resto.
           </h2>
           <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
             Sem planilha, sem recomeçar do zero todo mês.

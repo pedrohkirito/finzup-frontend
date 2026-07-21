@@ -52,9 +52,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2.5 md:hidden">
-                  <Logo size={32} className="h-8 w-8 shrink-0" />
+                  <Logo size={28} className="h-7 w-7 shrink-0 dark:hidden" />
+                  <Logo variant="isologo" size={24} className="hidden h-6 w-auto shrink-0 dark:block" />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">Finzup</p>
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:hidden">Finzup</p>
                     <p className="truncate text-xs text-slate-500">{firstName}</p>
                   </div>
                 </div>

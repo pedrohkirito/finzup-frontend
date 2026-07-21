@@ -29,7 +29,7 @@ function AtivarAcessoContent() {
       <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase">Pagamento confirmado</p>
       <h2 className="mb-1 text-xl font-semibold">Crie sua senha e entre</h2>
       <p className="mb-6 text-sm text-slate-500">
-        Falta só definir sua senha para acessar o Finzup.
+        Falta só definir sua senha para acessar a Finzup.
       </p>
       <AuthForm
         schema={schema}

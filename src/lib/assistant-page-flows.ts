@@ -290,7 +290,7 @@ export function getPageFlow(
       return {
         ...base,
         openingMessage:
-          'Sou seu coach financeiro no Finzup — foco em sair das dívidas, investir e ter controle do seu dinheiro. Como posso ajudar?',
+          'Sou seu coach financeiro na Finzup — foco em sair das dívidas, investir e ter controle do seu dinheiro. Como posso ajudar?',
         openingActions: [
           yesSuggest(
             'Quitar dívidas',
@@ -309,7 +309,7 @@ export function getPageFlow(
         suggestionAction: {
           label: 'Ver o que você pode fazer por mim',
           message:
-            'Com base nos meus dados no Finzup, o que você pode me ajudar a fazer? Liste opções concretas.',
+            'Com base nos meus dados na Finzup, o que você pode me ajudar a fazer? Liste opções concretas.',
         },
       };
     case 'metodo':

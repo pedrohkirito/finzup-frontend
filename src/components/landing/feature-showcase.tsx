@@ -22,7 +22,7 @@ const tabs = [
     id: 'recorrencia',
     label: 'Recorrência automática',
     icon: RefreshCw,
-    headline: 'Configure uma vez. O Finzup cuida do resto.',
+    headline: 'Configure uma vez. A Finzup cuida do resto.',
     description:
       'Marque lançamentos como recorrentes ou cadastre despesas fixas. Ao fechar o mês, receitas, despesas e orçamentos aparecem automaticamente no próximo — você só ajusta o que mudou.',
     highlights: [

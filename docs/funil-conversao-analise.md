@@ -89,7 +89,7 @@ Recriar o funil completo com as etapas intermediárias novas. Ver também [`mixp
 | Antes | Depois |
 |-------|--------|
 | Redirect para Checkout hospedado na Stripe | Checkout em **2 passos** na `/assinatura`: planos → pagamento |
-| Usuário saía do Finzup | **Payment Element** embutido; permanece no domínio Finzup |
+| Usuário saía da Finzup | **Payment Element** embutido; permanece no domínio da Finzup |
 | Mensagem genérica de cartão | Copy de confiança: R$ 0 hoje, Stripe processa pagamento, sem armazenar cartão |
 | Um evento entre plano e trial | `checkout_form_viewed` para medir abandono no formulário |
 

@@ -42,7 +42,7 @@ function LinkGoogleContent() {
       <AuthBackLink href="/login" />
       <h2 className="mb-2 text-xl font-semibold">Vincular conta Google</h2>
       <p className="mb-6 text-sm text-slate-600">
-        Já existe uma conta Finzup com o email <strong>{email}</strong>. Digite a senha dessa conta
+        Já existe uma conta da Finzup com o email <strong>{email}</strong>. Digite a senha dessa conta
         para vincular o login com Google.
       </p>
 
@@ -60,7 +60,7 @@ function LinkGoogleContent() {
           setKnownUserId(user.id, { email: user.email, name: user.name });
           router.push(getPostAuthRedirect(user));
         }}
-        fields={[{ name: 'password', label: 'Senha da conta Finzup', type: 'password' }]}
+        fields={[{ name: 'password', label: 'Senha da conta da Finzup', type: 'password' }]}
         submitLabel="Vincular e entrar"
         footer={
           <div className="space-y-3 pt-2 text-center text-sm text-slate-500">

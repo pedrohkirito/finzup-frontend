@@ -48,7 +48,7 @@ export function AiSuggestionsPanel() {
                     <Lightbulb className="h-4 w-4 text-amber-500" />
                   )}
                   <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                    {suggestion.tier === 'ai' ? 'Sugestão da IA' : 'Dica do Finzup'}
+                    {suggestion.tier === 'ai' ? 'Sugestão da IA' : 'Dica da Finzup'}
                   </span>
                 </div>
                 <h3 className="font-semibold text-slate-900 dark:text-white">{suggestion.title}</h3>

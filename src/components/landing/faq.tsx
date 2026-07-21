@@ -24,22 +24,22 @@ const faqs = [
   {
     question: 'Funciona no celular?',
     answer:
-      'Sim. O Finzup funciona em qualquer dispositivo com navegador — celular, tablet ou computador — com a mesma experiência.',
+      'Sim. A Finzup funciona em qualquer dispositivo com navegador — celular, tablet ou computador — com a mesma experiência.',
   },
   {
     question: 'Preciso recadastrar tudo todo mês?',
     answer:
-      'Não. Marque lançamentos com "Repetir todo mês", use despesas fixas e defina seus orçamentos uma vez. Ao fechar o mês, o Finzup copia receitas, despesas recorrentes, doações e meta de investimentos para o mês seguinte — você só ajusta o que mudou.',
+      'Não. Marque lançamentos com "Repetir todo mês", use despesas fixas e defina seus orçamentos uma vez. Ao fechar o mês, a Finzup copia receitas, despesas recorrentes, doações e meta de investimentos para o mês seguinte — você só ajusta o que mudou.',
   },
   {
     question: 'Preciso entender de finanças para usar?',
     answer:
-      'Não. O Finzup foi feito para ser simples desde o primeiro acesso. Você registra receitas e despesas, a gente organiza tudo de forma visual, e o Assistente de IA responde suas dúvidas sobre o dinheiro.',
+      'Não. A Finzup foi feita para ser simples desde o primeiro acesso. Você registra receitas e despesas, a gente organiza tudo de forma visual, e o Assistente de IA responde suas dúvidas sobre o dinheiro.',
   },
   {
     question: 'O que o Assistente de IA faz?',
     answer:
-      'É um assistente que responde suas dúvidas sobre o dinheiro — com base nos seus lançamentos — e sobre como usar o Finzup. Ele também monta planejamentos, sugere orçamentos, aponta onde economizar e ajuda a organizar metas e prioridades do mês.',
+      'É um assistente que responde suas dúvidas sobre o dinheiro — com base nos seus lançamentos — e sobre como usar a Finzup. Ele também monta planejamentos, sugere orçamentos, aponta onde economizar e ajuda a organizar metas e prioridades do mês.',
   },
   {
     question: 'Como funcionam os créditos de IA?',
@@ -49,7 +49,7 @@ const faqs = [
   {
     question: 'Por que não usar só uma planilha?',
     answer:
-      'Planilha é gratuita, mas exige recomeçar do zero todo mês: você recopia despesas fixas, salário, orçamentos e categorias uma a uma. No Finzup, marque um lançamento como recorrente e ele aparece automaticamente no próximo mês — você só ajusta o que mudou. Menos tempo gasto, mais consistência, e ainda conta com o Assistente de IA.',
+      'Planilha é gratuita, mas exige recomeçar do zero todo mês: você recopia despesas fixas, salário, orçamentos e categorias uma a uma. Na Finzup, marque um lançamento como recorrente e ele aparece automaticamente no próximo mês — você só ajusta o que mudou. Menos tempo gasto, mais consistência, e ainda conta com o Assistente de IA.',
   },
 ];
 

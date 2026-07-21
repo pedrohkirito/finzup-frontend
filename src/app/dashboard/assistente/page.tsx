@@ -27,7 +27,7 @@ function AssistentePageContent() {
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Assistente IA</h1>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Pergunte sobre suas finanças com base nos dados do Finzup. Não é consultoria de investimentos.
+            Pergunte sobre suas finanças com base nos dados da Finzup. Não é consultoria de investimentos.
           </p>
         </div>
         <div className="rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-right dark:border-brand-900 dark:bg-brand-950/40">

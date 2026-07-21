@@ -59,7 +59,7 @@ export function OnboardingTour() {
     <Card className="border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950">
       <CardHeader>
         <CardTitle className="text-emerald-800 dark:text-emerald-200">
-          Bem-vindo ao Finzup! ({step + 1}/{steps.length})
+          Bem-vindo à Finzup! ({step + 1}/{steps.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

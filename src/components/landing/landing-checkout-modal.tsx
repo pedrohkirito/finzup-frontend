@@ -274,7 +274,7 @@ export function LandingCheckoutModal({
           aria-describedby={undefined}
           className="fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl focus:outline-none dark:border-slate-800 dark:bg-slate-950"
         >
-          <Dialog.Title className="sr-only">Assinar Finzup</Dialog.Title>
+          <Dialog.Title className="sr-only">Assinar a Finzup</Dialog.Title>
 
           {step !== 'success' && (
             <Dialog.Close className="absolute right-4 top-4 z-10 rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Fechar">
@@ -536,7 +536,7 @@ function CheckoutConsentNotice() {
       <Link href="/politica-de-privacidade" target="_blank" className="text-brand-600 hover:underline">
         Política de Privacidade
       </Link>
-      , e em receber comunicações por e-mail e WhatsApp sobre sua conta, suporte e novidades do Finzup. Prometemos zero spam!
+      , e em receber comunicações por e-mail e WhatsApp sobre sua conta, suporte e novidades da Finzup. Prometemos zero spam!
     </p>
   );
 }
@@ -606,7 +606,7 @@ function SuccessStep({
       <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Pagamento confirmado!</h2>
       {needsPasswordSetup ? (
         <p className="mb-6 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          Enviamos um email para <strong className="text-slate-900 dark:text-white">{email}</strong> para você criar sua senha e acessar o Finzup. Confira a caixa de entrada (e o spam).
+          Enviamos um email para <strong className="text-slate-900 dark:text-white">{email}</strong> para você criar sua senha e acessar a Finzup. Confira a caixa de entrada (e o spam).
         </p>
       ) : (
         <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
@@ -618,7 +618,7 @@ function SuccessStep({
         onClick={onClose}
         className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
       >
-        {needsPasswordSetup ? 'Já recebi o email — Ativar acesso' : 'Entrar no Finzup'}
+        {needsPasswordSetup ? 'Já recebi o email — Ativar acesso' : 'Entrar na Finzup'}
         <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
       </Link>
     </div>

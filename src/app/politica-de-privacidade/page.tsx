@@ -4,7 +4,7 @@ import { PRIVACY_LAST_UPDATED, SUPPORT_EMAIL, WEBSITE_URL, COMPANY_LEGAL_NAME, C
 
 export const metadata: Metadata = {
   title: 'Política de Privacidade — Finzup',
-  description: 'Saiba como o Finzup coleta, usa e protege seus dados pessoais.',
+  description: 'Saiba como a Finzup coleta, usa e protege seus dados pessoais.',
 };
 
 const privacySections = [
@@ -13,7 +13,7 @@ const privacySections = [
     content: (
       <>
         <p>
-          Esta Política de Privacidade descreve como o Finzup (&quot;nós&quot;, &quot;nosso&quot; ou
+          Esta Política de Privacidade descreve como a Finzup (&quot;nós&quot;, &quot;nosso&quot; ou
           &quot;plataforma&quot;), disponível em{' '}
           <a href={WEBSITE_URL} className="text-emerald-600 hover:underline dark:text-emerald-400">
             {WEBSITE_URL}
@@ -34,7 +34,7 @@ const privacySections = [
       <>
         <p>
           O controlador dos dados pessoais tratados nesta plataforma é o <strong>{COMPANY_LEGAL_NAME}</strong>
-          , responsável pelo Finzup, disponível em{' '}
+          , responsável pela Finzup, disponível em{' '}
           <a href={WEBSITE_URL} className="text-emerald-600 hover:underline dark:text-emerald-400">
             {WEBSITE_URL}
           </a>
@@ -119,7 +119,7 @@ const privacySections = [
             assinatura e cobrança);
           </li>
           <li>
-            Enviar comunicações de marketing sobre o Finzup (novidades, dicas de uso, promoções e
+            Enviar comunicações de marketing sobre a Finzup (novidades, dicas de uso, promoções e
             funcionalidades), <strong>apenas quando você tiver consentido</strong> em recebê-las;
           </li>
           <li>
@@ -132,7 +132,7 @@ const privacySections = [
         </ul>
         <p>
           Não vendemos seus dados pessoais nem utilizamos suas informações financeiras para fins de
-          marketing de terceiros. Comunicações de marketing são limitadas ao Finzup e não dependem do
+          marketing de terceiros. Comunicações de marketing são limitadas à Finzup e não dependem do
           conteúdo financeiro que você registra na plataforma.
         </p>
       </>
@@ -144,7 +144,7 @@ const privacySections = [
       <>
         <p>O tratamento dos seus dados se fundamenta, conforme o caso, em:</p>
         <ul className="list-disc space-y-2 pl-5">
-          <li>Execução de contrato (prestação do serviço Finzup e e-mails transacionais);</li>
+          <li>Execução de contrato (prestação do serviço da Finzup e e-mails transacionais);</li>
           <li>
             Consentimento (comunicações de marketing, cookies não essenciais e outras finalidades para as
             quais você optar expressamente);
@@ -162,7 +162,7 @@ const privacySections = [
     title: '6. Compartilhamento de dados',
     content: (
       <>
-        <p>Podemos compartilhar dados com prestadores de serviço essenciais à operação do Finzup, como:</p>
+        <p>Podemos compartilhar dados com prestadores de serviço essenciais à operação da Finzup, como:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>
             <strong>Asaas</strong> — processamento de pagamentos e gestão de assinaturas (novos clientes);
@@ -294,7 +294,7 @@ const privacySections = [
           </li>
           <li>
             <strong>Marketing:</strong> novidades do produto, dicas de organização financeira, ofertas e
-            comunicações promocionais do Finzup. Esses e-mails dependem do seu consentimento e podem ser
+            comunicações promocionais da Finzup. Esses e-mails dependem do seu consentimento e podem ser
             interrompidos a qualquer momento.
           </li>
         </ul>

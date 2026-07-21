@@ -50,9 +50,10 @@ export function Sidebar() {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-none md:flex md:h-screen md:overflow-hidden">
       <div className="flex h-full flex-col p-4">
-        <div className="mb-8 flex shrink-0 items-center gap-2 px-2">
-          <Logo size={36} className="h-9 w-9" />
-          <span className="text-xl font-bold text-slate-900 dark:text-white">Finzup</span>
+        <div className="mb-8 flex h-8 shrink-0 items-center gap-2 px-2">
+          <Logo size={32} className="h-8 w-8 dark:hidden" />
+          <span className="text-lg font-bold text-slate-900 dark:hidden">Finzup</span>
+          <Logo variant="isologo" size={32} className="hidden h-8 w-auto dark:block" />
         </div>
 
         <ScrollArea className="flex-1">

@@ -62,7 +62,7 @@ O evento `trial_started` usa `$insert_id: trial_started_{userId}` em frontend e 
 
 ## Identidade do usuário (`user_id`)
 
-Eventos de funil usam o **ID do usuário no Finzup** como `distinct_id` sempre que possível:
+Eventos de funil usam o **ID do usuário na Finzup** como `distinct_id` sempre que possível:
 
 1. **Cadastro** — a API retorna `userId`; o frontend chama `identify` + `alias` (mesmo browser) e registra `user_id` como super property.
 2. **Verificação de email** — o backend envia `email_verified` com `distinct_id: userId` (fonte de verdade, inclusive no mobile). O frontend deduplica com `$insert_id: email_verified_{userId}`.

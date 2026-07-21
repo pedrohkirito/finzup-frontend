@@ -4,7 +4,7 @@ import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL, WEBSITE_URL, LGPD_RESPONSE_DAYS } fr
 
 export const metadata: Metadata = {
   title: 'Termos de Uso — Finzup',
-  description: 'Condições para utilização da plataforma Finzup.',
+  description: 'Condições para utilização da plataforma da Finzup.',
 };
 
 const termsSections = [
@@ -13,7 +13,7 @@ const termsSections = [
     content: (
       <>
         <p>
-          Estes Termos de Uso regulam o acesso e a utilização do Finzup, plataforma de organização
+          Estes Termos de Uso regulam o acesso e a utilização da Finzup, plataforma de organização
           financeira pessoal disponível em{' '}
           <a href={WEBSITE_URL} className="text-emerald-600 hover:underline dark:text-emerald-400">
             {WEBSITE_URL}
@@ -39,11 +39,11 @@ const termsSections = [
     content: (
       <>
         <p>
-          O Finzup é uma ferramenta de software como serviço (SaaS) que permite registrar e acompanhar
+          A Finzup é uma ferramenta de software como serviço (SaaS) que permite registrar e acompanhar
           receitas, despesas, orçamentos, investimentos e outras informações financeiras pessoais.
         </p>
         <p>
-          O Finzup <strong>não é uma instituição financeira</strong>, não oferece consultoria de
+          A Finzup <strong>não é uma instituição financeira</strong>, não oferece consultoria de
           investimentos, não realiza transações financeiras em seu nome e não garante resultados
           econômicos. As informações exibidas dependem dos dados inseridos por você.
         </p>
@@ -74,7 +74,7 @@ const termsSections = [
     content: (
       <>
         <p>
-          O Finzup é oferecido mediante assinatura paga, sem período de teste gratuito. Os planos e preços
+          A Finzup é oferecida mediante assinatura paga, sem período de teste gratuito. Os planos e preços
           estão divulgados no site. O pagamento pode ser feito via PIX ou cartão de crédito, processado com
           segurança pela <strong>Asaas</strong> (novas assinaturas). Assinaturas contratadas anteriormente
           podem continuar sendo processadas pela <strong>Stripe</strong>.
@@ -114,12 +114,12 @@ const termsSections = [
     content: (
       <>
         <p>
-          O Finzup pode enviar e-mails transacionais relacionados à sua conta, como confirmação de
+          A Finzup pode enviar e-mails transacionais relacionados à sua conta, como confirmação de
           cadastro, redefinição de senha e informações sobre assinatura.
         </p>
         <p>
           Com sua autorização prévia, também podemos enviar comunicações de marketing com novidades,
-          dicas de uso, promoções e informações sobre funcionalidades do Finzup. No cadastro, essa opção
+          dicas de uso, promoções e informações sobre funcionalidades da Finzup. No cadastro, essa opção
           pode aparecer pré-selecionada, mas você pode desmarcá-la antes de concluir o registro. Você
           pode revogar esse consentimento e cancelar o recebimento dessas mensagens a qualquer momento,
           pelo link de descadastro nos e-mails (quando aplicável) ou entrando em contato pelo{' '}
@@ -141,7 +141,7 @@ const termsSections = [
     title: '6. Uso permitido',
     content: (
       <>
-        <p>Você concorda em utilizar o Finzup apenas para fins lícitos e de acordo com estes termos. É
+        <p>Você concorda em utilizar a Finzup apenas para fins lícitos e de acordo com estes termos. É
           proibido:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>Violar leis aplicáveis ou direitos de terceiros;</li>
@@ -157,7 +157,7 @@ const termsSections = [
     title: '7. Propriedade intelectual',
     content: (
         <p>
-          O Finzup, incluindo sua marca, interface, código e conteúdo proprietário, é de nossa titularidade
+          A Finzup, incluindo sua marca, interface, código e conteúdo proprietário, é de nossa titularidade
           ou de nossos licenciadores. Você recebe uma licença limitada, pessoal, não exclusiva e revogável
           para usar a plataforma conforme estes termos. Os dados financeiros inseridos por você
           permanecem de sua propriedade. Você nos concede licença limitada para hospedar, processar e
@@ -188,7 +188,7 @@ const termsSections = [
     content: (
       <>
         <p>
-          O Finzup é fornecido &quot;como está&quot;. Na extensão máxima permitida pela lei, não nos
+          A Finzup é fornecida &quot;como está&quot;. Na extensão máxima permitida pela lei, não nos
           responsabilizamos por decisões financeiras tomadas com base nas informações registradas na
           plataforma, por perdas indiretas, lucros cessantes ou danos decorrentes de indisponibilidade do
           serviço.

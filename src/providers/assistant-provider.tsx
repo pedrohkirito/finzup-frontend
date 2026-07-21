@@ -70,7 +70,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
               Assistente IA
             </DialogTitle>
             <DialogDescription className="sr-only">
-              Chat com assistente de IA do Finzup para a página {pageContext.label}
+              Chat com assistente de IA da Finzup para a página {pageContext.label}
             </DialogDescription>
             <p className="mt-0.5 text-xs text-slate-500" aria-hidden>
               Contexto: {pageContext.label}

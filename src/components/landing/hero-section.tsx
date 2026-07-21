@@ -33,7 +33,7 @@ export function HeroSection() {
             <span className="font-semibold text-slate-900 dark:text-white">Assistente de IA</span>{' '}
             que responde suas dúvidas sobre o seu dinheiro.
             <br />
-            Cadastre uma vez — o Finzup repete tudo no mês seguinte.
+            Cadastre uma vez — a Finzup repete tudo no mês seguinte.
           </p>
 
           <a

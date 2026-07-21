@@ -41,7 +41,7 @@ export function TrialBanner({ billing }: TrialBannerProps) {
               <strong>
                 {days} {dayLabel}
               </strong>{' '}
-              no seu teste gratuito. Reative a assinatura para continuar com o Finzup depois desse
+              no seu teste gratuito. Reative a assinatura para continuar com a Finzup depois desse
               período.
             </>
           ) : (

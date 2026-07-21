@@ -23,7 +23,7 @@ export type AssistantPageContext = {
 const DEFAULT_CONTEXT: AssistantPageContext = {
   key: 'generic',
   label: 'Finzup',
-  description: 'O usuário está no painel financeiro do Finzup.',
+  description: 'O usuário está no painel financeiro da Finzup.',
   guidance: 'Ajude com finanças pessoais e uso do app. Indique a página correta se precisar cadastrar algo. Conecte a orientação ao Baby Step atual.',
 };
 
@@ -102,7 +102,7 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
   '/dashboard/assistente': {
     key: 'assistente',
     label: 'Assistente IA',
-    description: 'Coach financeiro do Finzup com base nos dados do usuário.',
+    description: 'Coach financeiro da Finzup com base nos dados do usuário.',
     guidance:
       'Priorize o Baby Step atual do usuário. Pergunte o foco antes de plano completo. Use % e R$ com dados reais.',
   },

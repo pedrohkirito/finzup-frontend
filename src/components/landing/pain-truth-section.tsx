@@ -26,11 +26,11 @@ function withBoldAi(text: string, strongClassName: string): ReactNode {
 const painPoints = [
   {
     pain: 'Você anota gastos no caderno ou planilha e no dia 1 do mês recomeça tudo do zero.',
-    solution: 'No Finzup, receitas e despesas fixas aparecem automaticamente no próximo mês.',
+    solution: 'Na Finzup, receitas e despesas fixas aparecem automaticamente no próximo mês.',
   },
   {
     pain: 'Apps genéricos mostram gráficos bonitos, mas não repetem suas contas fixas sozinhos.',
-    solution: 'O Finzup copia recorrências, orçamentos e metas ao fechar o mês — você só ajusta o que mudou.',
+    solution: 'A Finzup copia recorrências, orçamentos e metas ao fechar o mês — você só ajusta o que mudou.',
   },
   {
     pain: 'Você trabalha o mês inteiro e no fim não sabe para onde foi o salário.',
@@ -39,7 +39,7 @@ const painPoints = [
   {
     pain: 'Você já tentou vários aplicativos e nenhum resolveu o problema de verdade.',
     solution:
-      'O Finzup foi feito para quem quer sistema automático, não mais uma planilha digital.',
+      'A Finzup foi feita para quem quer sistema automático, não mais uma planilha digital.',
   },
 ];
 
