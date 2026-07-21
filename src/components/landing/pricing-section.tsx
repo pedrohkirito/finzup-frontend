@@ -1,17 +1,45 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { PlanPicker } from '@/components/billing/plan-picker';
 import { type BillingPlanId } from '@/constants/billing-plans';
+import { type LandingCtaClick } from '@/lib/funnel-analytics';
 
 interface PricingSectionProps {
   id?: string;
-  onCta?: (planId: BillingPlanId) => void;
+  onCta?: (planId: BillingPlanId, cta?: LandingCtaClick) => void;
+  onViewed?: () => void;
   compact?: boolean;
 }
 
-export function PricingSection({ id = 'pricing-section', onCta, compact = false }: PricingSectionProps) {
+export function PricingSection({
+  id = 'pricing-section',
+  onCta,
+  onViewed,
+  compact = false,
+}: PricingSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !onViewed) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        onViewed();
+        observer.disconnect();
+      },
+      { threshold: 0.15 },
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [onViewed]);
+
   return (
     <section
+      ref={sectionRef}
       id={id}
       className={`relative overflow-hidden py-16 sm:py-24 ${
         compact ? 'bg-slate-50 dark:bg-slate-900' : ''

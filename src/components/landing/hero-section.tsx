@@ -1,5 +1,6 @@
 import { Sparkles, ChevronRight } from 'lucide-react';
 import { BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
+import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
 export function HeroSection() {
   const annualEquiv = monthlyEquivalent(
@@ -37,6 +38,13 @@ export function HeroSection() {
 
           <a
             href="#pricing"
+            onClick={() =>
+              trackLandingCtaClick({
+                ctaLocation: 'hero',
+                ctaLabel: 'Começar agora',
+                action: 'scroll_to_pricing',
+              })
+            }
             className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-10 py-5 pr-14 text-base font-semibold"
           >
             Começar agora

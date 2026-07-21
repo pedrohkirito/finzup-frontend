@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import { setKnownUserId } from '@/lib/mixpanel';
-import { Button } from '@/components/ui/button';
 import type { User } from '@/types';
 import {
   trackEmailVerified,
@@ -29,10 +28,17 @@ function VerifyEmailContent() {
     if (!token) return;
 
     api
-      .get<{ user?: User; emailVerified?: boolean }>(`/auth/verify-email?token=${encodeURIComponent(token)}`)
+      .get<{ user?: User; userId?: string; emailVerified?: boolean }>(
+        `/auth/verify-email?token=${encodeURIComponent(token)}`,
+      )
       .then((data) => {
-        if (data.user?.id) {
-          setKnownUserId(data.user.id, { email: data.user.email, name: data.user.name });
+        const userId = data.user?.id ?? data.userId;
+        if (userId) {
+          setKnownUserId(
+            userId,
+            data.user ? { email: data.user.email, name: data.user.name } : undefined,
+            { linkAnonymous: true },
+          );
         }
         trackEmailVerified();
         router.replace('/login?verified=1');

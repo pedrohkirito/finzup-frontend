@@ -31,9 +31,12 @@ import { cpfSchema, emailSchema, fullNameSchema } from '@/lib/validators';
 import { maskCpfInput } from '@/lib/cpf';
 import {
   trackLandingCheckoutModalOpened,
-  trackInitiateCheckout,
-  trackCheckoutCompleted,
 } from '@/lib/funnel-analytics';
+import { setKnownUserId } from '@/lib/mixpanel';
+import {
+  trackPurchase,
+  type MetaPurchase,
+} from '@/lib/meta-pixel';
 
 type ModalStep = 'checkout' | 'pix' | 'waiting' | 'success';
 type PaymentMethod = 'pix' | 'credit_card';
@@ -84,11 +87,37 @@ type CheckoutStartResponse = {
   status: 'awaiting_payment' | 'paid';
   amount: number;
   planLabel: string;
+  userId?: string | null;
   email?: string;
   needsPasswordSetup?: boolean;
   checkoutUrl?: string;
   pix?: { encodedImage: string; payload: string; expirationDate: string };
+  purchase?: MetaPurchase;
 };
+
+type CheckoutStatusResponse = {
+  status: string;
+  userId?: string | null;
+  email?: string;
+  needsPasswordSetup?: boolean;
+  purchase?: MetaPurchase;
+};
+
+function trackPaidPurchase(
+  purchase?: MetaPurchase,
+  userId?: string | null,
+  email?: string,
+) {
+  if (!purchase) return;
+  if (userId) {
+    setKnownUserId(
+      userId,
+      email ? { email } : undefined,
+      { linkAnonymous: true },
+    );
+  }
+  trackPurchase(purchase);
+}
 
 interface LandingCheckoutModalProps {
   isOpen: boolean;
@@ -105,7 +134,6 @@ export function LandingCheckoutModal({
 }: LandingCheckoutModalProps) {
   const [step, setStep] = useState<ModalStep>('checkout');
   const [selectedPlan, setSelectedPlan] = useState<BillingPlanId>(initialPlan);
-  const [orderId, setOrderId] = useState<string | null>(null);
   const [pixData, setPixData] = useState<CheckoutStartResponse['pix'] | null>(null);
   const [successEmail, setSuccessEmail] = useState('');
   const [needsPasswordSetup, setNeedsPasswordSetup] = useState(true);
@@ -114,8 +142,6 @@ export function LandingCheckoutModal({
   const [copiedPix, setCopiedPix] = useState(false);
   const trackedOpenRef = useRef(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const selectedPlanRef = useRef(selectedPlan);
-  selectedPlanRef.current = selectedPlan;
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -129,7 +155,7 @@ export function LandingCheckoutModal({
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       try {
-        const status = await api.get<{ status: string; email?: string; needsPasswordSetup?: boolean }>(
+        const status = await api.get<CheckoutStatusResponse>(
           `/billing/checkout/${id}/status`,
         );
         if (status.status === 'paid') {
@@ -137,7 +163,7 @@ export function LandingCheckoutModal({
           setSuccessEmail(email || status.email || '');
           setNeedsPasswordSetup(status.needsPasswordSetup ?? true);
           setStep('success');
-          trackCheckoutCompleted(selectedPlanRef.current);
+          trackPaidPurchase(status.purchase, status.userId, status.email || email);
         }
       } catch {
         // continua polling
@@ -153,7 +179,6 @@ export function LandingCheckoutModal({
     }
 
     if (returnOrderId) {
-      setOrderId(returnOrderId);
       setStep('waiting');
       setCheckoutError(null);
       startPolling(returnOrderId, '');
@@ -162,7 +187,6 @@ export function LandingCheckoutModal({
 
     setStep('checkout');
     setSelectedPlan(initialPlan);
-    setOrderId(null);
     setPixData(null);
     setCheckoutError(null);
     setSuccessEmail('');
@@ -180,7 +204,6 @@ export function LandingCheckoutModal({
   const onSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
     setCheckoutError(null);
-    trackInitiateCheckout(selectedPlan);
 
     try {
       const cardChargeModePayload =
@@ -208,13 +231,12 @@ export function LandingCheckoutModal({
             };
 
       const result = await api.post<CheckoutStartResponse>('/billing/checkout/start', payload);
-      setOrderId(result.orderId);
 
       if (result.status === 'paid') {
         setSuccessEmail(result.email ?? '');
         setNeedsPasswordSetup(result.needsPasswordSetup ?? true);
         setStep('success');
-        trackCheckoutCompleted(selectedPlan);
+        trackPaidPurchase(result.purchase, result.userId, result.email);
         return;
       }
 

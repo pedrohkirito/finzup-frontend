@@ -6,6 +6,7 @@ services:
       target: production
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Defina NEXT_PUBLIC_API_URL no .env}
+        NEXT_PUBLIC_META_PIXEL_ID: ${NEXT_PUBLIC_META_PIXEL_ID:-}
     container_name: finzup-frontend
     restart: always
     init: true

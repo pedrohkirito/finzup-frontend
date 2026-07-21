@@ -3,6 +3,7 @@
 import { Check, X, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { type BillingPlanId, BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
+import { type LandingCtaClick } from '@/lib/funnel-analytics';
 
 const alternatives = [
   { name: 'Planilha manual', cost: 'R$ 0 + horas perdidas', hasAuto: false, hasVisual: false, hasHistory: false, hasAi: false },
@@ -19,7 +20,7 @@ function FeatureCell({ ok }: { ok: boolean }) {
 }
 
 interface CostComparisonSectionProps {
-  onCta: (plan?: BillingPlanId) => void;
+  onCta: (plan?: BillingPlanId, cta?: LandingCtaClick) => void;
 }
 
 export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
@@ -133,7 +134,14 @@ export function CostComparisonSection({ onCta }: CostComparisonSectionProps) {
         <div className="mt-8 text-center">
           <button
             type="button"
-            onClick={() => onCta('annual')}
+            onClick={() =>
+              onCta('annual', {
+                ctaLocation: 'cost_comparison',
+                ctaLabel: 'Ver planos e assinar',
+                action: 'open_checkout',
+                planId: 'annual',
+              })
+            }
             className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
           >
             Ver planos e assinar

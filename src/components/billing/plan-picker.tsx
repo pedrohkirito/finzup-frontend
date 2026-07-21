@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Check, Loader2, Star, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { trackLead } from '@/lib/funnel-analytics';
+import { trackLandingCtaClick, type LandingCtaClick } from '@/lib/funnel-analytics';
 import {
   ANNUAL_INSTALLMENT,
   BILLING_FEATURES,
@@ -21,7 +21,7 @@ import {
 
 interface PlanPickerProps {
   mode: 'landing' | 'subscribe';
-  onSelectPlan?: (plan: BillingPlanId) => void | Promise<void>;
+  onSelectPlan?: (plan: BillingPlanId, cta?: LandingCtaClick) => void | Promise<void>;
   loadingPlan?: BillingPlanId | null;
   defaultSelected?: BillingPlanId;
   compactHeader?: boolean;
@@ -116,10 +116,16 @@ export function PlanPicker({
           type="button"
           className={className}
           onClick={() => {
-            trackLead('Pricing Section', { ctaLocation: 'plan_picker', plan: planId });
+            const cta = {
+              ctaLocation: compactHeader ? 'pricing_compact' : 'pricing_primary',
+              ctaLabel: label,
+              action: 'open_checkout' as const,
+              planId,
+            };
             if (onSelectPlan) {
-              onSelectPlan(planId);
+              onSelectPlan(planId, cta);
             } else {
+              trackLandingCtaClick(cta);
               window.location.href = '/?checkout=1';
             }
           }}

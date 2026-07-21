@@ -3,6 +3,7 @@
 import { type ReactNode } from 'react';
 import { ChevronRight, X, Check } from 'lucide-react';
 import { type BillingPlanId } from '@/constants/billing-plans';
+import { type LandingCtaClick } from '@/lib/funnel-analytics';
 
 const AI_LABEL = 'Assistente de IA';
 
@@ -43,7 +44,7 @@ const painPoints = [
 ];
 
 interface PainTruthSectionProps {
-  onCta: (plan?: BillingPlanId) => void;
+  onCta: (plan?: BillingPlanId, cta?: LandingCtaClick) => void;
 }
 
 export function PainTruthSection({ onCta }: PainTruthSectionProps) {
@@ -105,7 +106,14 @@ export function PainTruthSection({ onCta }: PainTruthSectionProps) {
         <div className="mt-12 text-center">
           <button
             type="button"
-            onClick={() => onCta()}
+            onClick={() =>
+              onCta('annual', {
+                ctaLocation: 'pain_truth',
+                ctaLabel: 'Quero parar de recomeçar do zero',
+                action: 'open_checkout',
+                planId: 'annual',
+              })
+            }
             className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-base font-semibold"
           >
             Quero parar de recomeçar do zero

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Loader2, Lock, ShieldCheck } from 'lucide-react';
 import {
   CheckoutElementsProvider,
@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { CheckoutPlanSummary } from '@/components/billing/checkout-plan-summary';
 import { SupportLink } from '@/components/layout/support-link';
 import { type BillingPlanId } from '@/constants/billing-plans';
-import { trackCheckoutFormViewed } from '@/lib/funnel-analytics';
 import { stripePromise } from '@/lib/stripe';
 
 const checkoutAppearance = {
@@ -58,14 +57,6 @@ function SubscriptionCheckoutForm({
 }: Omit<SubscriptionCheckoutProps, 'clientSecret'>) {
   const checkoutState = useCheckoutElements();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const formViewedRef = useRef(false);
-
-  useEffect(() => {
-    if (checkoutState.type === 'success' && !formViewedRef.current) {
-      formViewedRef.current = true;
-      trackCheckoutFormViewed(planId);
-    }
-  }, [checkoutState.type, planId]);
 
   if (checkoutState.type === 'loading') {
     return (

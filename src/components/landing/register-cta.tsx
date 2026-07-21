@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { trackLead } from '@/lib/funnel-analytics';
+import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
 interface RegisterCtaProps {
   href?: string;
@@ -11,8 +11,20 @@ interface RegisterCtaProps {
 }
 
 export function RegisterCta({ href = '/register', className, contentName, children }: RegisterCtaProps) {
+  const ctaLabel = contentName ?? 'Criar conta';
+
   return (
-    <Link href={href} className={className} onClick={() => trackLead(contentName)}>
+    <Link
+      href={href}
+      className={className}
+      onClick={() =>
+        trackLandingCtaClick({
+          ctaLocation: 'register_cta',
+          ctaLabel,
+          action: 'register',
+        })
+      }
+    >
       {children}
     </Link>
   );

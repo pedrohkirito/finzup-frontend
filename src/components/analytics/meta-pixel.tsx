@@ -2,28 +2,49 @@
 
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
-import { useEffect } from 'react';
-
-const META_PIXEL_ID = '1510980023769913';
-
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void;
-  }
-}
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  prepareMetaTrackingUrl,
+  trackMetaEvent,
+} from '@/lib/meta-pixel';
 
 export function MetaPixel() {
   const pathname = usePathname();
+  const [enabled, setEnabled] = useState(false);
+  const lastPageViewRef = useRef<string | null>(null);
+  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
   useEffect(() => {
-    window.fbq?.('track', 'PageView');
-  }, [pathname]);
+    const shouldEnable = Boolean(pixelId) && prepareMetaTrackingUrl(pathname);
+    window.fbq?.('consent', shouldEnable ? 'grant' : 'revoke');
+
+    if (!shouldEnable) {
+      lastPageViewRef.current = null;
+    }
+
+    const timeout = window.setTimeout(() => setEnabled(shouldEnable), 0);
+    return () => window.clearTimeout(timeout);
+  }, [pathname, pixelId]);
+
+  const trackPageView = useCallback(() => {
+    if (!enabled || lastPageViewRef.current === pathname) return;
+    if (trackMetaEvent('PageView')) {
+      lastPageViewRef.current = pathname;
+    }
+  }, [enabled, pathname]);
+
+  useEffect(() => {
+    trackPageView();
+  }, [trackPageView]);
+
+  if (!pixelId || !enabled) return null;
 
   return (
     <>
       <Script
         id="meta-pixel"
         strategy="afterInteractive"
+        onReady={trackPageView}
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -34,7 +55,7 @@ export function MetaPixel() {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${META_PIXEL_ID}');
+            fbq('init', '${pixelId}');
           `,
         }}
       />
@@ -43,7 +64,7 @@ export function MetaPixel() {
           height="1"
           width="1"
           style={{ display: 'none' }}
-          src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+          src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
           alt=""
         />
       </noscript>

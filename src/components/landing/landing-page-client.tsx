@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, Suspense } from 'react';
+import { useState, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
@@ -18,7 +18,12 @@ import { Faq } from '@/components/landing/faq';
 import { ContactSection } from '@/components/landing/contact-section';
 import { LandingCheckoutModal } from '@/components/landing/landing-checkout-modal';
 import { type BillingPlanId } from '@/constants/billing-plans';
-import { trackLead } from '@/lib/funnel-analytics';
+import {
+  trackInitiateCheckout,
+  trackLandingCtaClick,
+  type LandingCtaClick,
+} from '@/lib/funnel-analytics';
+import { trackPricingView } from '@/lib/meta-pixel';
 
 interface ModalState {
   isOpen: boolean;
@@ -47,28 +52,50 @@ function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
 
 function LandingPageClientInner() {
   const searchParams = useSearchParams();
-  const [modal, setModal] = useState<ModalState>(CLOSED);
-
-  const openCheckout = useCallback((plan?: BillingPlanId) => {
-    trackLead('Landing CTA', { plan });
-    setModal({ isOpen: true, initialPlan: plan ?? 'annual', returnOrderId: null });
-  }, []);
-
-  const closeModal = useCallback(() => setModal(CLOSED), []);
-
-  useEffect(() => {
+  const [modal, setModal] = useState<ModalState>(() => {
     const checkoutParam = searchParams.get('checkout');
     const orderId = searchParams.get('orderId');
 
     if (checkoutParam === 'success' && orderId) {
-      setModal({ isOpen: true, initialPlan: 'annual', returnOrderId: orderId });
-      return;
+      return { isOpen: true, initialPlan: 'annual', returnOrderId: orderId };
     }
 
     if (checkoutParam === '1') {
-      openCheckout('annual');
+      return { isOpen: true, initialPlan: 'annual', returnOrderId: null };
     }
-  }, [searchParams, openCheckout]);
+
+    return CLOSED;
+  });
+  const modalOpenRef = useRef(modal.isOpen);
+  const pricingViewTrackedRef = useRef(false);
+
+  const openCheckout = useCallback((plan?: BillingPlanId, cta?: LandingCtaClick) => {
+    if (modalOpenRef.current) return;
+
+    const planId = plan ?? 'annual';
+    modalOpenRef.current = true;
+    trackLandingCtaClick(
+      cta ?? {
+        ctaLocation: 'landing',
+        ctaLabel: 'Assinar agora',
+        action: 'open_checkout',
+        planId,
+      },
+    );
+    trackInitiateCheckout(planId);
+    setModal({ isOpen: true, initialPlan: planId, returnOrderId: null });
+  }, []);
+
+  const closeModal = useCallback(() => {
+    modalOpenRef.current = false;
+    setModal(CLOSED);
+  }, []);
+
+  const trackPricingViewOnce = useCallback(() => {
+    if (pricingViewTrackedRef.current) return;
+    pricingViewTrackedRef.current = true;
+    trackPricingView();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
@@ -104,7 +131,14 @@ function LandingPageClientInner() {
             </Link>
             <a
               href="#pricing"
-              onClick={(e) => handleAnchorClick(e, 'pricing')}
+              onClick={(e) => {
+                trackLandingCtaClick({
+                  ctaLocation: 'navbar',
+                  ctaLabel: 'Começar agora',
+                  action: 'scroll_to_pricing',
+                });
+                handleAnchorClick(e, 'pricing');
+              }}
               className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-4 py-2.5 pr-9 text-sm font-semibold sm:px-5 sm:py-3 sm:pr-10"
             >
               Começar agora
@@ -126,7 +160,7 @@ function LandingPageClientInner() {
       <TrustStrip />
 
       {/* 4. Preços #1 — logo acima do fold inferior */}
-      <PricingSection id="pricing" onCta={openCheckout} />
+      <PricingSection id="pricing" onCta={openCheckout} onViewed={trackPricingViewOnce} />
 
       {/* 5. A verdade que ninguém te conta */}
       <PainTruthSection onCta={openCheckout} />
@@ -144,7 +178,12 @@ function LandingPageClientInner() {
       <SocialProof onCta={openCheckout} />
 
       {/* 10. Preços #2 */}
-      <PricingSection id="pricing-compact" onCta={openCheckout} compact />
+      <PricingSection
+        id="pricing-compact"
+        onCta={openCheckout}
+        onViewed={trackPricingViewOnce}
+        compact
+      />
 
       {/* 11. Suporte */}
       <ContactSection />
@@ -178,7 +217,14 @@ function LandingPageClientInner() {
           <div className="flex flex-col items-center gap-3">
             <button
               type="button"
-              onClick={() => openCheckout()}
+              onClick={() =>
+                openCheckout('annual', {
+                  ctaLocation: 'final_cta',
+                  ctaLabel: 'Assinar agora',
+                  action: 'open_checkout',
+                  planId: 'annual',
+                })
+              }
               className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-base font-semibold"
             >
               Assinar agora
@@ -219,7 +265,14 @@ function LandingPageClientInner() {
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95">
         <button
           type="button"
-          onClick={() => openCheckout()}
+          onClick={() =>
+            openCheckout('annual', {
+              ctaLocation: 'mobile_sticky',
+              ctaLabel: 'Assinar agora',
+              action: 'open_checkout',
+              planId: 'annual',
+            })
+          }
           className="btn-brand-gradient relative flex w-full items-center justify-center rounded-full px-6 py-4 pr-12 text-base font-semibold"
         >
           Assinar agora

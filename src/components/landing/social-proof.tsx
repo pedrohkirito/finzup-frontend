@@ -2,6 +2,7 @@
 
 import { ChevronRight, Star } from 'lucide-react';
 import { type BillingPlanId } from '@/constants/billing-plans';
+import { type LandingCtaClick } from '@/lib/funnel-analytics';
 
 const testimonials: { quote: string; name: string; detail?: string }[] = [
   {
@@ -19,7 +20,7 @@ const testimonials: { quote: string; name: string; detail?: string }[] = [
 ];
 
 interface SocialProofProps {
-  onCta?: (plan?: BillingPlanId) => void;
+  onCta?: (plan?: BillingPlanId, cta?: LandingCtaClick) => void;
 }
 
 export function SocialProof({ onCta }: SocialProofProps) {
@@ -50,7 +51,7 @@ export function SocialProof({ onCta }: SocialProofProps) {
                 ))}
               </div>
               <blockquote className="flex-1 text-base leading-relaxed text-slate-700 dark:text-slate-300">
-                "{t.quote}"
+                &ldquo;{t.quote}&rdquo;
               </blockquote>
               <figcaption className="mt-5 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-950 dark:text-brand-300">
@@ -71,7 +72,14 @@ export function SocialProof({ onCta }: SocialProofProps) {
           <div className="mt-12 text-center">
             <button
               type="button"
-              onClick={() => onCta()}
+              onClick={() =>
+                onCta('annual', {
+                  ctaLocation: 'social_proof',
+                  ctaLabel: 'Assinar agora',
+                  action: 'open_checkout',
+                  planId: 'annual',
+                })
+              }
               className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
             >
               Assinar agora

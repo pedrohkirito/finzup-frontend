@@ -9,12 +9,6 @@ import { Button } from '@/components/ui/button';
 import { type BillingPlanId } from '@/constants/billing-plans';
 import { useAuth, useLogout } from '@/hooks/use-auth';
 import { api } from '@/lib/api';
-import {
-  trackCheckoutCanceled,
-  trackInitiateCheckout,
-  trackSubscriptionPageViewed,
-  trackSubscriptionStarted,
-} from '@/lib/funnel-analytics';
 
 type CheckoutStep = 'plans' | 'checkout' | 'processing';
 
@@ -55,7 +49,6 @@ export default function AssinaturaPageContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const sessionIdParam = searchParams.get('session_id');
-  const subscriptionPageTrackedRef = useRef(false);
   const processingStartedRef = useRef(false);
 
   const waitForAccess = useCallback(async () => {
@@ -66,7 +59,6 @@ export default function AssinaturaPageContent() {
         const result = await refetch();
         if (result.data?.billing?.hasAccess) {
           clearInterval(interval);
-          trackSubscriptionStarted(result.data.id, result.data.billing);
           queryClient.invalidateQueries();
           router.replace('/dashboard');
           resolve(true);
@@ -109,13 +101,6 @@ export default function AssinaturaPageContent() {
   );
 
   useEffect(() => {
-    if (!isLoading && user && !subscriptionPageTrackedRef.current) {
-      subscriptionPageTrackedRef.current = true;
-      trackSubscriptionPageViewed(user.billing?.trialExpired ?? false);
-    }
-  }, [isLoading, user]);
-
-  useEffect(() => {
     if (!isLoading && isError) {
       router.replace('/login');
     }
@@ -138,7 +123,6 @@ export default function AssinaturaPageContent() {
       setErrorMessage(null);
       setCheckoutMessage(null);
       setLoadingPlan(plan);
-      trackInitiateCheckout(plan);
 
       try {
         const data = await api.post<CheckoutSessionResponse>('/billing/checkout-session', { plan });
@@ -165,7 +149,6 @@ export default function AssinaturaPageContent() {
   );
 
   const handleCheckoutBack = useCallback(() => {
-    trackCheckoutCanceled();
     setCheckoutSession(null);
     setSelectedPlan(null);
     setErrorMessage(null);

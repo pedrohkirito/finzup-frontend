@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { LegalPageLayout } from '@/components/legal/legal-page-layout';
-import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL, WEBSITE_URL, COMPANY_LEGAL_NAME, COMPANY_CNPJ, COMPANY_ADDRESS, LGPD_RESPONSE_DAYS, ANPD_URL } from '@/content/legal/constants';
+import { PRIVACY_LAST_UPDATED, SUPPORT_EMAIL, WEBSITE_URL, COMPANY_LEGAL_NAME, COMPANY_CNPJ, COMPANY_ADDRESS, LGPD_RESPONSE_DAYS, ANPD_URL } from '@/content/legal/constants';
 
 export const metadata: Metadata = {
   title: 'Política de Privacidade — Finzup',
@@ -324,8 +324,8 @@ const privacySections = [
             o site é utilizado e como os usuários percorrem etapas como cadastro e assinatura;
           </li>
           <li>
-            <strong>Marketing e medição:</strong> Meta (Facebook Pixel), para medir cadastros e
-            assinaturas originados de campanhas.
+            <strong>Marketing e medição:</strong> Meta (Facebook Pixel), para medir a visualização de
+            ofertas, o início do checkout e compras originadas de campanhas.
           </li>
         </ul>
         <p>
@@ -369,7 +369,7 @@ export default function PrivacyPolicyPage() {
   return (
     <LegalPageLayout
       title="Política de Privacidade"
-      lastUpdated={LEGAL_LAST_UPDATED}
+      lastUpdated={PRIVACY_LAST_UPDATED}
       sections={privacySections}
     />
   );
