@@ -19,16 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://finzup.com.br'),
   title: 'Finzup — Organização Financeira',
   description: 'Gerencie receitas, despesas e investimentos de forma simples',
-  icons: {
-    icon: {
-      url: '/images/finzup_logo.svg',
-      type: 'image/svg+xml',
-    },
-    shortcut: '/images/finzup_logo.svg',
-    apple: '/images/finzup_logo.svg',
-  },
 };
 
 export const viewport: Viewport = {

@@ -238,10 +238,7 @@ function LandingPageClientInner() {
       <footer className="border-t border-slate-200 bg-slate-50 py-12 pb-24 md:pb-12 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-2.5">
-              <Logo size={28} className="h-7 w-7" />
-              <span className="text-lg font-bold text-slate-900 dark:text-white">Finzup</span>
-            </div>
+            <Logo variant="isologo" size={28} className="h-7 w-auto" />
             <p className="text-sm text-slate-500 dark:text-slate-400">
               © {new Date().getFullYear()} Finzup. Todos os direitos reservados.
             </p>

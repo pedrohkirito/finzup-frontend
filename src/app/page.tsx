@@ -25,13 +25,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
+    url: 'https://finzup.com.br',
     title: 'Finzup — Controle Financeiro Pessoal com IA',
     description:
       'Tenha controle financeiro pessoal com a Finzup. Organize receitas e despesas, automatize lançamentos e use a IA para economizar e planejar seu dinheiro.',
     siteName: 'Finzup',
     images: [
       {
-        url: '/images/finzup_isologo.svg',
+        url: '/images/finzup_isologo.png',
         width: 1407,
         height: 391,
         alt: 'Finzup — Controle Financeiro Pessoal',
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
     title: 'Finzup — Controle Financeiro Pessoal com IA',
     description:
       'Tenha controle financeiro pessoal com a Finzup. Organize receitas e despesas, automatize lançamentos e use a IA para economizar e planejar seu dinheiro.',
-    images: ['/images/finzup_isologo.svg'],
+    images: ['/images/finzup_isologo.png'],
   },
 };
 
