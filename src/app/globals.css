@@ -170,6 +170,48 @@ body {
   }
 }
 
+@keyframes ai-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@utility ai-float {
+  animation: ai-float 4.2s ease-in-out infinite;
+}
+
+@keyframes ai-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility ai-msg {
+  opacity: 0;
+  animation: ai-msg-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-float {
+    animation: none;
+  }
+
+  .ai-msg {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+}
+
 @keyframes btn-cta-pulse {
   0%, 100% {
     box-shadow:
