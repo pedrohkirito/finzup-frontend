@@ -1,8 +1,7 @@
 'use client';
 
 import { ChevronRight, Star } from 'lucide-react';
-import { type BillingPlanId } from '@/constants/billing-plans';
-import { type LandingCtaClick } from '@/lib/funnel-analytics';
+import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
 const testimonials: { quote: string; name: string; detail?: string }[] = [
   {
@@ -19,11 +18,7 @@ const testimonials: { quote: string; name: string; detail?: string }[] = [
   },
 ];
 
-interface SocialProofProps {
-  onCta?: (plan?: BillingPlanId, cta?: LandingCtaClick) => void;
-}
-
-export function SocialProof({ onCta }: SocialProofProps) {
+export function SocialProof() {
   return (
     <section className="border-y border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -62,25 +57,22 @@ export function SocialProof({ onCta }: SocialProofProps) {
           ))}
         </div>
 
-        {onCta && (
-          <div className="mt-12 text-center">
-            <button
-              type="button"
-              onClick={() =>
-                onCta('annual', {
-                  ctaLocation: 'social_proof',
-                  ctaLabel: 'Assinar agora',
-                  action: 'open_checkout',
-                  planId: 'annual',
-                })
-              }
-              className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
-            >
-              Assinar agora
-              <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
-            </button>
-          </div>
-        )}
+        <div className="mt-12 text-center">
+          <a
+            href="#pricing"
+            onClick={() =>
+              trackLandingCtaClick({
+                ctaLocation: 'social_proof',
+                ctaLabel: 'Assinar agora',
+                action: 'scroll_to_pricing',
+              })
+            }
+            className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-8 py-4 pr-12 text-sm font-semibold"
+          >
+            Assinar agora
+            <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
+          </a>
+        </div>
       </div>
     </section>
   );

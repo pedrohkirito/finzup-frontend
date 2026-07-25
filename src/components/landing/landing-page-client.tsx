@@ -167,7 +167,7 @@ function LandingPageClientInner() {
       <AiAssistantSection />
 
       {/* 7. Depoimentos */}
-      <SocialProof onCta={openCheckout} />
+      <SocialProof />
 
       {/* 8. FAQ */}
       <Faq />
