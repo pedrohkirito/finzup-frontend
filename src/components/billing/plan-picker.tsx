@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Loader2, Star, ChevronRight } from 'lucide-react';
+import { Check, Loader2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { trackLandingCtaClick, type LandingCtaClick } from '@/lib/funnel-analytics';
@@ -65,8 +65,10 @@ export function PlanPicker({
 
   const renderPrice = (planId: BillingPlanId) => {
     const plan = BILLING_PLANS[planId];
-    const { int, dec } = formatPriceParts(plan.total);
-    const intervalSuffix = planPriceIntervalSuffix(plan.intervalMonths);
+    const isAnnual = planId === 'annual';
+    const displayTotal = isAnnual ? ANNUAL_INSTALLMENT.value : plan.total;
+    const { int, dec } = formatPriceParts(displayTotal);
+    const intervalSuffix = isAnnual ? '/mês' : planPriceIntervalSuffix(plan.intervalMonths);
 
     return (
       <>
@@ -78,22 +80,24 @@ export function PlanPicker({
           <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">{intervalSuffix}</span>
         </div>
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          {planBillingLabel(planId)}
+          {isAnnual
+            ? `Em ${ANNUAL_INSTALLMENT.count}x no cartão`
+            : planBillingLabel(planId)}
         </p>
         {/* Mesma altura em todos os cards para manter o alinhamento do grid */}
         <p
           className={`mt-1.5 text-sm font-medium ${
-            planId === 'annual'
+            isAnnual
               ? 'text-slate-600 dark:text-slate-300'
               : 'invisible select-none'
           }`}
-          aria-hidden={planId !== 'annual'}
+          aria-hidden={!isAnnual}
         >
           ou{' '}
           <span className="font-bold text-slate-900 dark:text-white">
-            {ANNUAL_INSTALLMENT.count}x de R${formatBRL(ANNUAL_INSTALLMENT.value)}
+            R${formatBRL(plan.total)}
           </span>{' '}
-          no cartão
+          à vista
         </p>
       </>
     );
@@ -215,7 +219,7 @@ export function PlanPicker({
         </ScrollArea>
       </div>
 
-      <div className="mx-auto grid max-w-6xl gap-4 overflow-visible sm:gap-6 lg:grid-cols-3 lg:items-stretch">
+      <div className="mx-auto grid max-w-4xl gap-4 overflow-visible sm:gap-6 lg:grid-cols-2 lg:items-stretch">
         {BILLING_PLAN_ORDER.map((planId) => {
           const plan = BILLING_PLANS[planId];
           const discount = planDiscountPercent(planId);
@@ -233,7 +237,6 @@ export function PlanPicker({
               {(planId === 'annual' || isSelected(planId)) && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white shadow-md ${mode === 'landing' ? 'brand-gradient-bg-r' : 'bg-brand-500'}`}>
-                    {planId === 'semester' && isSelected(planId) && <Star className="h-3.5 w-3.5" />}
                     {planId === 'annual' ? 'Mais escolhido · Melhor custo-benefício' : 'Selecionado'}
                   </span>
                 </div>
@@ -244,7 +247,7 @@ export function PlanPicker({
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Plano {plan.label}</h3>
                   </div>
-                  {discount != null && discount > 0 && monthlyEquivalentTotal != null && planId !== 'semester' && (
+                  {discount != null && discount > 0 && monthlyEquivalentTotal != null && (
                     <div className="flex flex-shrink-0 items-center gap-2">
                       <span className="text-xs font-medium text-slate-400 line-through decoration-slate-400/80 dark:text-slate-500 dark:decoration-slate-500/80">
                         R$ {formatBRL(monthlyEquivalentTotal)}{planPriceIntervalSuffix(plan.intervalMonths)}

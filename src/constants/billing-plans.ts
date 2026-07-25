@@ -1,6 +1,7 @@
 export type BillingPlanId = 'monthly' | 'semester' | 'annual';
 
-export const BILLING_PLAN_ORDER: BillingPlanId[] = ['monthly', 'semester', 'annual'];
+/** Planos exibidos no frontend (semestral oculto). */
+export const BILLING_PLAN_ORDER: BillingPlanId[] = ['monthly', 'annual'];
 
 export interface BillingPlanConfig {
   id: BillingPlanId;
@@ -16,7 +17,7 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
   monthly: {
     id: 'monthly',
     label: 'Mensal',
-    total: 67.9,
+    total: 47.9,
     intervalMonths: 1,
     aiCredits: 250,
     description: 'Sem compromisso de longo prazo',
