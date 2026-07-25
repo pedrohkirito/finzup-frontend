@@ -10,7 +10,7 @@ const outcomes = [
 
 export function MethodSection() {
   return (
-    <section id="metodo" className="relative overflow-hidden bg-slate-950 py-24 sm:py-32">
+    <section id="metodo" className="relative overflow-hidden bg-slate-950 pt-16 pb-24 sm:pt-20 sm:pb-32">
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/20 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-[400px] w-[400px] translate-x-1/4 translate-y-1/3 rounded-full bg-brand-green-500/15 blur-3xl" />
@@ -18,7 +18,7 @@ export function MethodSection() {
 
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <p className="mb-6 text-sm font-semibold tracking-[0.2em] text-brand-300 uppercase">
-          O Método Finzup
+          Como funciona
         </p>
 
         <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
