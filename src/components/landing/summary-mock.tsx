@@ -63,20 +63,43 @@ const summaryCards = [
 
 export function LandingSummaryMock() {
   return (
-    <div className="relative mx-auto mt-12 max-w-6xl sm:mt-16">
-      <div className="mb-4 sm:hidden">
-        <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Resumo do mês</h3>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Visão geral das suas finanças</p>
-      </div>
+    <div className="relative mx-auto max-w-6xl">
+      <div
+        className="pointer-events-none absolute -inset-4 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(3,182,230,0.14)_0%,transparent_68%)] blur-2xl dark:bg-[radial-gradient(ellipse_at_center,rgba(3,182,230,0.12)_0%,transparent_68%)]"
+        aria-hidden
+      />
 
-      <div className="relative sm:overflow-hidden sm:rounded-2xl sm:border sm:border-slate-200 sm:bg-slate-50/80 sm:p-6 sm:shadow-2xl sm:shadow-slate-300/40 sm:backdrop-blur dark:sm:border-slate-800 dark:sm:bg-slate-900/80 dark:sm:shadow-none">
-        <div className="mb-4 hidden sm:block">
-          <h3 className="text-base font-bold tracking-tight text-slate-900 sm:text-lg dark:text-white">
+      <div className="mb-4 sm:hidden">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-brand-green-500" aria-hidden />
+          <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Resumo do mês
           </h3>
-          <p className="mt-0.5 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
-            Demonstração — veja como fica seu controle financeiro
-          </p>
+        </div>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Visão geral das suas finanças
+        </p>
+      </div>
+
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/90 p-4 shadow-2xl shadow-brand-500/10 ring-1 ring-brand-500/5 backdrop-blur sm:p-6 dark:border-slate-800 dark:bg-slate-900/85 dark:shadow-brand-500/5 dark:ring-white/5">
+        <div className="mb-4 hidden items-end justify-between gap-4 sm:flex">
+          <div>
+            <div className="mb-1 flex items-center gap-2">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand-green-500" aria-hidden />
+              <p className="text-[11px] font-bold tracking-[0.18em] text-brand-600 uppercase dark:text-brand-400">
+                Ao vivo na conta
+              </p>
+            </div>
+            <h3 className="text-base font-bold tracking-tight text-slate-900 sm:text-lg dark:text-white">
+              Resumo do mês
+            </h3>
+            <p className="mt-0.5 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
+              Demonstração — veja como fica seu controle financeiro
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full border border-brand-200/70 bg-white/80 px-3 py-1 text-[11px] font-semibold tracking-wide text-brand-700 dark:border-brand-500/25 dark:bg-brand-950/40 dark:text-brand-300">
+            Julho · 2026
+          </span>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -148,8 +171,6 @@ export function LandingSummaryMock() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute -top-6 -right-6 hidden h-32 w-32 animate-pulse rounded-full bg-brand-400/15 blur-2xl sm:block" />
-      <div className="pointer-events-none absolute -bottom-6 -left-6 hidden h-32 w-32 animate-pulse rounded-full bg-brand-green-400/15 blur-2xl sm:block" />
     </div>
   );
 }
