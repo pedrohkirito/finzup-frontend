@@ -24,7 +24,7 @@ const faqs = [
   {
     question: 'Como funciona o Método Finzup?',
     answer:
-      'É a adaptação brasileira do método de Dave Ramsey. Preferimos não explicar por aqui: quando você entra, ele já está montado com os seus números.',
+      'É um método criado pela Finzup, baseado no método de Dave Ramsey. Quando você entra, ele já está montado com os seus números.',
   },
   {
     question: 'A Finzup se conecta ao meu banco?',
