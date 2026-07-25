@@ -9,7 +9,7 @@ import {
 export interface LandingCtaClick {
   ctaLocation: string;
   ctaLabel: string;
-  action: 'open_checkout' | 'scroll_to_pricing' | 'register';
+  action: 'open_checkout' | 'scroll_to_pricing' | 'scroll_to_section' | 'register';
   planId?: BillingPlanId;
 }
 

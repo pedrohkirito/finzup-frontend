@@ -3,11 +3,11 @@ import { LandingPageClient } from '@/components/landing/landing-page-client';
 import { Utmify } from '@/components/analytics/utmify';
 
 export const metadata: Metadata = {
-  title: 'Finzup — Controle Financeiro Pessoal com IA',
+  title: 'Finzup — Método Finzup para sair das dívidas e ter liberdade financeira',
   description:
-    'Tenha controle financeiro pessoal com a Finzup. Organize receitas e despesas, automatize lançamentos e use a IA para economizar e planejar seu dinheiro.',
+    'O Método Finzup, baseado no método de Dave Ramsey, já ajudou milhões de pessoas a saírem das dívidas no mundo. Conheça a plataforma e o Assistente de IA que trazem esse método para a sua realidade.',
   keywords:
-    'controle financeiro, finanças pessoais, orçamento pessoal, controle de gastos, gestão financeira, app financeiro, investimentos pessoais, recorrência automática',
+    'sair das dívidas, método finzup, liberdade financeira, controle financeiro, quitar dívidas, dave ramsey, assistente de ia financeiro, app financeiro, orçamento pessoal',
   authors: [{ name: 'Finzup' }],
   creator: 'Finzup',
   publisher: 'Finzup',
@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://finzup.com.br',
-    title: 'Finzup — Controle Financeiro Pessoal com IA',
+    title: 'Finzup — Método Finzup para sair das dívidas e ter liberdade financeira',
     description:
-      'Tenha controle financeiro pessoal com a Finzup. Organize receitas e despesas, automatize lançamentos e use a IA para economizar e planejar seu dinheiro.',
+      'O Método Finzup, baseado no método de Dave Ramsey, já ajudou milhões de pessoas a saírem das dívidas no mundo. Conheça a plataforma e o Assistente de IA que trazem esse método para a sua realidade.',
     siteName: 'Finzup',
     images: [
       {
@@ -41,9 +41,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Finzup — Controle Financeiro Pessoal com IA',
+    title: 'Finzup — Método Finzup para sair das dívidas e ter liberdade financeira',
     description:
-      'Tenha controle financeiro pessoal com a Finzup. Organize receitas e despesas, automatize lançamentos e use a IA para economizar e planejar seu dinheiro.',
+      'O Método Finzup, baseado no método de Dave Ramsey, já ajudou milhões de pessoas a saírem das dívidas no mundo. Conheça a plataforma e o Assistente de IA que trazem esse método para a sua realidade.',
     images: ['/images/finzup_isologo.png'],
   },
 };

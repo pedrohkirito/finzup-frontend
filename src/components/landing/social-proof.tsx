@@ -28,15 +28,9 @@ export function SocialProof({ onCta }: SocialProofProps) {
     <section className="border-y border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-widest uppercase brand-gradient-text">
-            Resultados reais
-          </p>
-          <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            Veja o que nossos clientes dizem
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            O que quem usa está dizendo
           </h2>
-          <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
-            Pessoas reais que pararam de recomeçar do zero todo mês.
-          </p>
         </div>
 
         <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2">
