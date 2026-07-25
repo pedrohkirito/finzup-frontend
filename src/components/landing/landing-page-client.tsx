@@ -182,15 +182,16 @@ function LandingPageClientInner() {
       <LifeComparisonSection onCta={openCheckout} />
 
       {/* 12. CTA final */}
-      <section className="relative overflow-hidden bg-slate-950 py-20 sm:py-28">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/20 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] translate-y-1/2 -translate-x-1/4 rounded-full bg-brand-green-500/15 blur-3xl" />
-          <div className="absolute right-0 bottom-0 h-[400px] w-[400px] translate-y-1/2 translate-x-1/4 rounded-full bg-brand-400/15 blur-3xl" />
+      <section className="relative overflow-hidden py-20 sm:py-28">
+        <div className="absolute inset-0 -z-10" aria-hidden>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-brand-50/40 to-brand-green-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950" />
+          <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/10 blur-3xl dark:bg-brand-500/15" />
+          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] translate-y-1/2 -translate-x-1/4 rounded-full bg-brand-green-500/10 blur-3xl dark:bg-brand-green-500/15" />
+          <div className="absolute right-0 bottom-0 h-[400px] w-[400px] translate-y-1/2 translate-x-1/4 rounded-full bg-brand-400/10 blur-3xl dark:bg-brand-400/15" />
         </div>
 
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="mb-8 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+          <h2 className="mb-8 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
             Continue girando em círculo…
             <br />
             <span className="brand-gradient-text">ou saia da dívida de vez</span>.
@@ -211,7 +212,7 @@ function LandingPageClientInner() {
             Assinar agora
             <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </button>
-          <p className="mt-4 text-sm text-slate-500">Sem taxa de cancelamento · Acesso imediato</p>
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Sem taxa de cancelamento · Acesso imediato</p>
         </div>
       </section>
 
