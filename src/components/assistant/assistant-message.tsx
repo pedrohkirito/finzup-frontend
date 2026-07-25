@@ -29,15 +29,15 @@ function headingClassName(
       ? 'mt-5 '
       : 'mt-3 ';
   if (isSectionHeading(section)) {
-    return `${spacing}text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400`;
+    return `${spacing}text-xs font-semibold uppercase tracking-wide text-slate-500`;
   }
   switch (level) {
     case 1:
-      return `${spacing}text-base font-semibold text-slate-900 dark:text-white`;
+      return `${spacing}text-base font-semibold text-white`;
     case 2:
-      return `${spacing}text-sm font-semibold text-slate-800 dark:text-slate-100`;
+      return `${spacing}text-sm font-semibold text-slate-100`;
     default:
-      return `${spacing}text-xs font-semibold text-slate-600 dark:text-slate-300`;
+      return `${spacing}text-xs font-semibold text-slate-300`;
   }
 }
 
@@ -47,7 +47,7 @@ function parseInlineBold(text: string): ReactNode[] {
     const match = part.match(/^\*\*(.+?)\*\*$/);
     if (match) {
       return (
-        <strong key={i} className="font-semibold text-slate-900 dark:text-white">
+        <strong key={i} className="font-semibold text-white">
           {match[1]}
         </strong>
       );
@@ -235,11 +235,11 @@ function renderBulletList(items: { text: string; indent: number }[], key: string
       {items.map((item, i) => (
         <li
           key={i}
-          className={`flex gap-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300 ${
+          className={`flex gap-2 text-sm leading-relaxed text-slate-300 ${
             item.indent > 0 ? 'ml-4' : ''
           }`}
         >
-          <span className="shrink-0 text-slate-500 dark:text-slate-400" aria-hidden>
+          <span className="shrink-0 text-slate-500" aria-hidden>
             •
           </span>
           <span className="min-w-0">{parseInlineBold(item.text)}</span>
@@ -253,17 +253,12 @@ function renderNumberedSections(sections: NumberedSection[], key: string): React
   return (
     <ol key={key} className="mt-1.5 list-none space-y-3">
       {sections.map((section, i) => (
-        <li key={i} className="flex gap-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          <span
-            className="shrink-0 font-semibold text-slate-800 dark:text-slate-100"
-            aria-hidden
-          >
+        <li key={i} className="flex gap-2 text-sm leading-relaxed text-slate-300">
+          <span className="shrink-0 font-semibold text-slate-100" aria-hidden>
             {i + 1}.
           </span>
           <div className="min-w-0">
-            <div className="text-slate-700 dark:text-slate-300">
-              {parseInlineBold(section.title)}
-            </div>
+            <div className="text-slate-300">{parseInlineBold(section.title)}</div>
             {section.bullets.length > 0 && (
               <div className="mt-1.5 font-normal">
                 {renderBulletList(section.bullets, `${key}-bullets-${i}`)}
@@ -337,7 +332,7 @@ export function AssistantMessage({ content }: { content: string }) {
       elements.push(
         <p
           key={`allocation-${index}`}
-          className="text-sm leading-relaxed text-slate-800 dark:text-slate-200"
+          className="text-sm leading-relaxed text-slate-200"
         >
           {parseInlineBold(unit.text)}
         </p>,
@@ -385,7 +380,7 @@ export function AssistantMessage({ content }: { content: string }) {
     }
 
     elements.push(
-      <p key={`para-${index}`} className="text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+      <p key={`para-${index}`} className="text-sm leading-relaxed text-slate-200">
         {parseInlineBold(unit.text)}
       </p>,
     );

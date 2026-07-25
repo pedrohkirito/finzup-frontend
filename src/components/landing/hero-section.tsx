@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react';
+import { Logo } from '@/components/brand/logo';
 import { HeroPlatformMock } from '@/components/landing/hero-platform-mock';
 import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
@@ -16,12 +17,14 @@ export function HeroSection() {
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-14 xl:gap-20">
           {/* Copy */}
           <div className="mx-auto flex max-w-xl flex-col items-center text-center lg:mx-0 lg:max-w-none lg:items-start lg:text-left">
-            <p
-              className="hero-reveal mb-6 text-4xl font-extrabold tracking-tight brand-gradient-text sm:mb-8 sm:text-5xl lg:text-6xl"
-              style={{ animationDelay: '0ms' }}
-            >
-              Finzup
-            </p>
+            <div className="hero-reveal mb-6 sm:mb-8" style={{ animationDelay: '0ms' }}>
+              <Logo
+                variant="isologo"
+                size={56}
+                className="h-10 w-auto sm:h-12 lg:h-14"
+                priority
+              />
+            </div>
 
             <h1 className="w-full">
               <span

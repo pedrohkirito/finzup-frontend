@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2, Send, Sparkles, Check } from 'lucide-react';
+import { Bot, Loader2, Send, Sparkles, Check } from 'lucide-react';
 import { AssistantMessage } from '@/components/assistant/assistant-message';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -37,6 +37,7 @@ import {
   writeAssistantChatSession,
   type ChatMessage,
 } from '@/lib/assistant-chat-session';
+import { cn } from '@/lib/utils';
 
 export type { ChatMessage };
 
@@ -297,128 +298,157 @@ export function AssistantChat({
     lastAwaitingConfirmation;
 
   return (
-    <div className={`flex flex-col ${compact ? 'h-full min-h-0' : 'h-[calc(100vh-8rem)]'}`}>
-      <div
-        className={`flex flex-1 flex-col overflow-hidden border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 ${
-          compact ? 'min-h-0 rounded-none border-0 bg-transparent dark:bg-transparent' : 'rounded-2xl'
-        }`}
-      >
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-          {summaryLoading && pageKey !== 'generic' && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
-            </div>
-          )}
-          {showOpening && (
-            <div className="space-y-4 py-2">
-              <div className="rounded-2xl border border-brand-200/80 bg-brand-50/50 px-4 py-3 dark:border-brand-900 dark:bg-brand-950/30">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
-                  {pageFlow.openingMessage}
-                </p>
+    <div className={cn('flex flex-col', compact ? 'h-full min-h-0' : 'h-[calc(100vh-10rem)]')}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <ScrollArea className={cn('flex-1', compact ? 'p-4' : 'p-4 sm:p-6')}>
+          <div className="space-y-4 sm:space-y-5">
+            {summaryLoading && pageKey !== 'generic' && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-brand-400" />
               </div>
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {pageFlow.openingActions.map((action, index) => (
-                    <Button
-                      key={`${action.label}-${index}`}
-                      type="button"
-                      size="sm"
-                      variant={action.variant === 'primary' ? 'default' : 'outline'}
-                      className={action.variant === 'primary' ? 'bg-brand-500 hover:bg-brand-600' : ''}
-                      onClick={() => void handleOpeningAction(action)}
-                      disabled={loading}
-                    >
-                      {action.label}
-                    </Button>
-                  ))}
+            )}
+
+            {showOpening && (
+              <div className="space-y-4 py-1">
+                <div className="flex justify-start gap-2.5">
+                  <div className="mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-green-500 text-white sm:flex">
+                    <Bot className="h-3.5 w-3.5" aria-hidden />
+                  </div>
+                  <div className="max-w-[92%] rounded-2xl rounded-tl-md bg-white/[0.08] px-4 py-3.5 text-sm leading-relaxed text-slate-200 sm:max-w-[85%]">
+                    {pageFlow.openingMessage}
+                  </div>
                 </div>
-                {pageFlow.suggestionAction && (
-                  <Button
-                    type="button"
-                    size="default"
-                    variant="outline"
-                    className="gap-1.5"
-                    onClick={() => void handleFixedSuggestion()}
-                    disabled={loading || credits <= 0}
-                    title={credits <= 0 ? 'Sem créditos' : undefined}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    {pageFlow.suggestionAction.label}
-                  </Button>
-                )}
+
+                <div className="space-y-2.5 sm:pl-9">
+                  <div className="flex flex-wrap gap-2">
+                    {pageFlow.openingActions.map((action, index) => (
+                      <button
+                        key={`${action.label}-${index}`}
+                        type="button"
+                        onClick={() => void handleOpeningAction(action)}
+                        disabled={loading}
+                        className={cn(
+                          'inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-semibold transition-opacity disabled:opacity-50',
+                          action.variant === 'primary'
+                            ? 'bg-gradient-to-r from-brand-500 to-brand-green-500 font-bold text-white shadow-md shadow-brand-500/25'
+                            : 'border border-white/[0.1] bg-white/[0.04] text-slate-400 hover:bg-white/[0.08] hover:text-slate-200',
+                        )}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                  {pageFlow.suggestionAction && (
+                    <button
+                      type="button"
+                      onClick={() => void handleFixedSuggestion()}
+                      disabled={loading || credits <= 0}
+                      title={credits <= 0 ? 'Sem créditos' : undefined}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 text-xs font-semibold text-brand-300 transition-colors hover:bg-brand-500/20 disabled:opacity-50"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      {pageFlow.suggestionAction.label}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {credits <= 0 && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-              Seus créditos de IA acabaram. Eles renovam automaticamente na próxima cobrança do seu plano.
-            </div>
-          )}
+            {credits <= 0 && (
+              <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+                Seus créditos de IA acabaram. Eles renovam automaticamente na próxima cobrança do seu
+                plano.
+              </div>
+            )}
 
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+            {messages.map((msg, i) => (
               <div
-                className={`max-w-[90%] rounded-2xl px-4 py-3 ${
-                  msg.role === 'user'
-                    ? 'bg-brand-500 text-sm leading-relaxed text-white'
-                    : 'border border-slate-200/80 bg-white py-3.5 dark:border-slate-800 dark:bg-slate-900'
-                }`}
-              >
-                {msg.role === 'assistant' ? (
-                  <AssistantMessage content={msg.content} />
-                ) : (
-                  msg.content
+                key={i}
+                className={cn(
+                  'flex',
+                  msg.role === 'user' ? 'justify-end' : 'justify-start gap-2.5',
                 )}
-              </div>
-              {showConfirmButton && i === messages.length - 1 && (
-                <Button
-                  type="button"
-                  size="sm"
-                  className="mt-2 gap-1.5 bg-brand-500 hover:bg-brand-600"
-                  onClick={() => void sendMessage('Confirmo')}
-                  disabled={loading}
+              >
+                {msg.role === 'assistant' && (
+                  <div className="mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-green-500 text-white sm:flex">
+                    <Bot className="h-3.5 w-3.5" aria-hidden />
+                  </div>
+                )}
+                <div
+                  className={cn(
+                    'max-w-[92%] sm:max-w-[85%]',
+                    msg.role === 'user'
+                      ? 'rounded-2xl rounded-tr-md bg-brand-500/25 px-4 py-3 text-sm leading-relaxed text-brand-100'
+                      : 'space-y-3',
+                  )}
                 >
-                  <Check className="h-3.5 w-3.5" />
-                  Confirmar cadastro
-                </Button>
-              )}
-            </div>
-          ))}
-
-          {loading && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-500 dark:bg-slate-900">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Pensando…
+                  {msg.role === 'assistant' ? (
+                    <div className="rounded-2xl rounded-tl-md bg-white/[0.08] px-4 py-3.5">
+                      <AssistantMessage content={msg.content} />
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
+                  {showConfirmButton && i === messages.length - 1 && (
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void sendMessage('Confirmo')}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-500 to-brand-green-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-brand-500/25 disabled:opacity-50"
+                      >
+                        <Check className="h-3.5 w-3.5" aria-hidden />
+                        Confirmar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => inputRef.current?.focus()}
+                        className="inline-flex items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-3.5 py-1.5 text-xs font-semibold text-slate-400 hover:bg-white/[0.08] hover:text-slate-200"
+                      >
+                        Ajustar valores
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-          <div ref={bottomRef} />
+            ))}
+
+            {loading && (
+              <div className="flex justify-start gap-2.5">
+                <div className="mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-green-500 text-white sm:flex">
+                  <Bot className="h-3.5 w-3.5" aria-hidden />
+                </div>
+                <div className="flex items-center gap-2 rounded-2xl rounded-tl-md bg-white/[0.08] px-4 py-3 text-sm text-slate-400">
+                  <Loader2 className="h-4 w-4 animate-spin text-brand-400" />
+                  Pensando…
+                </div>
+              </div>
+            )}
+            <div ref={bottomRef} />
           </div>
         </ScrollArea>
 
         {error && (
-          <p className="border-t border-slate-100 px-4 py-2 text-sm text-red-500 dark:border-slate-800">
-            {error}
-          </p>
+          <p className="border-t border-white/[0.08] px-4 py-2 text-sm text-red-400">{error}</p>
         )}
 
-        <div className={`shrink-0 border-t border-slate-200 dark:border-slate-800 ${compact ? 'p-3' : 'p-4'}`}>
+        <div
+          className={cn(
+            'shrink-0 border-t border-white/[0.08]',
+            compact ? 'p-3' : 'p-4',
+          )}
+        >
           {flowStarted && pageFlow?.suggestionAction && (
             <div className="mb-2">
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-1.5 px-2 text-xs text-brand-600 hover:text-brand-700"
                 onClick={() => void handleAnotherSuggestion()}
                 disabled={loading || credits <= 0}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-brand-300 transition-colors hover:bg-brand-500/10 hover:text-brand-200 disabled:opacity-50"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 Pedir outra sugestão
-              </Button>
+              </button>
             </div>
           )}
           <form
@@ -434,9 +464,14 @@ export function AssistantChat({
               onChange={(e) => setInput(e.target.value)}
               placeholder={credits > 0 ? 'Digite sua mensagem…' : 'Sem créditos disponíveis'}
               disabled={loading || credits <= 0}
-              className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="flex-1 rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-brand-500/50 focus:bg-white/[0.06] disabled:opacity-50"
             />
-            <Button type="submit" size="icon" disabled={loading || credits <= 0 || !input.trim()}>
+            <Button
+              type="submit"
+              size="icon"
+              disabled={loading || credits <= 0 || !input.trim()}
+              className="shrink-0 rounded-xl bg-gradient-to-br from-brand-500 to-brand-green-500 text-white shadow-md shadow-brand-500/25 hover:opacity-90 disabled:opacity-40"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </form>
