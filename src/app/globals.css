@@ -146,6 +146,30 @@ body {
   background-image: linear-gradient(90deg, #03b6e6 0%, #22bd7b 100%);
 }
 
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1.1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility hero-reveal {
+  opacity: 0;
+  animation: hero-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-reveal {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+}
+
 @keyframes btn-cta-pulse {
   0%, 100% {
     box-shadow:
