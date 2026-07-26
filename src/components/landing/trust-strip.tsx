@@ -9,7 +9,7 @@ const badges = [
 
 export function TrustStrip() {
   return (
-    <div className="border-y border-slate-200/70 bg-slate-50/80 py-4 dark:border-slate-800/70 dark:bg-slate-900/40">
+    <div data-landing-section="trust_strip" className="border-y border-slate-200/70 bg-slate-50/80 py-4 dark:border-slate-800/70 dark:bg-slate-900/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
           {badges.map(({ icon: Icon, text }) => (

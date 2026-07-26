@@ -98,3 +98,22 @@ export function trackLandingCheckoutAccountCreated(plan: BillingPlanId) {
     plan_label: planConfig.label,
   });
 }
+
+export function trackLandingSectionViewed(section: string) {
+  trackMixpanelEvent('landing_section_viewed', { section });
+}
+
+export function trackLandingScrollDepth(percent: number) {
+  trackMixpanelEvent('landing_scroll_depth', { percent });
+}
+
+export function trackLandingEngagementEnded(props: {
+  duration_ms: number;
+  max_scroll_percent: number;
+  last_section_viewed: string | null;
+  sections_viewed: string[];
+  sections_viewed_count: number;
+  end_reason: string;
+}) {
+  trackMixpanelEvent('landing_engagement_ended', props);
+}

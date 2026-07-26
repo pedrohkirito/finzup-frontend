@@ -20,7 +20,7 @@ const testimonials: { quote: string; name: string; detail?: string }[] = [
 
 export function SocialProof() {
   return (
-    <section className="border-y border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950">
+    <section data-landing-section="social_proof" className="border-y border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">

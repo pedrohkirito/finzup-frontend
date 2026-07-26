@@ -25,6 +25,7 @@ import {
   type LandingCtaClick,
 } from '@/lib/funnel-analytics';
 import { trackPricingView } from '@/lib/meta-pixel';
+import { useLandingEngagement } from '@/hooks/use-landing-engagement';
 
 interface ModalState {
   isOpen: boolean;
@@ -53,6 +54,7 @@ function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
 
 function LandingPageClientInner() {
   const searchParams = useSearchParams();
+  useLandingEngagement();
   const [modal, setModal] = useState<ModalState>(() => {
     const checkoutParam = searchParams.get('checkout');
     const orderId = searchParams.get('orderId');
@@ -182,7 +184,7 @@ function LandingPageClientInner() {
       <LifeComparisonSection onCta={openCheckout} />
 
       {/* 12. CTA final */}
-      <section className="relative overflow-hidden py-20 sm:py-28">
+      <section data-landing-section="final_cta" className="relative overflow-hidden py-20 sm:py-28">
         <div className="absolute inset-0 -z-10" aria-hidden>
           <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-brand-50/40 to-brand-green-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950" />
           <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/10 blur-3xl dark:bg-brand-500/15" />

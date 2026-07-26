@@ -33,7 +33,7 @@ const outcomes = [
 
 export function MethodSection() {
   return (
-    <section id="metodo" className="relative overflow-hidden bg-slate-950 pt-16 pb-24 sm:pt-20 sm:pb-32">
+    <section id="metodo" data-landing-section="method" className="relative overflow-hidden bg-slate-950 pt-16 pb-24 sm:pt-20 sm:pb-32">
       <div className="absolute inset-0 -z-10" aria-hidden>
         <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/20 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-[400px] w-[400px] translate-x-1/4 translate-y-1/3 rounded-full bg-brand-green-500/15 blur-3xl" />

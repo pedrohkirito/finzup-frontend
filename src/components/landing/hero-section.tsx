@@ -5,7 +5,7 @@ import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pb-28">
+    <section data-landing-section="hero" className="relative overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pb-28">
       <div className="absolute inset-0 -z-10" aria-hidden>
         <div className="absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-brand-green-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900" />
         <div className="absolute top-0 right-0 h-[700px] w-[700px] -translate-y-1/3 translate-x-1/4 rounded-full bg-brand-400/10 blur-3xl" />

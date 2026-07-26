@@ -75,7 +75,7 @@ const planBreakdown = [
 
 export function AiAssistantSection() {
   return (
-    <section className="relative overflow-hidden bg-slate-950 py-24 sm:py-32">
+    <section data-landing-section="ai_assistant" className="relative overflow-hidden bg-slate-950 py-24 sm:py-32">
       <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
         <div className="absolute top-1/4 right-0 h-[520px] w-[520px] translate-x-1/3 rounded-full bg-brand-500/15 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-[420px] w-[420px] -translate-x-1/4 translate-y-1/3 rounded-full bg-brand-green-500/10 blur-3xl" />

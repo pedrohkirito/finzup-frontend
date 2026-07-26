@@ -41,6 +41,7 @@ export function PricingSection({
     <section
       ref={sectionRef}
       id={id}
+      data-landing-section="pricing"
       className={`relative overflow-hidden py-16 sm:py-24 ${
         compact ? 'bg-slate-50 dark:bg-slate-900' : ''
       }`}

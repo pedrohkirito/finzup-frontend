@@ -49,7 +49,7 @@ const faqs = [
 
 export function Faq() {
   return (
-    <section id="faq" className="bg-slate-50 py-20 sm:py-28 dark:bg-slate-900">
+    <section id="faq" data-landing-section="faq" className="bg-slate-50 py-20 sm:py-28 dark:bg-slate-900">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center sm:mb-12">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">

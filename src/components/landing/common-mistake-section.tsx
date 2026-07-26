@@ -10,7 +10,7 @@ const chaosPieces = [
 
 export function CommonMistakeSection() {
   return (
-    <section className="relative overflow-hidden border-t border-slate-800 bg-slate-950 pt-20 pb-8 sm:pt-28 sm:pb-12">
+    <section data-landing-section="common_mistake" className="relative overflow-hidden border-t border-slate-800 bg-slate-950 pt-20 pb-8 sm:pt-28 sm:pb-12">
       <div
         className="pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(2,146,184,0.08)_0%,transparent_70%)]"
         aria-hidden

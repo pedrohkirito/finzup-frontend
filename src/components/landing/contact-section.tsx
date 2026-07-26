@@ -17,6 +17,7 @@ export function ContactSection() {
   return (
     <section
       id="contato"
+      data-landing-section="contact"
       className="border-t border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

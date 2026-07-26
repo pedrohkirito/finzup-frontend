@@ -13,7 +13,7 @@ const symptoms = [
 
 export function PainSymptomsSection() {
   return (
-    <section className="relative overflow-hidden bg-slate-900 py-20 sm:py-28">
+    <section data-landing-section="pain_symptoms" className="relative overflow-hidden bg-slate-900 py-20 sm:py-28">
       <div
         className="pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(2,146,184,0.08)_0%,transparent_70%)]"
         aria-hidden

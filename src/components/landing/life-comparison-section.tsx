@@ -63,7 +63,7 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
   );
 
   return (
-    <section className="relative overflow-hidden border-t border-slate-200 bg-slate-50 py-20 sm:py-28 dark:border-slate-800 dark:bg-slate-950">
+    <section data-landing-section="life_comparison" className="relative overflow-hidden border-t border-slate-200 bg-slate-50 py-20 sm:py-28 dark:border-slate-800 dark:bg-slate-950">
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute top-0 left-0 h-[420px] w-[420px] -translate-x-1/3 -translate-y-1/4 rounded-full bg-red-500/[0.06] blur-3xl dark:bg-red-500/10" />
         <div className="absolute right-0 bottom-0 h-[480px] w-[480px] translate-x-1/4 translate-y-1/4 rounded-full bg-brand-green-500/[0.08] blur-3xl dark:bg-brand-green-500/15" />

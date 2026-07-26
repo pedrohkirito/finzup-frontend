@@ -60,6 +60,7 @@ export function PlatformSection() {
   return (
     <section
       id="plataforma"
+      data-landing-section="platform"
       className="relative overflow-hidden border-t border-slate-200 bg-white py-20 sm:py-28 dark:border-slate-800 dark:bg-slate-950"
     >
       <div className="pointer-events-none absolute inset-0" aria-hidden>
