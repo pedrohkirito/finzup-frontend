@@ -18,6 +18,7 @@ import { PricingSection } from '@/components/landing/pricing-section';
 import { LifeComparisonSection } from '@/components/landing/life-comparison-section';
 import { ContactSection } from '@/components/landing/contact-section';
 import { LandingCheckoutModal } from '@/components/landing/landing-checkout-modal';
+import { Reveal } from '@/components/landing/reveal';
 import { type BillingPlanId } from '@/constants/billing-plans';
 import {
   trackInitiateCheckout,
@@ -192,7 +193,7 @@ function LandingPageClientInner() {
           <div className="absolute right-0 bottom-0 h-[400px] w-[400px] translate-y-1/2 translate-x-1/4 rounded-full bg-brand-400/10 blur-3xl dark:bg-brand-400/15" />
         </div>
 
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <Reveal className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="mb-8 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
             Continue girando em círculo…
             <br />
@@ -215,7 +216,7 @@ function LandingPageClientInner() {
             <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </button>
           <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Sem taxa de cancelamento · Acesso imediato</p>
-        </div>
+        </Reveal>
       </section>
 
       {/* Suporte */}
@@ -223,7 +224,7 @@ function LandingPageClientInner() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-slate-50 py-12 pb-24 md:pb-12 dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Reveal className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <Logo variant="isologo" size={28} className="h-7 w-auto" />
             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -241,7 +242,7 @@ function LandingPageClientInner() {
               </Link>
             </div>
           </div>
-        </div>
+        </Reveal>
       </footer>
 
       {/* CTA fixo mobile */}

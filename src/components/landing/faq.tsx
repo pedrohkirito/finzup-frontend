@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { Reveal } from '@/components/landing/reveal';
 
 const faqs = [
   {
@@ -51,24 +52,23 @@ export function Faq() {
   return (
     <section id="faq" data-landing-section="faq" className="bg-slate-50 py-20 sm:py-28 dark:bg-slate-900">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center sm:mb-12">
+        <Reveal className="mb-10 text-center sm:mb-12">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             Dúvidas comuns
           </h2>
-        </div>
+        </Reveal>
 
         <div className="space-y-3">
-          {faqs.map((faq) => (
-            <details
-              key={faq.question}
-              className="group rounded-2xl border border-slate-200 bg-white transition-colors dark:border-slate-800 dark:bg-slate-950"
-            >
-              <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-4 p-5 text-left text-base font-semibold text-slate-900 marker:content-none dark:text-white [&::-webkit-details-marker]:hidden">
-                {faq.question}
-                <Plus className="h-5 w-5 flex-shrink-0 text-brand-500 transition-transform group-open:rotate-45" />
-              </summary>
-              <p className="px-5 pb-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{faq.answer}</p>
-            </details>
+          {faqs.map((faq, index) => (
+            <Reveal key={faq.question} delay={index * 50}>
+              <details className="group rounded-2xl border border-slate-200 bg-white transition-colors dark:border-slate-800 dark:bg-slate-950">
+                <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-4 p-5 text-left text-base font-semibold text-slate-900 marker:content-none dark:text-white [&::-webkit-details-marker]:hidden">
+                  {faq.question}
+                  <Plus className="h-5 w-5 flex-shrink-0 text-brand-500 transition-transform group-open:rotate-45" />
+                </summary>
+                <p className="px-5 pb-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{faq.answer}</p>
+              </details>
+            </Reveal>
           ))}
         </div>
       </div>

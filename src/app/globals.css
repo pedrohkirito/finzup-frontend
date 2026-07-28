@@ -162,11 +162,71 @@ body {
   animation: hero-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+@keyframes hero-mock-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@utility hero-mock-float {
+  animation: hero-mock-float 5.5s ease-in-out infinite;
+}
+
+@keyframes hero-bar-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@utility hero-bar-fill {
+  transform-origin: left center;
+  animation: hero-bar-fill 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Scroll reveal — landing page sections */
+.landing-reveal {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.landing-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-reveal {
     opacity: 1;
     animation: none;
     transform: none;
+  }
+
+  .hero-mock-float {
+    animation: none;
+  }
+
+  .hero-bar-fill {
+    animation: none;
+    transform: none;
+  }
+
+  .landing-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
   }
 }
 

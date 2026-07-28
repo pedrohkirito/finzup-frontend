@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronRight, Star } from 'lucide-react';
+import { Reveal } from '@/components/landing/reveal';
 import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
 const testimonials: { quote: string; name: string; detail?: string }[] = [
@@ -22,18 +23,15 @@ export function SocialProof() {
   return (
     <section data-landing-section="social_proof" className="border-y border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             O que quem usa está dizendo
           </h2>
-        </div>
+        </Reveal>
 
         <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2">
-          {testimonials.map((t) => (
-            <figure
-              key={t.name}
-              className="flex h-full flex-col rounded-2xl border border-slate-200 bg-slate-50 p-7 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-            >
+          {testimonials.map((t, index) => (
+            <Reveal key={t.name} as="figure" delay={index * 100} className="flex h-full flex-col rounded-2xl border border-slate-200 bg-slate-50 p-7 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex gap-0.5 text-amber-400">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="h-5 w-5 fill-current" />
@@ -53,11 +51,11 @@ export function SocialProof() {
                   )}
                 </div>
               </figcaption>
-            </figure>
+            </Reveal>
           ))}
         </div>
 
-        <div className="mt-12 text-center">
+        <Reveal delay={160} className="mt-12 text-center">
           <a
             href="#pricing"
             onClick={() =>
@@ -72,7 +70,7 @@ export function SocialProof() {
             Assinar agora
             <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </a>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

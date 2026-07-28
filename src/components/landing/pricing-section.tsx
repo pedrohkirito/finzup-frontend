@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { PlanPicker } from '@/components/billing/plan-picker';
+import { Reveal } from '@/components/landing/reveal';
 import { type BillingPlanId } from '@/constants/billing-plans';
 import { type LandingCtaClick } from '@/lib/funnel-analytics';
 
@@ -54,9 +55,9 @@ export function PricingSection({
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Reveal className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <PlanPicker mode="landing" onSelectPlan={onCta} compactHeader={compact} />
-      </div>
+      </Reveal>
     </section>
   );
 }

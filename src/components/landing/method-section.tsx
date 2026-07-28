@@ -6,6 +6,7 @@ import {
   TrendingDown,
   Unlock,
 } from 'lucide-react';
+import { Reveal } from '@/components/landing/reveal';
 import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
 const outcomes = [
@@ -40,8 +41,7 @@ export function MethodSection() {
       </div>
 
       <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center">
+        <Reveal className="text-center">
           <p className="mb-6 text-sm font-semibold tracking-[0.2em] text-brand-300 uppercase">
             Como funciona
           </p>
@@ -57,10 +57,9 @@ export function MethodSection() {
             <span className="font-semibold text-white">Finzup</span>, baseado no método de{' '}
             <span className="font-semibold text-white">Dave Ramsey</span>.
           </p>
-        </div>
+        </Reveal>
 
-        {/* Path label */}
-        <div className="mx-auto mt-14 mb-8 flex max-w-md items-center gap-4 sm:mt-16">
+        <Reveal delay={80} className="mx-auto mt-14 mb-8 flex max-w-md items-center gap-4 sm:mt-16">
           <div
             className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-500/40 to-transparent"
             aria-hidden
@@ -72,11 +71,9 @@ export function MethodSection() {
             className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-500/40 to-transparent"
             aria-hidden
           />
-        </div>
+        </Reveal>
 
-        {/* Visual journey */}
         <ol className="relative mx-auto max-w-lg">
-          {/* Connecting line */}
           <div
             className="pointer-events-none absolute top-5 bottom-5 left-[1.375rem] w-px bg-gradient-to-b from-brand-500 via-brand-400 to-brand-green-400 sm:left-6"
             aria-hidden
@@ -85,11 +82,12 @@ export function MethodSection() {
           {outcomes.map((outcome, index) => {
             const isLast = index === outcomes.length - 1;
             return (
-              <li
+              <Reveal
                 key={outcome.title}
+                as="li"
+                delay={index * 90}
                 className="group relative flex gap-4 pb-8 last:pb-0 sm:gap-5 sm:pb-10"
               >
-                {/* Milestone marker */}
                 <div className="relative z-10 flex shrink-0 flex-col items-center">
                   <div
                     className={
@@ -102,7 +100,6 @@ export function MethodSection() {
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="min-w-0 flex-1 pt-1.5 sm:pt-2">
                   <div className="mb-1 flex items-center gap-2">
                     <span
@@ -127,13 +124,12 @@ export function MethodSection() {
                     {outcome.detail}
                   </p>
                 </div>
-              </li>
+              </Reveal>
             );
           })}
         </ol>
 
-        {/* Tease + CTA */}
-        <div className="relative mx-auto mt-16 max-w-lg text-center sm:mt-20">
+        <Reveal delay={120} className="relative mx-auto mt-16 max-w-lg text-center sm:mt-20">
           <div
             className="pointer-events-none absolute top-1/2 left-1/2 h-[220px] w-[420px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(2,146,184,0.14)_0%,transparent_70%)]"
             aria-hidden
@@ -164,7 +160,7 @@ export function MethodSection() {
               <ChevronRight className="h-4 w-4" />
             </span>
           </a>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

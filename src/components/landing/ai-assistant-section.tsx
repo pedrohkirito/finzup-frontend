@@ -12,6 +12,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { trackLandingCtaClick } from '@/lib/funnel-analytics';
+import { Reveal } from '@/components/landing/reveal';
 
 const knowledge = [
   {
@@ -84,8 +85,7 @@ export function AiAssistantSection() {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-sm font-medium text-brand-300">
             <Bot className="h-3.5 w-3.5" aria-hidden />
             Assistente de IA
@@ -98,10 +98,10 @@ export function AiAssistantSection() {
             Não é chat genérico. Ele lê o seu mês, a sua dívida e o seu próximo passo —
             e responde com valor, ordem e decisão.
           </p>
-        </div>
+        </Reveal>
 
         {/* Stage: knowledge chips + chat */}
-        <div className="relative mx-auto max-w-3xl">
+        <Reveal delay={100} className="relative mx-auto max-w-3xl">
           {/* Knowledge chips — gatilhos visuais */}
           <div className="mb-5 flex flex-wrap items-stretch justify-center gap-2.5 sm:mb-7 sm:gap-3">
             {knowledge.map((item, index) => (
@@ -222,11 +222,11 @@ export function AiAssistantSection() {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Capabilities */}
         <div className="mx-auto mt-14 max-w-4xl sm:mt-20">
-          <div className="mb-6 flex items-center gap-4 sm:mb-8">
+          <Reveal className="mb-6 flex items-center gap-4 sm:mb-8">
             <div
               className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-500/30 to-transparent"
               aria-hidden
@@ -238,40 +238,39 @@ export function AiAssistantSection() {
               className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-500/30 to-transparent"
               aria-hidden
             />
-          </div>
+          </Reveal>
 
           <ul className="mx-auto grid max-w-[860px] grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             {capabilities.map((item, index) => (
-              <li
-                key={item.title}
-                className="group relative flex items-start gap-3.5 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-500/35 hover:bg-white/[0.05] sm:gap-4 sm:px-5 sm:py-4"
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  aria-hidden
-                />
-                <span className="relative mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-300 transition-colors duration-200 group-hover:bg-brand-500/20 group-hover:text-brand-200">
-                  <item.icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-                </span>
-                <div className="relative min-w-0 flex-1 pt-0.5">
-                  <div className="mb-0.5 flex items-baseline gap-2">
-                    <span className="font-mono text-[10px] font-bold tracking-wider text-brand-500/70">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <p className="text-sm font-semibold text-white transition-colors duration-200 group-hover:text-brand-100 sm:text-base">
-                      {item.title}
+              <Reveal key={item.title} as="li" delay={index * 70}>
+                <div className="group relative flex items-start gap-3.5 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-500/35 hover:bg-white/[0.05] sm:gap-4 sm:px-5 sm:py-4">
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    aria-hidden
+                  />
+                  <span className="relative mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-300 transition-colors duration-200 group-hover:bg-brand-500/20 group-hover:text-brand-200">
+                    <item.icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                  </span>
+                  <div className="relative min-w-0 flex-1 pt-0.5">
+                    <div className="mb-0.5 flex items-baseline gap-2">
+                      <span className="font-mono text-[10px] font-bold tracking-wider text-brand-500/70">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <p className="text-sm font-semibold text-white transition-colors duration-200 group-hover:text-brand-100 sm:text-base">
+                        {item.title}
+                      </p>
+                    </div>
+                    <p className="text-sm leading-snug text-slate-500 transition-colors duration-200 group-hover:text-slate-400">
+                      {item.detail}
                     </p>
                   </div>
-                  <p className="text-sm leading-snug text-slate-500 transition-colors duration-200 group-hover:text-slate-400">
-                    {item.detail}
-                  </p>
                 </div>
-              </li>
+              </Reveal>
             ))}
           </ul>
         </div>
 
-        <div className="mt-14 text-center sm:mt-16">
+        <Reveal delay={120} className="mt-14 text-center sm:mt-16">
           <a
             href="#pricing"
             onClick={() =>
@@ -288,7 +287,7 @@ export function AiAssistantSection() {
               <ChevronRight className="h-4 w-4" />
             </span>
           </a>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { type BillingPlanId, BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
 import { type LandingCtaClick } from '@/lib/funnel-analytics';
+import { Reveal } from '@/components/landing/reveal';
 
 const rows = [
   {
@@ -70,7 +71,7 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
       </div>
 
       <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           <span className="mb-4 inline-block text-sm font-semibold tracking-[0.2em] text-brand-600 uppercase dark:text-brand-400">
             Antes e depois
           </span>
@@ -84,11 +85,10 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
           <p className="mx-auto mt-4 max-w-md text-base text-slate-500 sm:text-lg dark:text-slate-400">
             O mesmo problema. Dois caminhos. Só um te tira do ciclo.
           </p>
-        </div>
+        </Reveal>
 
         {/* Column headers */}
-        <div className="mx-auto mb-4 grid max-w-4xl grid-cols-[1fr_auto_1fr] items-center gap-2 sm:mb-5 sm:gap-4">
-          <div className="flex items-center justify-center gap-2 rounded-2xl border border-red-200/80 bg-red-50 px-3 py-3.5 sm:px-4 dark:border-red-500/20 dark:bg-red-950/40">
+        <Reveal delay={80} className="mx-auto mb-4 grid max-w-4xl grid-cols-[1fr_auto_1fr] items-center gap-2 sm:mb-5 sm:gap-4">          <div className="flex items-center justify-center gap-2 rounded-2xl border border-red-200/80 bg-red-50 px-3 py-3.5 sm:px-4 dark:border-red-500/20 dark:bg-red-950/40">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500/15 dark:bg-red-500/20">
               <X className="h-3.5 w-3.5 text-red-500" strokeWidth={2.5} aria-hidden />
             </span>
@@ -112,15 +112,12 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
               Com a Finzup
             </span>
           </div>
-        </div>
+        </Reveal>
 
         {/* Comparison rows */}
         <div className="mx-auto max-w-4xl space-y-3">
-          {rows.map(({ without, with: withCopy, withoutIcon: WithoutIcon, withIcon: WithIcon }) => (
-            <div
-              key={without}
-              className="group grid grid-cols-1 items-stretch gap-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-4"
-            >
+          {rows.map(({ without, with: withCopy, withoutIcon: WithoutIcon, withIcon: WithIcon }, index) => (
+            <Reveal key={without} delay={index * 70} className="group grid grid-cols-1 items-stretch gap-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-4">
               <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-white/70 px-4 py-4 transition-all duration-200 group-hover:border-red-200 group-hover:bg-red-50/60 dark:border-red-500/10 dark:bg-red-950/20 dark:group-hover:border-red-500/25 dark:group-hover:bg-red-950/35">
                 <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-500 dark:bg-red-500/15">
                   <WithoutIcon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
@@ -151,12 +148,12 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
                   {withCopy}
                 </p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
 
         {/* Price + CTA */}
-        <div className="mx-auto mt-14 max-w-md text-center sm:mt-16">
+        <Reveal delay={140} className="mx-auto mt-14 max-w-md text-center sm:mt-16">
           <div className="mb-8 inline-flex flex-col items-center gap-1 rounded-2xl border border-brand-200/60 bg-white/80 px-6 py-4 dark:border-brand-500/20 dark:bg-slate-900/60">
             <span className="text-xs font-semibold tracking-[0.18em] text-brand-600 uppercase dark:text-brand-400">
               Tudo isso por apenas
@@ -186,7 +183,7 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
               </span>
             </button>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

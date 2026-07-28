@@ -1,4 +1,5 @@
 import { Mail } from 'lucide-react';
+import { Reveal } from '@/components/landing/reveal';
 import {
   SUPPORT_EMAIL,
   SUPPORT_WHATSAPP_DISPLAY,
@@ -21,7 +22,7 @@ export function ContactSection() {
       className="border-t border-slate-200 bg-white py-16 sm:py-24 dark:border-slate-800 dark:bg-slate-950"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 sm:px-12 sm:py-14 dark:border-slate-800 dark:bg-slate-900">
+        <Reveal className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 sm:px-12 sm:py-14 dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-10 text-center">
             <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
               Fale conosco
@@ -68,7 +69,7 @@ export function ContactSection() {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

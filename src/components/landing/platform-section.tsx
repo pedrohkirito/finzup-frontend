@@ -13,6 +13,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { LandingSummaryMock } from '@/components/landing/summary-mock';
+import { Reveal } from '@/components/landing/reveal';
 
 const flow = [
   {
@@ -70,8 +71,7 @@ export function PlatformSection() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           <p className="mb-3 text-sm font-semibold tracking-[0.2em] uppercase brand-gradient-text">
             A plataforma
           </p>
@@ -81,14 +81,14 @@ export function PlatformSection() {
           <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-slate-500 sm:text-lg dark:text-slate-400">
             Seus números entram. O caminho aparece. Você só segue o próximo passo certo.
           </p>
-        </div>
+        </Reveal>
 
         {/* Flow — jornada visual */}
         <ol className="mx-auto mb-14 grid max-w-4xl grid-cols-1 gap-4 sm:mb-16 sm:grid-cols-3 sm:gap-0">
           {flow.map((step, index) => {
             const isLast = index === flow.length - 1;
             return (
-              <li key={step.title} className="relative flex sm:flex-col sm:items-center sm:text-center">
+              <Reveal key={step.title} as="li" delay={index * 100} className="relative flex sm:flex-col sm:items-center sm:text-center">
                 {/* Connector (desktop) */}
                 {!isLast && (
                   <div
@@ -123,7 +123,7 @@ export function PlatformSection() {
                     </p>
                   </div>
                 </div>
-              </li>
+              </Reveal>
             );
           })}
         </ol>
@@ -131,9 +131,10 @@ export function PlatformSection() {
         {/* Product stage + floating callouts */}
         <div className="relative mx-auto max-w-6xl">
           <div className="mb-6 flex flex-wrap items-center justify-center gap-3 sm:mb-8 sm:gap-4">
-            {callouts.map((callout) => (
-              <div
+            {callouts.map((callout, index) => (
+              <Reveal
                 key={callout.label}
+                delay={index * 80}
                 className={
                   callout.tone === 'positive'
                     ? 'inline-flex items-center gap-2.5 rounded-full border border-emerald-200/80 bg-emerald-50/90 px-3.5 py-2 shadow-sm shadow-emerald-500/10 dark:border-emerald-500/25 dark:bg-emerald-950/50'
@@ -171,16 +172,18 @@ export function PlatformSection() {
                   }
                   aria-hidden
                 />
-              </div>
+              </Reveal>
             ))}
           </div>
 
-          <LandingSummaryMock />
+          <Reveal delay={120}>
+            <LandingSummaryMock />
+          </Reveal>
         </div>
 
         {/* Capabilities — grid organizado, sem cluster de pills */}
         <div className="mx-auto mt-14 max-w-4xl sm:mt-20">
-          <div className="mb-6 flex items-center gap-4 sm:mb-8">
+          <Reveal className="mb-6 flex items-center gap-4 sm:mb-8">
             <div
               className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-500/30 to-transparent"
               aria-hidden
@@ -192,24 +195,23 @@ export function PlatformSection() {
               className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-500/30 to-transparent"
               aria-hidden
             />
-          </div>
+          </Reveal>
 
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
-            {capabilities.map((item) => (
-              <li
-                key={item.label}
-                className="group flex items-start gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/60 px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300/50 hover:bg-white hover:shadow-[0_10px_28px_-18px_rgba(2,146,184,0.4)] dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-brand-500/30 dark:hover:bg-slate-900"
-              >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600 transition-colors duration-200 group-hover:bg-brand-500/15 group-hover:text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
-                  <item.icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-                </span>
-                <div className="min-w-0 pt-0.5">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.label}</p>
-                  <p className="mt-0.5 text-xs leading-snug text-slate-500 dark:text-slate-400">
-                    {item.hint}
-                  </p>
+            {capabilities.map((item, index) => (
+              <Reveal key={item.label} as="li" delay={index * 70}>
+                <div className="group flex items-start gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/60 px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300/50 hover:bg-white hover:shadow-[0_10px_28px_-18px_rgba(2,146,184,0.4)] dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-brand-500/30 dark:hover:bg-slate-900">
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600 transition-colors duration-200 group-hover:bg-brand-500/15 group-hover:text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+                    <item.icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                  </span>
+                  <div className="min-w-0 pt-0.5">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.label}</p>
+                    <p className="mt-0.5 text-xs leading-snug text-slate-500 dark:text-slate-400">
+                      {item.hint}
+                    </p>
+                  </div>
                 </div>
-              </li>
+              </Reveal>
             ))}
           </ul>
         </div>
