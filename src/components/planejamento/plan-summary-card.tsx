@@ -22,7 +22,7 @@ export function PlanSummaryCard({ summary, compact }: PlanSummaryCardProps) {
             {summary.alerts.map((alert) => (
               <div
                 key={alert.type}
-                className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300"
+                className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-300"
               >
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 {alert.message}
@@ -45,10 +45,10 @@ export function PlanSummaryCard({ summary, compact }: PlanSummaryCardProps) {
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map(({ label, value, color }) => (
-          <Card key={label} className="border-slate-200 dark:border-slate-800">
+          <Card key={label}>
             <CardContent className="p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-              <p className={cn('mt-1 text-xl font-bold', color)}>{formatCurrency(value)}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
+              <p className={cn('mt-1 text-xl font-bold tabular-nums', color)}>{formatCurrency(value)}</p>
             </CardContent>
           </Card>
         ))}
@@ -58,18 +58,18 @@ export function PlanSummaryCard({ summary, compact }: PlanSummaryCardProps) {
         className={cn(
           'border-2',
           balancePositive
-            ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30'
-            : 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30',
+            ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-400/20 dark:bg-emerald-500/10'
+            : 'border-red-200 bg-red-50 dark:border-red-400/20 dark:bg-red-500/10',
         )}
       >
         <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div
               className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-full',
+                'icon-chip',
                 balancePositive
-                  ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60'
-                  : 'bg-red-100 text-red-600 dark:bg-red-900/60',
+                  ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+                  : 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400',
               )}
             >
               {balancePositive ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
@@ -98,7 +98,7 @@ export function PlanSummaryCard({ summary, compact }: PlanSummaryCardProps) {
           {summary.alerts.map((alert) => (
             <div
               key={alert.type}
-              className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300"
+              className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-300"
             >
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               {alert.message}

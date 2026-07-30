@@ -24,7 +24,7 @@ export function DragHandle({ className }: { className?: string }) {
     <button
       type="button"
       className={cn(
-        'flex shrink-0 cursor-grab touch-none items-center justify-center rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 active:cursor-grabbing dark:hover:bg-slate-800 dark:hover:text-slate-300',
+        'flex shrink-0 cursor-grab touch-none items-center justify-center rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 active:cursor-grabbing dark:text-slate-500 dark:hover:bg-white/[0.06] dark:hover:text-slate-300',
         className,
       )}
       aria-label="Arrastar para reordenar"
@@ -91,7 +91,7 @@ export function SortableList<T extends { id: string }>({
   if (!sortable) {
     if (items.length === 0) return null;
     return (
-      <div className="space-y-4">
+      <div className="space-y-2.5">
         {items.map((item) => (
           <div key={item.id}>{children(item, null)}</div>
         ))}
@@ -117,7 +117,7 @@ export function SortableList<T extends { id: string }>({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={localItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {localItems.map((item) => (
             <SortableItem key={item.id} id={item.id}>
               {({ dragHandle }) => children(item, dragHandle)}

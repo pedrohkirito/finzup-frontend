@@ -43,7 +43,7 @@ export function InvestmentSimulatorTab({
 
   if (!simulations?.length) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-200 py-16 text-center dark:border-slate-800">
+      <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-200 py-16 text-center dark:border-white/[0.08]">
         <LineChart className="h-10 w-10 text-slate-400" />
         <div>
           <p className="font-medium">Nenhuma simulação ainda</p>

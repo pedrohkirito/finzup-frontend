@@ -54,7 +54,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
 
   if (month.status === 'closed') {
     return (
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900/50">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.08] dark:bg-white/[0.04]">
         <div>
           <p className="font-medium text-slate-900 dark:text-slate-100">Este mês está fechado</p>
           <p className="text-sm text-slate-500">
@@ -83,7 +83,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-amber-900 dark:bg-amber-950">
+    <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-amber-500/25 dark:bg-amber-500/10">
       <div>
         <p className="font-medium text-amber-900 dark:text-amber-200">Pronto para fechar o mês?</p>
         <p className="text-sm text-amber-700 dark:text-amber-400">
@@ -92,7 +92,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="w-full border-amber-300 sm:w-auto">Fechar mês</Button>
+          <Button variant="outline" className="w-full border-amber-300 sm:w-auto dark:border-amber-500/40">Fechar mês</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Bot } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { AssistantChat } from '@/components/assistant/assistant-chat';
 import { AssistantTrigger } from '@/components/assistant/assistant-trigger';
 import { AssistantPanelContent } from '@/components/assistant/assistant-panel-content';
@@ -67,8 +67,8 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
           <DialogHeader className="relative shrink-0 border-b border-white/[0.08] px-4 py-3.5 pr-12 text-left sm:px-5">
             <div className="flex items-center justify-between gap-3">
               <DialogTitle className="flex items-center gap-3 text-base font-semibold text-white">
-                <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-green-500 text-white shadow-md shadow-brand-500/30">
-                  <Bot className="h-4 w-4" aria-hidden />
+                <div className="brand-gradient-bg relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-brand-500/30">
+                  <Sparkles className="h-4 w-4" aria-hidden />
                   <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-950 bg-brand-green-400" />
                 </div>
                 <span className="min-w-0 leading-tight">

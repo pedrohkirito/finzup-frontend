@@ -167,22 +167,22 @@ export default function DoacoesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold sm:text-2xl">Doações</h1>
-        <p className="text-sm text-slate-500">Registre suas contribuições e doações do mês</p>
+        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Doações</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Registre suas contribuições e doações do mês</p>
       </div>
 
       <BabyStepPageHint pageKey="doacoes" />
 
-      <Card className="border-sky-100 bg-sky-50 dark:border-sky-900/40 dark:bg-sky-950/30">
+      <Card className="border-sky-100 bg-sky-50 dark:border-sky-400/20 dark:bg-sky-500/[0.08]">
         <CardContent className="flex items-center gap-4 p-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/60 dark:text-sky-400">
+          <div className="icon-chip h-11 w-11 bg-sky-500/15 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400">
             <Heart className="h-5 w-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-sky-600 dark:text-sky-400">
               Total doado este mês
             </p>
-            <p className="text-2xl font-bold text-sky-700 dark:text-sky-300">
+            <p className="text-3xl font-bold tracking-tight text-sky-700 dark:text-sky-300">
               {formatCurrency(totalDonated)}
             </p>
           </div>
@@ -190,11 +190,11 @@ export default function DoacoesPage() {
       </Card>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold">Doações do mês</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Doações do mês</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           {isMonthOpen && (
           <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Nova doação</Button>
+            <Button className="h-11 w-full bg-sky-600 font-semibold hover:bg-sky-700 focus-visible:ring-sky-500 sm:w-auto dark:bg-sky-500 dark:shadow-[0_4px_14px_rgba(14,165,233,0.25)] dark:hover:bg-sky-400"><Plus className="h-4 w-4" /> Nova doação</Button>
           </DialogTrigger>
           )}
           <DialogContent>
@@ -220,7 +220,12 @@ export default function DoacoesPage() {
 
       <div className="grid gap-3">
         {entries?.length === 0 && (
-          <p className="text-center text-sm text-slate-500">Nenhuma doação registrada este mês.</p>
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 px-6 py-16 text-center dark:border-white/[0.08]">
+            <div className="icon-chip mb-4 h-14 w-14 rounded-2xl bg-sky-500/10 text-sky-500 dark:bg-sky-500/15 dark:text-sky-400">
+              <Heart className="h-7 w-7" />
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Nenhuma doação registrada este mês.</p>
+          </div>
         )}
         {entries && entries.length > 0 && (
           <SortableList
@@ -233,31 +238,33 @@ export default function DoacoesPage() {
             {(entry, dragHandle) => (
               <Card
                 key={entry.id}
-                className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800"
+                className="border-slate-200 transition-colors hover:shadow-sm dark:hover:bg-white/[0.05]"
               >
-                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
+                <CardContent className="flex min-h-[60px] flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     {dragHandle}
-                    <div className="h-8 w-1 shrink-0 rounded-full bg-sky-500" />
+                    <div className="icon-chip bg-sky-500/15 text-sky-600 dark:text-sky-400">
+                      <Heart className="h-4 w-4" />
+                    </div>
                     <div className="min-w-0">
                       <p className="truncate font-medium text-slate-900 dark:text-white">{entry.name}</p>
                       {entry.carryForward && (
-                        <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
+                        <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400 dark:text-slate-400">
                           <RefreshCw className="h-3 w-3" />
                           Repete todo mês
                         </div>
                       )}
                       {entry.paymentMethod && (
-                        <p className="text-xs text-slate-500">{entry.paymentMethod.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{entry.paymentMethod.name}</p>
                       )}
                       {entry.budgetTemplate && (
-                        <p className="text-xs text-slate-500">Orçamento: {entry.budgetTemplate.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Orçamento: {entry.budgetTemplate.name}</p>
                       )}
-                      {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
+                      {entry.notes && <p className="text-xs text-slate-500 dark:text-slate-400">{entry.notes}</p>}
                     </div>
                   </div>
                   <div className="flex items-center justify-end gap-2">
-                    <span className="font-semibold text-sky-600 dark:text-sky-400">
+                    <span className="font-semibold tabular-nums text-sky-600 dark:text-sky-400">
                       {formatCurrency(Number(entry.amount))}
                     </span>
                     <ItemActions

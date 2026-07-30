@@ -26,11 +26,11 @@ const badges = [
 
 export function TrialTrust() {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 backdrop-blur-xl sm:p-6 dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-[0_8px_32px_rgba(2,6,23,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]">
       <div className="grid gap-4 sm:grid-cols-3">
         {timeline.map((step) => (
           <div key={step.title} className="flex gap-3">
-            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600 dark:bg-brand-950 dark:text-brand-400">
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
               <step.icon className="h-4 w-4" />
             </span>
             <div>
@@ -43,13 +43,13 @@ export function TrialTrust() {
         ))}
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:flex-wrap sm:gap-6 dark:border-slate-800">
+      <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:flex-wrap sm:gap-6 dark:border-white/[0.08]">
         {badges.map(({ icon: Icon, text }) => (
           <div
             key={text}
             className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300"
           >
-            <Icon className="h-4 w-4 text-brand-green-500" />
+            <Icon className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
             {text}
           </div>
         ))}

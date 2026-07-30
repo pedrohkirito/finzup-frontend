@@ -23,7 +23,7 @@ export function BabyStepCompass({ compact = false, className }: BabyStepCompassP
   return (
     <Card
       className={cn(
-        'border-brand-200/80 bg-gradient-to-br from-brand-50/90 to-white dark:border-brand-900 dark:from-brand-950/40 dark:to-slate-900',
+        'border-brand-200/80 bg-gradient-to-br from-brand-50/90 to-white dark:border-white/[0.08] dark:from-brand-500/[0.09] dark:to-transparent',
         className,
       )}
     >
@@ -45,14 +45,14 @@ export function BabyStepCompass({ compact = false, className }: BabyStepCompassP
             )}
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-2xl font-bold tabular-nums text-brand-600 dark:text-brand-400">
+            <p className="brand-gradient-text text-2xl font-bold tabular-nums">
               {data.progressPercent}%
             </p>
-            <p className="text-[11px] text-slate-500">do passo</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">do passo</p>
           </div>
         </div>
 
-        <Progress value={data.progressPercent} className="h-2 [&>div]:bg-brand-500" />
+        <Progress value={data.progressPercent} className="h-2 [&>div]:brand-gradient-bg-r" />
 
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild size="sm" className="gap-1.5">
@@ -73,13 +73,13 @@ export function BabyStepCompass({ compact = false, className }: BabyStepCompassP
                 key={step.step}
                 title={step.title}
                 className={cn(
-                  'inline-flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 text-xs font-semibold',
+                  'inline-flex h-7 min-w-7 items-center justify-center rounded-lg px-1.5 text-xs font-semibold',
                   step.status === 'completed' &&
-                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400',
                   step.status === 'current' &&
-                    'bg-brand-500 text-white shadow-sm',
+                    'brand-gradient-bg text-white shadow-sm',
                   step.status === 'locked' &&
-                    'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500',
+                    'bg-slate-100 text-slate-400 dark:bg-white/[0.05] dark:text-slate-500',
                 )}
               >
                 {step.status === 'completed' ? (

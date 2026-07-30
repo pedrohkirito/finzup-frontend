@@ -25,9 +25,9 @@ export function PlanDistributionBar({ totalIncome, segments, className }: PlanDi
 
   return (
     <div className={cn('space-y-3', className)}>
-      <div className="flex h-4 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+      <div className="flex h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/[0.08]">
         {totalIncome <= 0 ? (
-          <div className="h-full w-full bg-slate-200 dark:bg-slate-700" />
+          <div className="h-full w-full bg-slate-200 dark:bg-white/[0.12]" />
         ) : (
           <>
             {visibleSegments.map((segment) => (
@@ -40,7 +40,7 @@ export function PlanDistributionBar({ totalIncome, segments, className }: PlanDi
             ))}
             {freeAmount > 0 && (
               <div
-                className="h-full bg-slate-200 dark:bg-slate-700"
+                className="h-full bg-slate-200 dark:bg-white/[0.12]"
                 style={{ width: `${freePercent}%` }}
                 title={`Livre: ${formatCurrency(freeAmount)}`}
               />
@@ -74,7 +74,7 @@ export function PlanDistributionBar({ totalIncome, segments, className }: PlanDi
           ))}
           {freeAmount > 0 && (
             <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-              <span className="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-700" />
+              <span className="h-2 w-2 rounded-full bg-slate-200 dark:bg-white/[0.2]" />
               <span>Livre</span>
             </div>
           )}

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
   CheckCircle2,
-  Circle,
   Lock,
   ArrowRight,
   Sparkles,
@@ -47,20 +46,25 @@ export default function MetodoPage() {
         </p>
       </div>
 
-      <Card className="border-brand-200 bg-brand-50/50 dark:border-brand-900 dark:bg-brand-950/30">
+      <Card className="brand-gradient-border">
         <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-300">
+          <div className="min-w-0 space-y-1">
+            <p className="brand-gradient-text text-xs font-bold uppercase tracking-wide">
               Você está aqui
             </p>
-            <p className="text-xl font-semibold text-slate-900 dark:text-white">
+            <p className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
               Baby Step {state.currentStep}
               {current ? ` — ${current.title}` : ''}
             </p>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Faça agora: {state.nextAction.label}
             </p>
-            <Progress value={state.progressPercent} className="mt-2 max-w-xs [&>div]:bg-brand-500" />
+            <div className="mt-2 flex max-w-xs items-center gap-3">
+              <Progress value={state.progressPercent} className="h-2.5 [&>div]:brand-gradient-bg-r" />
+              <span className="shrink-0 text-sm font-bold tabular-nums text-brand-600 dark:text-brand-400">
+                {state.progressPercent}%
+              </span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild>
@@ -90,23 +94,31 @@ export default function MetodoPage() {
           <div
             key={step.step}
             className={cn(
-              'flex gap-3 rounded-xl border p-4',
+              'flex gap-3 rounded-2xl border p-4',
               step.status === 'current' &&
-                'border-brand-300 bg-white shadow-sm dark:border-brand-800 dark:bg-slate-900',
+                'brand-gradient-border shadow-sm dark:shadow-lg dark:shadow-brand-500/10',
               step.status === 'completed' &&
-                'border-emerald-200 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/20',
+                'border-emerald-200 bg-emerald-50/40 dark:border-emerald-500/20 dark:bg-emerald-500/[0.06]',
               step.status === 'locked' &&
-                'border-slate-200 bg-slate-50/50 opacity-75 dark:border-slate-800 dark:bg-slate-900/40',
+                'border-slate-200 bg-slate-50/50 opacity-75 dark:border-white/[0.06] dark:bg-white/[0.02] dark:opacity-60',
             )}
           >
-            <div className="mt-0.5 shrink-0">
+            <div className="shrink-0">
               {step.status === 'completed' && (
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                <span className="icon-chip bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="h-5 w-5" />
+                </span>
               )}
               {step.status === 'current' && (
-                <Circle className="h-5 w-5 fill-brand-500 text-brand-500" />
+                <span className="icon-chip brand-gradient-bg text-sm font-bold text-white shadow-sm">
+                  {step.step}
+                </span>
               )}
-              {step.status === 'locked' && <Lock className="h-5 w-5 text-slate-400" />}
+              {step.status === 'locked' && (
+                <span className="icon-chip bg-slate-100 text-slate-400 dark:bg-white/[0.05] dark:text-slate-500">
+                  <Lock className="h-4 w-4" />
+                </span>
+              )}
             </div>
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-baseline gap-2">
@@ -114,14 +126,17 @@ export default function MetodoPage() {
                   Passo {step.step}: {step.shortTitle}
                 </p>
                 {step.status === 'current' && (
-                  <span className="rounded bg-brand-500 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+                  <span className="brand-gradient-bg rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
                     Atual
                   </span>
                 )}
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400">{step.description}</p>
               {step.status === 'current' && (
-                <Progress value={step.progressPercent} className="mt-2 max-w-sm [&>div]:bg-brand-500" />
+                <Progress
+                  value={step.progressPercent}
+                  className="mt-2 max-w-sm [&>div]:brand-gradient-bg-r"
+                />
               )}
               {step.status === 'locked' && (
                 <p className="text-xs text-slate-500">
@@ -155,31 +170,31 @@ export default function MetodoPage() {
         <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
           <Link
             href="/dashboard/investimentos?tab=reserva"
-            className="rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+            className="rounded-xl bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
           >
             <p className="font-medium text-slate-900 dark:text-white">Reserva de emergência</p>
-            <p className="text-slate-500">Investimentos → Reserva</p>
+            <p className="text-slate-500 dark:text-slate-400">Investimentos → Reserva</p>
           </Link>
           <Link
             href="/dashboard/despesas"
-            className="rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+            className="rounded-xl bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
           >
             <p className="font-medium text-slate-900 dark:text-white">Bola de neve de dívidas</p>
-            <p className="text-slate-500">Despesas (quando houver dívidas)</p>
+            <p className="text-slate-500 dark:text-slate-400">Despesas (quando houver dívidas)</p>
           </Link>
           <Link
             href="/dashboard/investimentos?tab=casa"
-            className="rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+            className="rounded-xl bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
           >
             <p className="font-medium text-slate-900 dark:text-white">Entrada da casa</p>
-            <p className="text-slate-500">Investimentos → Casa</p>
+            <p className="text-slate-500 dark:text-slate-400">Investimentos → Casa</p>
           </Link>
           <Link
             href="/dashboard/investimentos?tab=aportes"
-            className="rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+            className="rounded-xl bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
           >
             <p className="font-medium text-slate-900 dark:text-white">Investir 15%</p>
-            <p className="text-slate-500">Investimentos → Aportes</p>
+            <p className="text-slate-500 dark:text-slate-400">Investimentos → Aportes</p>
           </Link>
         </CardContent>
       </Card>
@@ -189,13 +204,13 @@ export default function MetodoPage() {
           <CardTitle className="text-base">Princípios (valem em todos os passos)</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
-          <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
             Dízimo: {state.metrics.tithePercentOfIncome.toFixed(1)}% da renda (meta 10%)
           </div>
-          <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
             Investir: {state.metrics.investmentPercentOfIncome.toFixed(1)}% da renda (meta ≥15%)
           </div>
-          <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50 sm:col-span-2">
+          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04] sm:col-span-2">
             Lazer 10% e sem cartão de crédito — pilares do método em qualquer fase.
           </div>
         </CardContent>

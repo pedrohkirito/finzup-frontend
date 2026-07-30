@@ -14,8 +14,8 @@ const INITIAL_VISIBLE = 3;
 
 function TopExpenseItem({ expense, rank }: { expense: SummaryItem; rank: number }) {
   return (
-    <li className="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-800/50">
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-700 dark:bg-orange-950/60 dark:text-orange-400">
+    <li className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 dark:border-white/[0.06] dark:bg-white/[0.04]">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">
         {rank}
       </span>
       <div className="min-w-0 flex-1">
@@ -26,7 +26,9 @@ function TopExpenseItem({ expense, rank }: { expense: SummaryItem; rank: number 
           </Badge>
         )}
       </div>
-      <span className="shrink-0 text-sm font-semibold text-orange-600">{formatCurrency(expense.amount)}</span>
+      <span className="shrink-0 text-sm font-semibold tabular-nums text-orange-600 dark:text-orange-400">
+        {formatCurrency(expense.amount)}
+      </span>
     </li>
   );
 }
@@ -75,7 +77,9 @@ function ReportTopExpensesContent({ expenses }: { expenses: SummaryItem[] }) {
           </DialogHeader>
           <div className="flex items-center justify-between border-b pb-3 text-sm">
             <span className="text-slate-500">Total</span>
-            <span className="text-lg font-bold text-orange-600">{formatCurrency(total)}</span>
+            <span className="text-lg font-bold tabular-nums text-orange-600 dark:text-orange-400">
+              {formatCurrency(total)}
+            </span>
           </div>
           <ScrollArea className="max-h-[50vh]">
             <ol className="space-y-2">

@@ -24,11 +24,11 @@ const expenseCategoryOrder = ['avulsa', 'fixa', 'parcelamento', 'assinatura', 'f
 const summaryScrollClass = '-mr-5 max-h-[50vh] sm:-mr-6';
 const summaryScrollContentClass = 'space-y-2 pt-3 pr-2';
 const summaryTotalRowClass =
-  'flex items-center justify-between border-b border-slate-200/25 pb-3 text-sm dark:border-slate-700/40';
+  'flex items-center justify-between border-b border-slate-200/25 pb-3 text-sm dark:border-white/[0.08]';
 const summaryItemClass =
-  'flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50';
+  'flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.04]';
 const summaryItemWithMetaClass =
-  'flex items-start justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50';
+  'flex items-start justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.04]';
 
 function groupItemsByCategory(items: SummaryItem[]) {
   const groups = new Map<string, SummaryItem[]>();
@@ -157,9 +157,9 @@ export function BalanceDetailDialog({
   balance: number;
 }) {
   const rows = [
-    { label: 'Receitas', value: totalIncome, color: 'text-emerald-600', prefix: '+' },
-    { label: 'Despesas', value: totalExpenses, color: 'text-orange-600', prefix: '−' },
-    { label: 'Doações', value: totalDonations, color: 'text-sky-600', prefix: '−' },
+    { label: 'Receitas', value: totalIncome, color: 'text-emerald-600 dark:text-emerald-400', prefix: '+' },
+    { label: 'Despesas', value: totalExpenses, color: 'text-orange-600 dark:text-orange-400', prefix: '−' },
+    { label: 'Doações', value: totalDonations, color: 'text-sky-600 dark:text-sky-400', prefix: '−' },
   ];
 
   return (
@@ -179,7 +179,7 @@ export function BalanceDetailDialog({
           ))}
           <div className="flex items-center justify-between border-t pt-3">
             <span className="font-medium">Saldo</span>
-            <span className={cn('text-lg font-bold', balance >= 0 ? 'text-emerald-600' : 'text-red-500')}>
+            <span className={cn('text-lg font-bold', balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
               {formatCurrency(balance)}
             </span>
           </div>
@@ -220,7 +220,7 @@ export function BudgetDetailDialog({
               entries.map((item) => (
                 <div key={item.id} className={summaryItemClass}>
                   <p className="min-w-0 flex-1 truncate text-sm font-medium">{item.name}</p>
-                  <span className="shrink-0 text-sm font-semibold text-amber-600">{formatCurrency(item.amount)}</span>
+                  <span className="shrink-0 text-sm font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(item.amount)}</span>
                 </div>
               ))
             )}

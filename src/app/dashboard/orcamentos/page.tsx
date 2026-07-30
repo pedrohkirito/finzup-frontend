@@ -35,14 +35,19 @@ const templateSchema = z.object({
 function getProgressColor(progress: number, overBudget: boolean) {
   if (overBudget) return '[&>div]:bg-red-500';
   if (progress >= 85) return '[&>div]:bg-amber-400';
-  if (progress >= 60) return '[&>div]:bg-blue-500';
   return '[&>div]:bg-emerald-500';
 }
 
 function getAmountColor(progress: number, overBudget: boolean) {
-  if (overBudget) return 'text-red-500';
-  if (progress >= 85) return 'text-amber-500';
-  return 'text-slate-700 dark:text-slate-200';
+  if (overBudget) return 'text-red-500 dark:text-red-400';
+  if (progress >= 85) return 'text-amber-500 dark:text-amber-400';
+  return 'text-emerald-600 dark:text-emerald-400';
+}
+
+function getChipColor(progress: number, overBudget: boolean) {
+  if (overBudget) return 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400';
+  if (progress >= 85) return 'bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400';
+  return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400';
 }
 
 function MonthLimitEditor({
@@ -120,6 +125,7 @@ function BudgetCard({
   const pct = Math.min(budget.progress, 100);
   const progressColor = getProgressColor(budget.progress, budget.overBudget);
   const amountColor = getAmountColor(budget.progress, budget.overBudget);
+  const chipColor = getChipColor(budget.progress, budget.overBudget);
   const hasDetails = budget.entries.length > 0 || (isMonthOpen && !!selectedMonthId);
 
   return (
@@ -127,31 +133,36 @@ function BudgetCard({
       <CardContent className="p-5">
         {/* Header row */}
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-slate-800 dark:text-slate-100 truncate leading-snug">
-              {budget.name}
-            </p>
-            <p className="mt-0.5 min-h-4 text-xs leading-4 text-slate-400">
-              {budget.limit !== budget.defaultLimit && (
-                <>Limite ajustado: {formatCurrency(budget.limit)}</>
-              )}
-            </p>
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <span className={cn('icon-chip', chipColor)}>
+              <Target className="h-4.5 w-4.5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-slate-800 dark:text-slate-100 truncate leading-snug">
+                {budget.name}
+              </p>
+              <p className="mt-0.5 min-h-4 text-xs leading-4 text-slate-400">
+                {budget.limit !== budget.defaultLimit && (
+                  <>Limite ajustado: {formatCurrency(budget.limit)}</>
+                )}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-0.5 shrink-0">
-            <span className={cn('mr-1 text-sm font-bold tabular-nums', amountColor)}>
+          <div className="flex items-center shrink-0">
+            <span className={cn('mr-1.5 text-base font-bold tabular-nums', amountColor)}>
               {budget.progress.toFixed(0)}%
             </span>
             <Button
               variant="ghost" size="icon"
-              className="h-7 w-7 text-slate-300 hover:text-slate-600 dark:hover:text-slate-300"
+              className="h-11 w-11 text-slate-300 hover:text-slate-600 sm:h-9 sm:w-9 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-white/[0.05]"
               onClick={() => onEdit(budget)}
             >
               <Pencil className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost" size="icon"
-              className="h-7 w-7 text-slate-300 hover:text-red-500"
+              className="h-11 w-11 text-slate-300 hover:text-red-500 sm:h-9 sm:w-9 dark:text-slate-500 dark:hover:text-red-400 dark:hover:bg-white/[0.05]"
               onClick={() => onDelete(budget)}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -162,21 +173,24 @@ function BudgetCard({
         {/* Progress bar */}
         <Progress
           value={pct}
-          className={cn('mt-3 h-1.5', progressColor)}
+          className={cn('mt-4 h-2.5', progressColor)}
         />
 
         {/* Amounts */}
-        <div className="mt-2 flex justify-between text-xs">
-          <span className={cn('font-medium', budget.overBudget ? 'text-red-500' : 'text-slate-500')}>
+        <div className="mt-2.5 flex items-baseline justify-between gap-3">
+          <span className={cn(
+            'text-sm font-semibold tabular-nums',
+            budget.overBudget ? 'text-red-500 dark:text-red-400' : 'text-slate-700 dark:text-slate-200',
+          )}>
             {formatCurrency(budget.spent)}
-            <span className="font-normal text-slate-400"> / {formatCurrency(budget.limit)}</span>
+            <span className="text-xs font-normal text-slate-400"> / {formatCurrency(budget.limit)}</span>
           </span>
           {budget.remaining >= 0 ? (
-            <span className="text-emerald-500 font-medium">
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
               {formatCurrency(budget.remaining)} restantes
             </span>
           ) : (
-            <span className="text-red-500 font-medium">
+            <span className="text-xs font-medium text-red-500 dark:text-red-400">
               {formatCurrency(Math.abs(budget.remaining))} acima
             </span>
           )}
@@ -187,16 +201,16 @@ function BudgetCard({
           <>
             <button
               type="button"
-              className="mt-3 flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              className="-mx-2 mt-2 flex min-h-11 w-full items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-slate-400 transition-colors hover:text-slate-600 hover:bg-slate-50 dark:hover:text-slate-300 dark:hover:bg-white/[0.05] sm:min-h-9"
               onClick={() => setExpanded((v) => !v)}
             >
               {expanded
-                ? <><ChevronUp className="h-3 w-3" /> Ocultar detalhes</>
-                : <><ChevronDown className="h-3 w-3" /> Detalhes</>}
+                ? <><ChevronUp className="h-3.5 w-3.5" /> Ocultar detalhes</>
+                : <><ChevronDown className="h-3.5 w-3.5" /> Detalhes</>}
             </button>
 
             {expanded && (
-              <div className="mt-1 space-y-4 divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="mt-1 space-y-4 divide-y divide-slate-100 dark:divide-white/[0.06]">
                 {isMonthOpen && selectedMonthId && (
                   <MonthLimitEditor
                     budget={budget}
@@ -283,7 +297,7 @@ export default function OrcamentosPage() {
   const totalRemaining = totalLimit - totalSpent;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -291,16 +305,16 @@ export default function OrcamentosPage() {
             Orçamentos
           </h1>
           {!!budgets?.length && (
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {formatCurrency(totalSpent)} gastos de {formatCurrency(totalLimit)} ·{' '}
-              <span className={totalRemaining < 0 ? 'text-red-500' : 'text-emerald-500'}>
+              <span className={totalRemaining < 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-500 dark:text-emerald-400'}>
                 {formatCurrency(Math.abs(totalRemaining))}{' '}
                 {totalRemaining < 0 ? 'acima do limite' : 'restantes'}
               </span>
             </p>
           )}
         </div>
-        <Button onClick={openCreateTemplate} size="sm" className="w-full sm:w-auto">
+        <Button onClick={openCreateTemplate} size="sm" className="h-11 w-full sm:h-9 sm:w-auto">
           <Plus className="mr-1.5 h-4 w-4" />
           Novo orçamento
         </Button>
@@ -311,8 +325,8 @@ export default function OrcamentosPage() {
       {/* Empty state */}
       {!budgets?.length && (
         <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <div className="rounded-2xl bg-slate-100 dark:bg-slate-800 p-5">
-            <Target className="h-9 w-9 text-slate-400" />
+          <div className="rounded-2xl bg-slate-100 p-5 dark:bg-white/[0.06] dark:border dark:border-white/[0.08]">
+            <Target className="h-9 w-9 text-slate-400 dark:text-slate-500" />
           </div>
           <div className="space-y-1">
             <p className="font-semibold text-slate-700 dark:text-slate-300">
@@ -331,7 +345,7 @@ export default function OrcamentosPage() {
 
       {/* Grid of cards */}
       {sortedBudgets.length > 0 && (
-        <div className="grid items-start gap-3 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           {sortedBudgets.map((budget) => (
             <BudgetCard
               key={budget.templateId}

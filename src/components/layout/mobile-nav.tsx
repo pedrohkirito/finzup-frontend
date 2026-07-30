@@ -60,7 +60,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-40 min-h-[var(--mobile-nav-height)] border-t border-slate-200/80 bg-white/95 px-1 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.07)] backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-none">
+      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-40 min-h-[var(--mobile-nav-height)] border-t border-slate-200/80 bg-white/95 px-1 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.07)] backdrop-blur-xl md:hidden dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-[0_-8px_32px_rgba(2,6,23,0.45)]">
         <div className="mx-auto flex max-w-lg items-end justify-around">
           {primaryLinks.slice(0, 2).map(({ href, icon: Icon, label }) => {
             const active = isNavLinkActive(pathname, href);
@@ -71,14 +71,14 @@ export function MobileNav() {
                 className={cn(
                   'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors',
                   active
-                    ? 'text-emerald-600 dark:text-emerald-400'
+                    ? 'text-brand-600 dark:text-brand-300'
                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
                 )}
               >
                 <span
                   className={cn(
                     'flex h-8 w-8 items-center justify-center rounded-xl transition-colors',
-                    active && 'bg-emerald-50 dark:bg-emerald-950/60',
+                    active && 'bg-brand-50 dark:bg-brand-500/15 dark:shadow-[0_0_14px_rgba(3,182,230,0.35)]',
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -91,10 +91,10 @@ export function MobileNav() {
           <button
             type="button"
             onClick={() => openAssistant()}
-            className="relative -mt-5 flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 pb-1.5 text-[11px] font-semibold text-brand-600 dark:text-brand-400"
+            className="relative -mt-5 flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 pb-1.5 text-[11px] font-semibold text-brand-600 dark:text-brand-300"
             aria-label="Abrir assistente de IA"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg shadow-brand-500/40 ring-4 ring-white dark:ring-slate-950">
+            <span className="brand-gradient-bg flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg shadow-brand-500/40 ring-4 ring-white dark:ring-[#020618]/90">
               <Sparkles className="h-6 w-6" />
             </span>
             <span className="truncate">Assistente</span>
@@ -109,14 +109,14 @@ export function MobileNav() {
                 className={cn(
                   'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors',
                   active
-                    ? 'text-emerald-600 dark:text-emerald-400'
+                    ? 'text-brand-600 dark:text-brand-300'
                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
                 )}
               >
                 <span
                   className={cn(
                     'flex h-8 w-8 items-center justify-center rounded-xl transition-colors',
-                    active && 'bg-emerald-50 dark:bg-emerald-950/60',
+                    active && 'bg-brand-50 dark:bg-brand-500/15 dark:shadow-[0_0_14px_rgba(3,182,230,0.35)]',
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -132,14 +132,15 @@ export function MobileNav() {
             className={cn(
               'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors',
               isMoreActive || moreOpen
-                ? 'text-emerald-600 dark:text-emerald-400'
+                ? 'text-brand-600 dark:text-brand-300'
                 : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
             )}
           >
             <span
               className={cn(
                 'flex h-8 w-8 items-center justify-center rounded-xl transition-colors',
-                (isMoreActive || moreOpen) && 'bg-emerald-50 dark:bg-emerald-950/60',
+                (isMoreActive || moreOpen) &&
+                  'bg-brand-50 dark:bg-brand-500/15 dark:shadow-[0_0_14px_rgba(3,182,230,0.35)]',
               )}
             >
               <MoreHorizontal className="h-5 w-5" />
@@ -150,7 +151,8 @@ export function MobileNav() {
       </nav>
 
       <Dialog open={moreOpen} onOpenChange={setMoreOpen}>
-        <DialogContent className="fixed bottom-0 left-0 right-0 top-auto max-h-[85dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-b-none rounded-t-2xl sm:bottom-auto sm:left-[50%] sm:right-auto sm:top-[50%] sm:w-[calc(100%-2rem)] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl">
+        <DialogContent className="fixed bottom-0 left-0 right-0 top-auto max-h-[85dvh] w-full max-w-none translate-x-0 translate-y-0 rounded-b-none rounded-t-3xl sm:bottom-auto sm:left-[50%] sm:right-auto sm:top-[50%] sm:w-[calc(100%-2rem)] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl">
+          <div className="mx-auto -mt-1 h-1 w-10 shrink-0 rounded-full bg-slate-300 sm:hidden dark:bg-white/20" />
           <DialogHeader>
             <DialogTitle>Mais opções</DialogTitle>
           </DialogHeader>
@@ -165,8 +167,8 @@ export function MobileNav() {
                   className={cn(
                     'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors',
                     active
-                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
-                      : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50',
+                      ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300'
+                      : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/[0.06]',
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
@@ -178,7 +180,7 @@ export function MobileNav() {
               );
             })}
           </div>
-          <div className="space-y-1 border-t border-slate-200 pt-3 dark:border-slate-800">
+          <div className="space-y-1 border-t border-slate-200 pt-3 dark:border-white/[0.08]">
             <SupportLink variant="mobile" onOpen={() => setMoreOpen(false)} />
             <Button variant="ghost" className="h-11 w-full justify-start gap-3 px-3" onClick={toggle}>
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

@@ -27,7 +27,7 @@ import {
 } from '@/lib/investment-page-bridge';
 import { formatCurrency } from '@/lib/utils';
 import type { InvestmentSimulation } from '@/types';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, TrendingUp } from 'lucide-react';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 import { EmergencyFundCard } from '@/components/baby-steps/emergency-fund-card';
 import { HouseDownPaymentCard } from '@/components/baby-steps/house-down-payment-card';
@@ -80,10 +80,32 @@ function InvestmentAportesTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Meta do mês</CardTitle>
+          <div className="flex items-center gap-3">
+            <span className="icon-chip bg-violet-500/15 text-violet-600 dark:text-violet-400">
+              <TrendingUp className="h-5 w-5" />
+            </span>
+            <div>
+              <CardTitle className="text-base">Meta do mês</CardTitle>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Total aportado</p>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isMonthOpen ? (
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="text-3xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white">
+              {formatCurrency(totalInvested)}
+            </p>
+            <span className="text-sm font-semibold tabular-nums text-violet-600 dark:text-violet-400">
+              {Math.round(progress)}% da meta
+            </span>
+          </div>
+          <div>
+            <Progress value={progress} className="h-2.5 [&>div]:bg-violet-500" />
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              Meta: {formatCurrency(target)}
+            </p>
+          </div>
+          {isMonthOpen && (
             <form
               onSubmit={goalForm.handleSubmit(async (data) => {
                 await api.put(`/months/${selectedMonthId}/investments/goal`, data);
@@ -101,16 +123,7 @@ function InvestmentAportesTab() {
                 Salvar meta
               </Button>
             </form>
-          ) : (
-            <p className="text-sm text-slate-500">Meta: {formatCurrency(target)}</p>
           )}
-          <div>
-            <div className="mb-2 flex justify-between text-sm">
-              <span>{formatCurrency(totalInvested)} investidos</span>
-              <span className="text-slate-500">Meta: {formatCurrency(target)}</span>
-            </div>
-            <Progress value={progress} />
-          </div>
         </CardContent>
       </Card>
 
@@ -160,13 +173,22 @@ function InvestmentAportesTab() {
       <div className="grid gap-3">
         {entries?.map((entry) => (
           <Card key={entry.id}>
-            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="font-medium">{entry.name}</p>
-                {entry.notes && <p className="text-xs text-slate-500">{entry.notes}</p>}
+            <CardContent className="flex items-center justify-between gap-3 p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="icon-chip bg-violet-500/15 text-violet-600 dark:text-violet-400">
+                  <TrendingUp className="h-4 w-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{entry.name}</p>
+                  {entry.notes && (
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                      {entry.notes}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center justify-end gap-2">
-                <span className="font-semibold text-emerald-600">
+              <div className="flex shrink-0 items-center gap-1">
+                <span className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(Number(entry.amount))}
                 </span>
                 {isMonthOpen && (

@@ -24,10 +24,10 @@ export default function DashboardPage() {
   if (!summary) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7 sm:space-y-8">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Resumo do mês</h1>
-        <p className="mt-1 text-sm text-slate-500">Visão geral das suas finanças</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Visão geral das suas finanças</p>
       </div>
       <OnboardingTour />
       {BABY_STEPS_ENABLED && <BabyStepCompass />}

@@ -48,7 +48,7 @@ export function ReportIncomeCompositionChart({ items }: { items: CompositionItem
         )}
       </div>
 
-      <ul className="w-full min-w-0 space-y-2.5 sm:max-w-xs">
+      <ul className="w-full min-w-0 space-y-3 sm:max-w-xs">
         {items.map((item) => (
           <li key={item.label} className="flex items-start gap-2.5">
             <span
@@ -56,13 +56,18 @@ export function ReportIncomeCompositionChart({ items }: { items: CompositionItem
               style={{ background: item.color }}
             />
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.label}</span>
-                <span className="shrink-0 text-sm font-bold tabular-nums" style={{ color: item.color }}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">
+                  {item.label}
+                </span>
+                <span
+                  className="shrink-0 rounded-full px-2 py-0.5 text-xs font-bold tabular-nums"
+                  style={{ color: item.color, background: `${item.color}1f` }}
+                >
                   {item.pct.toFixed(1)}%
                 </span>
               </div>
-              <p className="text-xs text-slate-500">{formatCurrency(item.value)}</p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{formatCurrency(item.value)}</p>
             </div>
           </li>
         ))}

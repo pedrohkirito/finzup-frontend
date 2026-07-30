@@ -115,13 +115,13 @@ export default function PlanejamentoPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-bold sm:text-2xl">Planejamento</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Planejamento</h1>
           <NewFeatureBadge />
         </div>
-        <p className="text-sm text-slate-500">Simule como distribuir sua renda antes de aplicar no mês</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Simule como distribuir sua renda antes de aplicar no mês</p>
       </div>
 
       <BabyStepPageHint pageKey="planejamento" />
@@ -134,10 +134,12 @@ export default function PlanejamentoPage() {
       />
 
       {!selectedPlanId ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 py-16 text-center dark:border-slate-800">
-          <CalendarRange className="h-8 w-8 text-slate-300" />
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-200 py-16 text-center dark:border-white/[0.08]">
+          <span className="icon-chip h-14 w-14 rounded-2xl bg-slate-100 text-slate-400 dark:bg-white/[0.06] dark:text-slate-500">
+            <CalendarRange className="h-7 w-7" />
+          </span>
           <div>
-            <p className="font-medium text-slate-600 dark:text-slate-400">Nenhum cenário criado</p>
+            <p className="font-medium text-slate-600 dark:text-slate-300">Nenhum cenário criado</p>
             <p className="mt-0.5 text-sm text-slate-400">
               Clique em <strong>Novo</strong> para criar o primeiro
             </p>
@@ -145,7 +147,7 @@ export default function PlanejamentoPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_580px] xl:grid-cols-[1fr_680px]">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-[0_8px_32px_rgba(2,6,23,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] dark:backdrop-blur-xl">
             <PlanEditor
               planId={selectedPlanId}
               summary={summary}

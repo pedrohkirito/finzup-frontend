@@ -68,3 +68,21 @@ export const changePasswordSchema = z
     message: 'Senhas não conferem',
     path: ['confirmPassword'],
   });
+
+export const updateProfileSchema = z
+  .object({
+    name: fullNameSchema,
+    cpf: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const raw = data.cpf?.trim();
+    if (!raw) return;
+    const result = cpfSchema.safeParse(raw);
+    if (!result.success) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: result.error.issues[0]?.message ?? 'CPF ou CNPJ inválido',
+        path: ['cpf'],
+      });
+    }
+  });

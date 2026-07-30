@@ -125,12 +125,12 @@ export default function ReceitasPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Receitas</h1>
-          <p className="text-sm text-slate-500">Salário, freelances e outras fontes de renda</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Salário, freelances e outras fontes de renda</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           {isMonthOpen && (
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
+              <Button className="h-11 w-full font-semibold sm:w-auto">
                 <Plus className="h-4 w-4" />
                 Nova receita
               </Button>
@@ -157,16 +157,16 @@ export default function ReceitasPage() {
       <BabyStepPageHint pageKey="receitas" />
 
       {/* Card de total */}
-      <Card className="border-emerald-100 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+      <Card className="border-emerald-100 bg-emerald-50 dark:border-emerald-400/20 dark:bg-emerald-500/[0.08]">
         <CardContent className="flex items-center gap-4 p-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-400">
+          <div className="icon-chip h-11 w-11 bg-emerald-500/15 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-400">
             <TrendingUp className="h-5 w-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
               Total do mês
             </p>
-            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+            <p className="text-3xl font-bold tracking-tight text-emerald-700 dark:text-emerald-300">
               {formatCurrency(totalIncome)}
             </p>
           </div>
@@ -175,14 +175,14 @@ export default function ReceitasPage() {
 
       {/* Lista */}
       {incomes?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-            <TrendingUp className="h-6 w-6 text-slate-400" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 px-6 py-16 text-center dark:border-white/[0.08]">
+          <div className="icon-chip mb-4 h-14 w-14 rounded-2xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/15 dark:text-emerald-400">
+            <TrendingUp className="h-7 w-7" />
           </div>
-          <p className="font-medium text-slate-700 dark:text-slate-300">Nenhuma receita cadastrada</p>
-          <p className="mt-1 text-sm text-slate-500">Adicione seu salário ou outras fontes de renda.</p>
+          <p className="font-medium text-slate-700 dark:text-slate-200">Nenhuma receita cadastrada</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Adicione seu salário ou outras fontes de renda.</p>
           {isMonthOpen && (
-            <Button variant="outline" className="mt-4" onClick={() => setOpen(true)}>
+            <Button variant="outline" className="mt-5 h-11" onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" />
               Adicionar receita
             </Button>
@@ -199,16 +199,18 @@ export default function ReceitasPage() {
           {(income, dragHandle) => (
             <Card
               key={income.id}
-              className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800"
+              className="border-slate-200 transition-colors hover:shadow-sm dark:hover:bg-white/[0.05]"
             >
-              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                <div className="flex min-w-0 flex-1 items-start gap-3">
+              <CardContent className="flex min-h-[60px] flex-col gap-3 p-4 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   {dragHandle}
-                  <div className="h-8 w-1 shrink-0 rounded-full bg-emerald-500" />
+                  <div className="icon-chip bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                    <TrendingUp className="h-4 w-4" />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-slate-900 dark:text-white">{income.name}</p>
                     {income.carryForward && (
-                      <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
+                      <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400 dark:text-slate-400">
                         <RefreshCw className="h-3 w-3" />
                         Repete todo mês
                       </div>
@@ -216,7 +218,7 @@ export default function ReceitasPage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-2">
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
                     {formatCurrency(Number(income.amount))}
                   </span>
                   <ItemActions

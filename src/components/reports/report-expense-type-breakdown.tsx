@@ -47,7 +47,7 @@ export function ReportExpenseTypeBreakdown({
   if (groups.length === 0) return null;
 
   return (
-    <div className="mt-6 border-t border-slate-100 pt-6 dark:border-slate-800">
+    <div className="mt-6 border-t border-slate-100 pt-6 dark:border-white/[0.06]">
       <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
         Detalhamento por tipo
       </p>
@@ -63,7 +63,7 @@ export function ReportExpenseTypeBreakdown({
           return (
             <div
               key={group.key}
-              className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/20"
+              className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-white/[0.06] dark:bg-white/[0.03]"
             >
               <div className="mb-4 flex items-baseline justify-between gap-2">
                 <h4

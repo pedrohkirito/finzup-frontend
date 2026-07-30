@@ -166,7 +166,7 @@ export default function AssinaturaPageContent() {
   if (isLoading || !user) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
       </div>
     );
   }
@@ -194,7 +194,7 @@ export default function AssinaturaPageContent() {
     return (
       <div className="space-y-6">
         {errorMessage && (
-          <div className="mx-auto max-w-5xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200">
+          <div className="mx-auto max-w-5xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
             {errorMessage}
           </div>
         )}
@@ -212,7 +212,7 @@ export default function AssinaturaPageContent() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase">
+        <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase dark:text-emerald-400">
           Passo 3 de 3
         </p>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -224,20 +224,20 @@ export default function AssinaturaPageContent() {
       </div>
 
       {checkoutMessage && (
-        <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-200">
+        <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800 dark:border-brand-400/20 dark:bg-brand-500/10 dark:text-brand-200">
           {checkoutMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
           {errorMessage}
         </div>
       )}
 
       <PlanPicker mode="subscribe" onSelectPlan={handleSelectPlan} loadingPlan={loadingPlan} compactHeader />
 
-      <div className="flex justify-center border-t border-slate-200 pt-8 dark:border-slate-800">
+      <div className="flex justify-center border-t border-slate-200 pt-8 dark:border-white/[0.08]">
         <Button type="button" variant="outline" onClick={() => logout()}>
           Sair da conta
         </Button>

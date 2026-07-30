@@ -69,7 +69,7 @@ function SubscriptionCheckoutForm({
 
   if (checkoutState.type === 'error') {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200">
+      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
         {checkoutState.error.message}
       </div>
     );
@@ -103,7 +103,7 @@ function SubscriptionCheckoutForm({
         </button>
 
         <div>
-          <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase">
+          <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase dark:text-emerald-400">
             {stepLabel}
           </p>
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">
@@ -121,9 +121,9 @@ function SubscriptionCheckoutForm({
         </div>
 
         <div className="space-y-5">
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-950 dark:shadow-none">
-            <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-brand-50/40 px-5 py-4 dark:border-slate-800 dark:from-slate-900 dark:to-brand-950/20">
-              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-brand-600 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/50 backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-[0_8px_32px_rgba(2,6,23,0.4),inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-brand-50/40 px-5 py-4 dark:border-white/[0.06] dark:from-white/[0.04] dark:to-brand-500/10">
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-brand-600 shadow-sm ring-1 ring-slate-200 dark:bg-white/[0.06] dark:text-brand-400 dark:ring-white/[0.1]">
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
@@ -135,7 +135,7 @@ function SubscriptionCheckoutForm({
               </div>
             </div>
 
-            <div className="p-5 sm:p-6">
+            <div className="p-4 sm:p-6">
               <PaymentElement />
             </div>
           </div>
@@ -143,7 +143,7 @@ function SubscriptionCheckoutForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-xl bg-brand-500 py-6 text-base font-semibold shadow-lg shadow-brand-200/60 hover:bg-brand-600 hover:shadow-brand-300/50 dark:shadow-brand-900/30"
+            className="btn-brand-gradient w-full rounded-xl py-6 text-base font-semibold"
           >
             {isSubmitting ? (
               <>
@@ -155,7 +155,7 @@ function SubscriptionCheckoutForm({
             )}
           </Button>
 
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-center dark:border-slate-800 dark:bg-slate-900/40">
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-center dark:border-white/[0.08] dark:bg-white/[0.04]">
             <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-slate-600 dark:text-slate-400">
               <span className="inline-flex items-center gap-1.5">
                 <Lock className="h-3.5 w-3.5 text-brand-green-600" />

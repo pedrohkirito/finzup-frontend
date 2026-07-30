@@ -25,7 +25,7 @@ type OverviewCardItem = {
   value: number;
   icon: LucideIcon;
   accent: string;
-  bg: string;
+  chip: string;
 };
 
 export function ReportOverview({
@@ -46,36 +46,36 @@ export function ReportOverview({
       title: 'Receitas',
       value: totalIncome,
       icon: TrendingUp,
-      accent: 'text-emerald-600',
-      bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+      accent: 'text-emerald-600 dark:text-emerald-400',
+      chip: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400',
     },
     {
       title: 'Despesas',
       value: totalExpenses,
       icon: TrendingDown,
-      accent: 'text-orange-600',
-      bg: 'bg-orange-50 dark:bg-orange-950/60',
+      accent: 'text-orange-600 dark:text-orange-400',
+      chip: 'bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400',
     },
     {
       title: 'Doações',
       value: totalDonations,
       icon: Heart,
-      accent: 'text-sky-600',
-      bg: 'bg-sky-50 dark:bg-sky-950/60',
+      accent: 'text-sky-600 dark:text-sky-400',
+      chip: 'bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400',
     },
     {
       title: 'Fatura',
       value: creditCardBill.total,
       icon: CreditCard,
-      accent: 'text-violet-600',
-      bg: 'bg-violet-50 dark:bg-violet-950/60',
+      accent: 'text-violet-600 dark:text-violet-400',
+      chip: 'bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400',
     },
     {
       title: 'Investimentos',
       value: investment.totalInvested,
       icon: PiggyBank,
-      accent: 'text-emerald-600',
-      bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+      accent: 'text-emerald-600 dark:text-emerald-400',
+      chip: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400',
     },
   ];
 
@@ -134,16 +134,18 @@ export function ReportOverview({
   return (
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {summaryItems.map(({ title, value, icon: Icon, accent, bg }) => (
+        {summaryItems.map(({ title, value, icon: Icon, accent, chip }) => (
           <Card key={title}>
             <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">{title}</CardTitle>
-              <div className={cn('rounded-lg p-2', bg)}>
-                <Icon className={cn('h-4 w-4', accent)} />
+              <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</CardTitle>
+              <div className={cn('icon-chip', chip)}>
+                <Icon className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0">
-              <p className={cn('text-2xl font-bold tracking-tight', accent)}>{formatCurrency(value)}</p>
+              <p className={cn('text-2xl font-bold tracking-tight tabular-nums', accent)}>
+                {formatCurrency(value)}
+              </p>
             </CardContent>
           </Card>
         ))}
@@ -160,7 +162,10 @@ export function ReportOverview({
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {incomeAllocationItems.map((item) => (
-                  <div key={item.label} className="rounded-xl bg-slate-50 px-3 py-3 dark:bg-slate-800/40">
+                  <div
+                    key={item.label}
+                    className="rounded-xl bg-slate-50 px-3 py-3 dark:border dark:border-white/[0.06] dark:bg-white/[0.04]"
+                  >
                     <p className="text-xs text-slate-500">{item.label}</p>
                     <p
                       className="mt-1 text-2xl font-bold tabular-nums leading-none"
@@ -196,7 +201,10 @@ export function ReportOverview({
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 {expenseDistributionItems.map((item) => (
-                  <div key={item.label} className="rounded-xl bg-slate-50 px-3 py-3 dark:bg-slate-800/40">
+                  <div
+                    key={item.label}
+                    className="rounded-xl bg-slate-50 px-3 py-3 dark:border dark:border-white/[0.06] dark:bg-white/[0.04]"
+                  >
                     <p className="text-xs text-slate-500">{item.label}</p>
                     <p
                       className="mt-1 text-2xl font-bold tabular-nums leading-none"
@@ -218,7 +226,7 @@ export function ReportOverview({
               />
             </div>
             <ReportExpenseTypeBreakdown expenses={expenses} expenseByType={expenseByType} />
-            <div className="mt-6 border-t border-slate-100 pt-6 dark:border-slate-800">
+            <div className="mt-6 border-t border-slate-100 pt-6 dark:border-white/[0.06]">
               <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
                 <ReportPaymentMethods paymentMethods={paymentMethods} embedded />
                 <ReportTopExpenses expenses={expenses} embedded />

@@ -62,8 +62,10 @@ export function EmergencyFundCard({ state }: EmergencyFundCardProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <PiggyBank className="h-5 w-5 text-brand-600" />
+        <div className="flex items-center gap-3">
+          <span className="icon-chip bg-brand-500/15 text-brand-600 dark:text-brand-400">
+            <PiggyBank className="h-5 w-5" />
+          </span>
           <CardTitle>Reserva de emergência</CardTitle>
         </div>
         <CardDescription>
@@ -75,21 +77,27 @@ export function EmergencyFundCard({ state }: EmergencyFundCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
-            <p className="text-xs text-slate-500">Saldo atual</p>
-            <p className="text-lg font-semibold">{formatCurrency(state.metrics.emergencyFundBalance)}</p>
+          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
+            <p className="text-xs text-slate-500 dark:text-slate-400">Saldo atual</p>
+            <p className="text-lg font-semibold tabular-nums text-brand-600 dark:text-brand-400">
+              {formatCurrency(state.metrics.emergencyFundBalance)}
+            </p>
           </div>
-          <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
-            <p className="text-xs text-slate-500">Meta da reserva</p>
-            <p className="text-lg font-semibold">{formatCurrency(state.metrics.emergencyFundTarget)}</p>
+          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
+            <p className="text-xs text-slate-500 dark:text-slate-400">Meta da reserva</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {formatCurrency(state.metrics.emergencyFundTarget)}
+            </p>
           </div>
-          <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
-            <p className="text-xs text-slate-500">Meses cobertos</p>
-            <p className="text-lg font-semibold">{state.metrics.reserveMonths.toFixed(1)}</p>
+          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
+            <p className="text-xs text-slate-500 dark:text-slate-400">Meses cobertos</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {state.metrics.reserveMonths.toFixed(1)}
+            </p>
           </div>
         </div>
-        <Progress value={step1Progress} className="[&>div]:bg-brand-500" />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <Progress value={step1Progress} className="h-2.5 [&>div]:bg-brand-500" />
+        <div className="grid gap-4 sm:grid-cols-2">
           <MoneyField
             id="fund-balance"
             label="Saldo da reserva"
@@ -109,7 +117,7 @@ export function EmergencyFundCard({ state }: EmergencyFundCardProps) {
             }
           />
         </div>
-        <Button onClick={save} disabled={update.isPending}>
+        <Button onClick={save} disabled={update.isPending} className="w-full sm:w-auto">
           {update.isPending ? 'Salvando…' : 'Salvar reserva'}
         </Button>
       </CardContent>

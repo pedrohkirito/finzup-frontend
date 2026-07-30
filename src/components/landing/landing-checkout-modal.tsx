@@ -27,6 +27,8 @@ import {
   formatBRL,
 } from '@/constants/billing-plans';
 import { api, ApiError } from '@/lib/api';
+import { cn } from '@/lib/utils';
+import { glassOverlayClassName, glassSurfaceClassName } from '@/lib/glass';
 import { cpfSchema, emailSchema, fullNameSchema } from '@/lib/validators';
 import { maskCpfInput } from '@/lib/cpf';
 import {
@@ -269,15 +271,18 @@ export function LandingCheckoutModal({
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
+        <Dialog.Overlay className={cn('fixed inset-0 z-50', glassOverlayClassName)} />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl focus:outline-none dark:border-slate-800 dark:bg-slate-950"
+          className={cn(
+            'fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl focus:outline-none',
+            glassSurfaceClassName,
+          )}
         >
           <Dialog.Title className="sr-only">Assinar a Finzup</Dialog.Title>
 
           {step !== 'success' && (
-            <Dialog.Close className="absolute right-4 top-4 z-10 rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Fechar">
+            <Dialog.Close className="absolute right-4 top-4 z-10 rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.08]" aria-label="Fechar">
               <X className="h-5 w-5" />
             </Dialog.Close>
           )}

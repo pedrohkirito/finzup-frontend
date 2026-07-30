@@ -18,7 +18,7 @@ export function ReportSection({
     <Card className={cn('h-full', className)}>
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        {description && <p className="text-sm text-slate-500">{description}</p>}
+        {description && <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>}
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>

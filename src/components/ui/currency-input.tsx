@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
 import { cn, centsToNumber, formatCurrencyInput, numberToCents } from '@/lib/utils';
 
 type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'> & {
@@ -11,7 +10,7 @@ type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'val
 };
 
 export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
-  ({ value = 0, onChange, className, ...props }, ref) => {
+  ({ value = 0, onChange, className, disabled, ...props }, ref) => {
     const [display, setDisplay] = React.useState(() => formatCurrencyInput(numberToCents(value)));
 
     React.useEffect(() => {
@@ -26,17 +25,24 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
     };
 
     return (
-      <div className="relative">
-        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+      <div
+        className={cn(
+          'flex h-10 w-full items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm ring-offset-white focus-within:outline-none focus-within:ring-2 focus-within:ring-emerald-500 dark:border-white/10 dark:bg-white/[0.05] dark:ring-offset-slate-950 dark:backdrop-blur-md dark:focus-within:ring-emerald-400/70',
+          disabled && 'cursor-not-allowed opacity-50',
+          className,
+        )}
+      >
+        <span className="shrink-0 select-none font-medium text-slate-500 dark:text-slate-300">
           R$
         </span>
-        <Input
+        <input
           ref={ref}
           type="text"
           inputMode="numeric"
           value={display}
           onChange={handleChange}
-          className={cn('pl-10', className)}
+          disabled={disabled}
+          className="min-w-0 flex-1 bg-transparent text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
           {...props}
         />
       </div>

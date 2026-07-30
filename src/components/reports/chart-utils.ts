@@ -1,27 +1,34 @@
+export const BRAND_CYAN = '#03b6e6';
+export const BRAND_GREEN = '#22bd7b';
+
 export const CHART_COLORS = [
-  '#10b981',
+  BRAND_GREEN,
   '#f97316',
   '#8b5cf6',
   '#0ea5e9',
   '#f59e0b',
   '#ef4444',
-  '#6366f1',
+  BRAND_CYAN,
   '#14b8a6',
 ];
 
+// slate-400: legível tanto no fundo claro quanto no dark
+export const CHART_AXIS_TICK_FILL = '#94a3b8';
+
 export const CHART_TOOLTIP_STYLE = {
   contentStyle: {
-    background: 'rgba(15, 23, 42, 0.88)',
-    border: 'none',
-    borderRadius: '8px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-    padding: '8px 12px',
-    fontSize: '15px',
-    color: '#ffffff',
-    backdropFilter: 'blur(4px)',
+    background: 'rgba(15, 23, 42, 0.75)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '12px',
+    boxShadow: '0 12px 32px rgba(2, 6, 23, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    padding: '10px 14px',
+    fontSize: '14px',
+    color: '#e2e8f0',
   },
-  labelStyle: { color: '#ffffff', fontWeight: 700, marginBottom: 2 },
-  itemStyle: { color: '#ffffff' },
+  labelStyle: { color: '#f8fafc', fontWeight: 700, marginBottom: 2 },
+  itemStyle: { color: '#e2e8f0' },
   cursor: { fill: 'rgba(148,163,184,0.08)' },
 };
 

@@ -18,12 +18,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { CreditPaymentToggle } from '@/components/despesas/credit-payment-toggle';
 import { ItemActions } from '@/components/despesas/item-actions';
+import { ExpenseCardLayout } from '@/components/despesas/expense-card-layout';
 import { SortableList } from '@/components/despesas/sortable-list';
 import { PaymentMethodField } from '@/components/payment-methods/payment-method-field';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import type {
   ExpenseEntry,
   FixedExpenseTemplate,
@@ -41,7 +41,33 @@ import { SnowballDebtsCard } from '@/components/baby-steps/snowball-debts-card';
 import { useBabySteps } from '@/hooks/use-baby-steps';
 
 function getExpenseAmountColor(isCredit: boolean, isPaid: boolean) {
-  return isCredit && !isPaid ? 'text-violet-600' : 'text-orange-600 dark:text-orange-400';
+  return isCredit && !isPaid
+    ? 'text-violet-600 dark:text-violet-400'
+    : 'text-orange-600 dark:text-orange-400';
+}
+
+function withPaidAt<T extends { id: string; paidAt?: string | null }>(
+  items: T[] | undefined,
+  id: string,
+  paid: boolean,
+): T[] | undefined {
+  if (!items) return items;
+  const paidAt = paid ? new Date().toISOString() : null;
+  return items.map((item) => (item.id === id ? { ...item, paidAt } : item));
+}
+
+const EXPENSE_TABS = [
+  { value: 'avulsas', label: 'Avulsas' },
+  { value: 'fixas', label: 'Fixas' },
+  { value: 'parceladas', label: 'Parceladas' },
+  { value: 'assinaturas', label: 'Assinaturas' },
+  { value: 'financiamentos', label: 'Financiamentos' },
+] as const;
+
+type ExpenseTab = (typeof EXPENSE_TABS)[number]['value'];
+
+function isExpenseTab(value: string | null): value is ExpenseTab {
+  return EXPENSE_TABS.some((tab) => tab.value === value);
 }
 
 const expenseSchema = z.object({
@@ -129,26 +155,13 @@ export default function DespesasPage() {
   const searchParams = useSearchParams();
   const { data: babySteps } = useBabySteps();
   const tabParam = searchParams.get('tab');
-  const initialTab =
-    tabParam === 'parceladas' ||
-    tabParam === 'fixas' ||
-    tabParam === 'assinaturas' ||
-    tabParam === 'financiamentos' ||
-    tabParam === 'avulsas'
-      ? tabParam
-      : 'avulsas';
-  const [expenseTab, setExpenseTab] = useState(initialTab);
+  const initialTab = isExpenseTab(tabParam) ? tabParam : 'avulsas';
+  const [expenseTab, setExpenseTab] = useState<ExpenseTab>(initialTab);
   const [dialog, setDialog] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<{ type: EditType; id: string } | null>(null);
 
   useEffect(() => {
-    if (
-      tabParam === 'parceladas' ||
-      tabParam === 'fixas' ||
-      tabParam === 'assinaturas' ||
-      tabParam === 'financiamentos' ||
-      tabParam === 'avulsas'
-    ) {
+    if (isExpenseTab(tabParam)) {
       setExpenseTab(tabParam);
     }
   }, [tabParam]);
@@ -261,10 +274,10 @@ export default function DespesasPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-6 md:space-y-8">
+      <div className="space-y-1">
         <h1 className="text-xl font-bold sm:text-2xl">Despesas</h1>
-        <p className="text-sm text-slate-500">Avulsas, fixas, parceladas, assinaturas e financiamentos</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Avulsas, fixas, parceladas, assinaturas e financiamentos</p>
       </div>
 
       <BabyStepPageHint pageKey="despesas" />
@@ -277,32 +290,50 @@ export default function DespesasPage() {
         />
       )}
 
-      <Card className="border-orange-100 bg-orange-50 dark:border-orange-900/40 dark:bg-orange-950/30">
-        <CardContent className="flex items-center gap-4 p-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/60 dark:text-orange-400">
+      <Card className="border-orange-100 bg-orange-50 dark:border-orange-400/20 dark:bg-orange-500/[0.08]">
+        <CardContent className="flex items-center gap-4 p-5 sm:p-6">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400">
             <TrendingDown className="h-5 w-5" />
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-orange-600 dark:text-orange-400">
               Total de despesas do mês
             </p>
-            <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+            <p className="text-2xl font-bold tabular-nums text-orange-700 sm:text-3xl dark:text-orange-300">
               {formatCurrency(summary?.totalExpenses ?? 0)}
             </p>
           </div>
         </CardContent>
       </Card>
 
-      <Tabs value={expenseTab} onValueChange={setExpenseTab}>
-        <TabsList>
-          <TabsTrigger value="avulsas">Avulsas</TabsTrigger>
-          <TabsTrigger value="fixas">Fixas</TabsTrigger>
-          <TabsTrigger value="parceladas">Parceladas</TabsTrigger>
-          <TabsTrigger value="assinaturas">Assinaturas</TabsTrigger>
-          <TabsTrigger value="financiamentos">Financiamentos</TabsTrigger>
+      <Tabs value={expenseTab} onValueChange={(value) => isExpenseTab(value) && setExpenseTab(value)}>
+        <div className="sm:hidden">
+          <Label htmlFor="expense-category" className="sr-only">
+            Tipo de despesa
+          </Label>
+          <Select value={expenseTab} onValueChange={(value) => isExpenseTab(value) && setExpenseTab(value)}>
+            <SelectTrigger id="expense-category" className="h-11 w-full">
+              <SelectValue placeholder="Tipo de despesa" />
+            </SelectTrigger>
+            <SelectContent>
+              {EXPENSE_TABS.map((tab) => (
+                <SelectItem key={tab.value} value={tab.value}>
+                  {tab.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <TabsList className="hidden sm:inline-flex">
+          {EXPENSE_TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        <TabsContent value="avulsas" className="space-y-4">
+        <TabsContent value="avulsas" className="space-y-4 pt-4 sm:pt-5">
           {isMonthOpen && (
           <Dialog open={dialog === 'expense'} onOpenChange={(o) => setDialog(o ? 'expense' : null)}>
             <DialogTrigger asChild>
@@ -359,58 +390,59 @@ export default function DespesasPage() {
                 const isPaid = !!e.paidAt;
 
                 const setPaid = async (paid: boolean) => {
-                  if (paid === isPaid) return;
-                  await api.patch(`/months/${selectedMonthId}/expenses/${e.id}/paid`, { paid });
-                  invalidate();
+                  if (paid === isPaid || !selectedMonthId) return;
+                  const key = ['expenses', selectedMonthId, 'one_off'] as const;
+                  const previous = queryClient.getQueryData<ExpenseEntry[]>(key);
+                  queryClient.setQueryData(key, withPaidAt(previous, e.id, paid));
+                  try {
+                    await api.patch(`/months/${selectedMonthId}/expenses/${e.id}/paid`, { paid });
+                    invalidate();
+                  } catch (error) {
+                    queryClient.setQueryData(key, previous);
+                    throw error;
+                  }
                 };
 
                 return (
-                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
-                    <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                      <div className="flex min-w-0 flex-1 items-start gap-3">
-                        {dragHandle}
-                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">{e.name}</p>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                            <span>{e.paymentMethod?.name}</span>
-                            {e.budgetTemplate && (
-                              <Badge variant="secondary">{e.budgetTemplate.name}</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 sm:justify-end">
-                        {isCredit && (
-                          <CreditPaymentToggle
-                            isPaid={isPaid}
-                            isMonthOpen={!!isMonthOpen}
-                            onChange={setPaid}
-                          />
-                        )}
-                        <div className="ml-auto flex items-center gap-2 sm:ml-0">
-                          <span className={cn('font-semibold', getExpenseAmountColor(isCredit, isPaid))}>
-                            {formatCurrency(Number(e.amount))}
-                          </span>
-                          <ItemActions
-                            readOnly={!isMonthOpen}
-                            onEdit={() => openEdit('one_off', e)}
-                            onDelete={async () => {
-                              await api.delete(`/months/${selectedMonthId}/expenses/${e.id}`);
-                              invalidate();
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ExpenseCardLayout
+                    dragHandle={dragHandle}
+                    title={e.name}
+                    meta={<span>{e.paymentMethod?.name}</span>}
+                    badges={e.budgetTemplate ? <Badge variant="secondary">{e.budgetTemplate.name}</Badge> : null}
+                    amount={
+                      <span className={getExpenseAmountColor(isCredit, isPaid)}>
+                        {formatCurrency(Number(e.amount))}
+                      </span>
+                    }
+                    status={
+                      isCredit ? (
+                        <CreditPaymentToggle
+                          isPaid={isPaid}
+                          isMonthOpen={!!isMonthOpen}
+                          onChange={setPaid}
+                        />
+                      ) : null
+                    }
+                    actions={
+                      <ItemActions
+                        readOnly={!isMonthOpen}
+                        itemName={e.name}
+                        confirmTitle="Remover despesa"
+                        onEdit={() => openEdit('one_off', e)}
+                        onDelete={async () => {
+                          await api.delete(`/months/${selectedMonthId}/expenses/${e.id}`);
+                          invalidate();
+                        }}
+                      />
+                    }
+                  />
                 );
               }}
             </SortableList>
           )}
         </TabsContent>
 
-        <TabsContent value="fixas" className="space-y-4">
+        <TabsContent value="fixas" className="space-y-4 pt-4 sm:pt-5">
           <Dialog open={dialog === 'fixed'} onOpenChange={(o) => setDialog(o ? 'fixed' : null)}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4" /> Nova despesa fixa</Button>
@@ -465,64 +497,71 @@ export default function DespesasPage() {
 
                 const setPaid = async (paid: boolean) => {
                   if (!monthEntry || !selectedMonthId || paid === isPaid) return;
-                  await api.patch(`/months/${selectedMonthId}/expenses/${monthEntry.id}/paid`, { paid });
-                  invalidate();
+                  const key = ['expenses', selectedMonthId, 'fixed'] as const;
+                  const previous = queryClient.getQueryData<ExpenseEntry[]>(key);
+                  queryClient.setQueryData(key, withPaidAt(previous, monthEntry.id, paid));
+                  try {
+                    await api.patch(`/months/${selectedMonthId}/expenses/${monthEntry.id}/paid`, { paid });
+                    invalidate();
+                  } catch (error) {
+                    queryClient.setQueryData(key, previous);
+                    throw error;
+                  }
                 };
 
                 return (
-                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
-                    <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                      <div className="flex min-w-0 flex-1 items-start gap-3">
-                        {dragHandle}
-                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="truncate font-medium text-slate-900 dark:text-white">{t.name}</p>
-                            {t.isSystemSeeded && <Badge variant="secondary">Sugerida</Badge>}
-                            {t.budgetTemplate && <Badge variant="secondary">{t.budgetTemplate.name}</Badge>}
-                          </div>
-                          <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
-                            <RefreshCw className="h-3 w-3" />
-                            Repete todo mês
-                          </div>
-                          <p className="text-xs text-slate-500">{t.paymentMethod?.name ?? monthEntry?.paymentMethod?.name}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 sm:justify-end">
-                        {monthEntry && isCredit && (
-                          <CreditPaymentToggle
-                            isPaid={isPaid}
-                            isMonthOpen={!!isMonthOpen}
-                            onChange={setPaid}
-                          />
-                        )}
-                        <div className="ml-auto flex items-center gap-2 sm:ml-0">
-                        <span
-                          className={cn(
-                            'font-semibold',
-                            getExpenseAmountColor(!!monthEntry && isCredit, isPaid),
-                          )}
-                        >
-                          {formatCurrency(Number(monthEntry?.amount ?? t.defaultAmount))}
+                  <ExpenseCardLayout
+                    dragHandle={dragHandle}
+                    title={t.name}
+                    meta={
+                      <>
+                        <span className="inline-flex items-center gap-1">
+                          <RefreshCw className="h-3 w-3" />
+                          Repete todo mês
                         </span>
-                        <ItemActions
-                          onEdit={() => openEdit('fixed', t)}
-                          onDelete={async () => {
-                            await api.delete(`/fixed-expense-templates/${t.id}`);
-                            invalidate();
-                          }}
+                        <span>·</span>
+                        <span>{t.paymentMethod?.name ?? monthEntry?.paymentMethod?.name}</span>
+                      </>
+                    }
+                    badges={
+                      <>
+                        {t.isSystemSeeded && <Badge variant="secondary">Sugerida</Badge>}
+                        {t.budgetTemplate && <Badge variant="secondary">{t.budgetTemplate.name}</Badge>}
+                      </>
+                    }
+                    amount={
+                      <span className={getExpenseAmountColor(!!monthEntry && isCredit, isPaid)}>
+                        {formatCurrency(Number(monthEntry?.amount ?? t.defaultAmount))}
+                      </span>
+                    }
+                    status={
+                      monthEntry && isCredit ? (
+                        <CreditPaymentToggle
+                          isPaid={isPaid}
+                          isMonthOpen={!!isMonthOpen}
+                          onChange={setPaid}
                         />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      ) : null
+                    }
+                    actions={
+                      <ItemActions
+                        itemName={t.name}
+                        confirmTitle="Remover despesa"
+                        onEdit={() => openEdit('fixed', t)}
+                        onDelete={async () => {
+                          await api.delete(`/fixed-expense-templates/${t.id}`);
+                          invalidate();
+                        }}
+                      />
+                    }
+                  />
                 );
               }}
             </SortableList>
           )}
         </TabsContent>
 
-        <TabsContent value="parceladas" className="space-y-4">
+        <TabsContent value="parceladas" className="space-y-4 pt-4 sm:pt-5">
           {isMonthOpen && (
           <Dialog open={dialog === 'installment'} onOpenChange={(o) => setDialog(o ? 'installment' : null)}>
             <DialogTrigger asChild>
@@ -583,63 +622,79 @@ export default function DespesasPage() {
 
                 const setPaid = async (paid: boolean) => {
                   if (!monthEntry || paid === isPaid) return;
-                  await api.patch(`/installment-plans/entries/${monthEntry.id}/paid`, { paid });
-                  invalidate();
+                  const key = ['installments'] as const;
+                  const previous = queryClient.getQueryData<InstallmentPlan[]>(key);
+                  const paidAt = paid ? new Date().toISOString() : null;
+                  queryClient.setQueryData<InstallmentPlan[]>(key, (old) =>
+                    old?.map((plan) =>
+                      plan.id !== p.id
+                        ? plan
+                        : {
+                            ...plan,
+                            installmentEntries: plan.installmentEntries?.map((entry) =>
+                              entry.id === monthEntry.id ? { ...entry, paidAt } : entry,
+                            ),
+                          },
+                    ),
+                  );
+                  try {
+                    await api.patch(`/installment-plans/entries/${monthEntry.id}/paid`, { paid });
+                    invalidate();
+                  } catch (error) {
+                    queryClient.setQueryData(key, previous);
+                    throw error;
+                  }
                 };
 
                 return (
-                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
-                    <CardContent className="space-y-2 p-4">
-                      <div className="flex items-start gap-3">
-                        {dragHandle}
-                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
-                        <div className="min-w-0 flex-1 space-y-2">
-                          <div className="flex justify-between gap-4">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="truncate font-medium text-slate-900 dark:text-white">{p.name}</p>
-                              {p.budgetTemplate && <Badge variant="secondary">{p.budgetTemplate.name}</Badge>}
-                            </div>
-                            <span
-                              className={cn(
-                                'shrink-0 font-semibold',
-                                getExpenseAmountColor(!!monthEntry && isCredit, isPaid),
-                              )}
-                            >
-                              {formatCurrency(Number(monthEntry?.amount ?? p.installmentAmount))}
-                              {monthEntry ? '' : '/mês'}
-                            </span>
-                          </div>
-                          <Progress value={(p.installmentsPaid / p.totalInstallments) * 100} />
-                          <p className="text-xs text-slate-500">
-                            {monthEntry
-                              ? `Parcela ${monthEntry.installmentNumber} deste mês`
-                              : `${p.installmentsPaid}/${p.totalInstallments} parcelas pagas`}
-                          </p>
-                        </div>
-                        {monthEntry && isCredit && (
-                          <CreditPaymentToggle
-                            isPaid={isPaid}
-                            isMonthOpen={!!isMonthOpen}
-                            onChange={setPaid}
-                          />
+                  <ExpenseCardLayout
+                    dragHandle={dragHandle}
+                    title={p.name}
+                    meta={<span>{p.paymentMethod?.name}</span>}
+                    badges={p.budgetTemplate ? <Badge variant="secondary">{p.budgetTemplate.name}</Badge> : null}
+                    amount={
+                      <span className={getExpenseAmountColor(!!monthEntry && isCredit, isPaid)}>
+                        {formatCurrency(Number(monthEntry?.amount ?? p.installmentAmount))}
+                        {!monthEntry && (
+                          <span className="ml-0.5 text-xs font-medium text-slate-400">/mês</span>
                         )}
-                        <ItemActions
-                          onEdit={() => openEdit('installment', p)}
-                          onDelete={async () => {
-                            await api.delete(`/installment-plans/${p.id}`);
-                            invalidate();
-                          }}
+                      </span>
+                    }
+                    progress={{
+                      value: (p.installmentsPaid / p.totalInstallments) * 100,
+                      className: '[&>div]:bg-violet-500',
+                      label: monthEntry
+                        ? `Parcela ${monthEntry.installmentNumber} deste mês · ${p.installmentsPaid}/${p.totalInstallments} pagas`
+                        : `${p.installmentsPaid}/${p.totalInstallments} parcelas pagas`,
+                    }}
+                    status={
+                      monthEntry && isCredit ? (
+                        <CreditPaymentToggle
+                          isPaid={isPaid}
+                          isMonthOpen={!!isMonthOpen}
+                          onChange={setPaid}
                         />
-                      </div>
-                    </CardContent>
-                  </Card>
+                      ) : null
+                    }
+                    actions={
+                      <ItemActions
+                        itemName={p.name}
+                        confirmTitle="Remover despesa"
+                        onEdit={() => openEdit('installment', p)}
+                        onDelete={async () => {
+                          await api.delete(`/installment-plans/${p.id}`);
+                          invalidate();
+                        }}
+                      />
+                    }
+                  />
                 );
               }}
             </SortableList>
           )}
         </TabsContent>
 
-        <TabsContent value="assinaturas" className="space-y-4">
+        <TabsContent value="assinaturas" className="space-y-4 pt-4 sm:pt-5">
           <Dialog open={dialog === 'subscription'} onOpenChange={(o) => setDialog(o ? 'subscription' : null)}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4" /> Nova assinatura</Button>
@@ -692,59 +747,69 @@ export default function DespesasPage() {
 
                 const setPaid = async (paid: boolean) => {
                   if (!monthEntry || paid === isPaid) return;
-                  await api.patch(`/subscriptions/entries/${monthEntry.id}/paid`, { paid });
-                  invalidate();
+                  const key = ['subscriptions'] as const;
+                  const previous = queryClient.getQueryData<Subscription[]>(key);
+                  const paidAt = paid ? new Date().toISOString() : null;
+                  queryClient.setQueryData<Subscription[]>(key, (old) =>
+                    old?.map((sub) =>
+                      sub.id !== s.id
+                        ? sub
+                        : {
+                            ...sub,
+                            subscriptionEntries: sub.subscriptionEntries?.map((entry) =>
+                              entry.id === monthEntry.id ? { ...entry, paidAt } : entry,
+                            ),
+                          },
+                    ),
+                  );
+                  try {
+                    await api.patch(`/subscriptions/entries/${monthEntry.id}/paid`, { paid });
+                    invalidate();
+                  } catch (error) {
+                    queryClient.setQueryData(key, previous);
+                    throw error;
+                  }
                 };
 
                 return (
-                  <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
-                    <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                      <div className="flex min-w-0 flex-1 items-start gap-3">
-                        {dragHandle}
-                        <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">{s.name}</p>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                            <span>{s.paymentMethod.name} · Mensal</span>
-                            {s.budgetTemplate && <Badge variant="secondary">{s.budgetTemplate.name}</Badge>}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 sm:justify-end">
-                        {monthEntry && isCredit && (
-                          <CreditPaymentToggle
-                            isPaid={isPaid}
-                            isMonthOpen={!!isMonthOpen}
-                            onChange={setPaid}
-                          />
-                        )}
-                        <div className="ml-auto flex items-center gap-2 sm:ml-0">
-                        <span
-                          className={cn(
-                            'font-semibold',
-                            getExpenseAmountColor(!!monthEntry && isCredit, isPaid),
-                          )}
-                        >
-                          {formatCurrency(Number(monthEntry?.amount ?? s.amount))}
-                        </span>
-                        <ItemActions
-                          onEdit={() => openEdit('subscription', s)}
-                          onDelete={async () => {
-                            await api.delete(`/subscriptions/${s.id}`);
-                            invalidate();
-                          }}
+                  <ExpenseCardLayout
+                    dragHandle={dragHandle}
+                    title={s.name}
+                    meta={<span>{s.paymentMethod.name} · Mensal</span>}
+                    badges={s.budgetTemplate ? <Badge variant="secondary">{s.budgetTemplate.name}</Badge> : null}
+                    amount={
+                      <span className={getExpenseAmountColor(!!monthEntry && isCredit, isPaid)}>
+                        {formatCurrency(Number(monthEntry?.amount ?? s.amount))}
+                      </span>
+                    }
+                    status={
+                      monthEntry && isCredit ? (
+                        <CreditPaymentToggle
+                          isPaid={isPaid}
+                          isMonthOpen={!!isMonthOpen}
+                          onChange={setPaid}
                         />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      ) : null
+                    }
+                    actions={
+                      <ItemActions
+                        itemName={s.name}
+                        confirmTitle="Remover despesa"
+                        onEdit={() => openEdit('subscription', s)}
+                        onDelete={async () => {
+                          await api.delete(`/subscriptions/${s.id}`);
+                          invalidate();
+                        }}
+                      />
+                    }
+                  />
                 );
               }}
             </SortableList>
           )}
         </TabsContent>
 
-        <TabsContent value="financiamentos" className="space-y-4">
+        <TabsContent value="financiamentos" className="space-y-4 pt-4 sm:pt-5">
           <Dialog open={dialog === 'financing'} onOpenChange={(o) => setDialog(o ? 'financing' : null)}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4" /> Novo financiamento</Button>
@@ -786,83 +851,86 @@ export default function DespesasPage() {
                 const monthTotal = monthEntries.reduce((sum, e) => sum + Number(e.amount), 0);
 
                 return (
-                <Card className="border-slate-200 transition-shadow hover:shadow-sm dark:border-slate-800">
-                  <CardContent className="space-y-3 p-4">
-                    <div className="flex items-start gap-3">
-                      {dragHandle}
-                      <div className="h-8 w-1 shrink-0 rounded-full bg-orange-500" />
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <div className="flex justify-between gap-4">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">{f.name}</p>
-                          <span className="shrink-0 font-semibold text-orange-600 dark:text-orange-400">
-                            {formatCurrency(Number(f.installmentAmount))}/mês
-                          </span>
-                        </div>
-                        <Progress value={(f.installmentsPaid / f.totalInstallments) * 100} />
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="space-y-0.5">
-                            <p className="text-xs text-slate-500">{f.installmentsPaid}/{f.totalInstallments} parcelas</p>
-                            {monthEntries.length > 0 && (
-                              <p className="text-xs font-medium text-emerald-600">
-                                {monthEntries.length} parcela(s) neste mês — {formatCurrency(monthTotal)}
-                              </p>
-                            )}
-                          </div>
-                          {f.active && f.installmentsPaid < f.totalInstallments && selectedMonthId && isMonthOpen && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="w-full sm:w-auto"
-                              onClick={async () => {
-                                await api.post(`/financings/${f.id}/pay-ahead`, { installmentsToPay: 1, monthId: selectedMonthId });
-                                invalidate();
-                              }}
-                            >
-                              Adiantar 1 parcela
-                            </Button>
-                          )}
-                        </div>
+                <ExpenseCardLayout
+                  dragHandle={dragHandle}
+                  title={f.name}
+                  meta={<span>{f.paymentMethod?.name}</span>}
+                  amount={
+                    <span className="text-orange-600 dark:text-orange-400">
+                      {formatCurrency(Number(f.installmentAmount))}
+                      <span className="ml-0.5 text-xs font-medium text-slate-400">/mês</span>
+                    </span>
+                  }
+                  progress={{
+                    value: (f.installmentsPaid / f.totalInstallments) * 100,
+                    className: '[&>div]:bg-orange-500',
+                    label: (
+                      <div className="space-y-0.5">
+                        <p>{f.installmentsPaid}/{f.totalInstallments} parcelas</p>
                         {monthEntries.length > 0 && (
-                          <div className="space-y-1.5 border-t pt-2">
-                            {monthEntries.map((entry) => {
-                              const cancellable = isMonthOpen && canCancelFinancingEntry(entry, f.installmentsPaid);
-                              return (
-                                <div key={entry.id} className="flex items-center justify-between gap-2 text-xs">
-                                  <span className="text-slate-600">
-                                    Parcela {entry.installmentNumber} — {formatCurrency(Number(entry.amount))}
-                                    {entry.discountApplied && (
-                                      <span className="ml-1 text-emerald-600">(adiantamento)</span>
-                                    )}
-                                  </span>
-                                  {cancellable && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 px-2 text-red-500 hover:text-red-600"
-                                      onClick={async () => {
-                                        await api.delete(`/financings/${f.id}/entries/${entry.id}`);
-                                        invalidate();
-                                      }}
-                                    >
-                                      Cancelar
-                                    </Button>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
+                          <p className="font-medium text-emerald-600 dark:text-emerald-400">
+                            {monthEntries.length} parcela(s) neste mês — {formatCurrency(monthTotal)}
+                          </p>
                         )}
                       </div>
-                      <ItemActions
-                        onEdit={() => openEdit('financing', f)}
-                        onDelete={async () => {
-                          await api.delete(`/financings/${f.id}`);
-                          invalidate();
-                        }}
-                      />
+                    ),
+                  }}
+                  actions={
+                    <ItemActions
+                      itemName={f.name}
+                      confirmTitle="Remover despesa"
+                      onEdit={() => openEdit('financing', f)}
+                      onDelete={async () => {
+                        await api.delete(`/financings/${f.id}`);
+                        invalidate();
+                      }}
+                    />
+                  }
+                >
+                  {f.active && f.installmentsPaid < f.totalInstallments && selectedMonthId && isMonthOpen && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-10 w-full sm:h-9 sm:w-auto"
+                      onClick={async () => {
+                        await api.post(`/financings/${f.id}/pay-ahead`, { installmentsToPay: 1, monthId: selectedMonthId });
+                        invalidate();
+                      }}
+                    >
+                      Adiantar 1 parcela
+                    </Button>
+                  )}
+                  {monthEntries.length > 0 && (
+                    <div className="space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                      {monthEntries.map((entry) => {
+                        const cancellable = isMonthOpen && canCancelFinancingEntry(entry, f.installmentsPaid);
+                        return (
+                          <div key={entry.id} className="flex min-h-9 items-center justify-between gap-2 text-xs">
+                            <span className="min-w-0 truncate text-slate-600 dark:text-slate-400">
+                              Parcela {entry.installmentNumber} — {formatCurrency(Number(entry.amount))}
+                              {entry.discountApplied && (
+                                <span className="ml-1 text-emerald-600 dark:text-emerald-400">(adiantamento)</span>
+                              )}
+                            </span>
+                            {cancellable && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-9 shrink-0 px-3 text-red-500 hover:text-red-600 sm:h-7 sm:px-2 dark:hover:bg-white/[0.06]"
+                                onClick={async () => {
+                                  await api.delete(`/financings/${f.id}/entries/${entry.id}`);
+                                  invalidate();
+                                }}
+                              >
+                                Cancelar
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                </ExpenseCardLayout>
                 );
               }}
             </SortableList>

@@ -46,21 +46,19 @@ export function PlanPicker({
 
   const ctaClass = (plan: BillingPlanId) =>
     isSelected(plan)
-      ? mode === 'landing'
-        ? 'btn-brand-gradient'
-        : 'bg-brand-500 text-white shadow-md shadow-brand-200/70 hover:bg-brand-600 hover:shadow-lg dark:shadow-brand-900/50'
-      : 'border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900';
+      ? 'btn-brand-gradient'
+      : 'border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-white/[0.12] dark:text-slate-300 dark:hover:bg-white/[0.06]';
 
   const cardClass = (plan: BillingPlanId) => {
     if (isSelected(plan)) {
-      return 'brand-gradient-border shadow-xl shadow-brand-100/60 dark:shadow-brand-950/80';
+      return 'brand-gradient-border shadow-xl shadow-brand-100/60 dark:shadow-brand-500/10';
     }
 
     if (plan === 'annual') {
-      return 'border-brand-200 shadow-md dark:border-brand-800';
+      return 'border-brand-200 shadow-md dark:border-brand-400/30';
     }
 
-    return 'border-slate-200 shadow-sm dark:border-slate-800';
+    return 'border-slate-200 shadow-sm dark:border-white/[0.08]';
   };
 
   const renderPrice = (planId: BillingPlanId) => {
@@ -74,7 +72,7 @@ export function PlanPicker({
       <>
         <div className="flex items-end gap-1">
           <span className="text-sm font-medium text-slate-500 dark:text-slate-400">R$</span>
-          <span className="text-4xl font-extrabold leading-none text-slate-900 sm:text-5xl dark:text-white">
+          <span className="text-4xl font-extrabold leading-none text-slate-900 sm:text-5xl dark:brand-gradient-text">
             {int}<span className="text-2xl sm:text-3xl">,{dec}</span>
           </span>
           <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">{intervalSuffix}</span>
@@ -185,7 +183,7 @@ export function PlanPicker({
         <ScrollArea
           variant="none"
           orientation="horizontal"
-          className="inline-flex max-w-full rounded-full border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+          className="inline-flex max-w-full rounded-full border border-slate-200 bg-white p-1 shadow-sm dark:border-white/[0.1] dark:bg-white/[0.06]"
         >
           <div className="inline-flex items-center">
           {tabs.map(({ id, label, badge }) => (
@@ -195,9 +193,7 @@ export function PlanPicker({
               onClick={() => setSelected(id)}
               className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all sm:gap-2 sm:px-5 sm:py-2 sm:text-sm ${
                 isSelected(id)
-                  ? mode === 'landing'
-                    ? 'brand-gradient-bg-r text-white shadow-sm'
-                    : 'bg-brand-500 text-white shadow-sm'
+                  ? 'brand-gradient-bg-r text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
@@ -228,7 +224,7 @@ export function PlanPicker({
           return (
             <div
               key={planId}
-              className={`relative flex h-full flex-col rounded-3xl border bg-white p-5 transition-all sm:p-7 dark:bg-slate-950 ${cardClass(planId)} ${
+              className={`relative flex h-full flex-col rounded-3xl border bg-white p-5 backdrop-blur-xl transition-all sm:p-7 dark:bg-white/[0.06] dark:shadow-[0_8px_32px_rgba(2,6,23,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] ${cardClass(planId)} ${
                 isSelected(planId)
                   ? 'mx-auto w-full max-w-md lg:mx-0 lg:max-w-none'
                   : 'hidden lg:flex'
@@ -236,7 +232,7 @@ export function PlanPicker({
             >
               {(planId === 'annual' || isSelected(planId)) && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white shadow-md ${mode === 'landing' ? 'brand-gradient-bg-r' : 'bg-brand-500'}`}>
+                  <span className="brand-gradient-bg-r flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white shadow-md">
                     {planId === 'annual' ? 'Mais escolhido · Melhor custo-benefício' : 'Selecionado'}
                   </span>
                 </div>
@@ -268,7 +264,7 @@ export function PlanPicker({
 
               <div className="mb-6">{renderPrice(planId)}</div>
 
-              <div className="mb-4 rounded-xl border border-brand-100 bg-brand-50/60 px-4 py-3 dark:border-brand-900 dark:bg-brand-950/40">
+              <div className="mb-4 rounded-xl border border-brand-100 bg-brand-50/60 px-4 py-3 dark:border-brand-400/20 dark:bg-brand-500/10">
                 <p className="text-sm font-semibold text-brand-700 dark:text-brand-300">
                   {plan.aiCredits} créditos de IA inclusos
                 </p>
@@ -282,7 +278,7 @@ export function PlanPicker({
               <ul className="space-y-2.5">
                 {BILLING_FEATURES.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-green-500" />
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400" />
                     <span className="text-sm text-slate-700 dark:text-slate-300">
                       {feature.startsWith('Assistente de IA') ? (
                         <>

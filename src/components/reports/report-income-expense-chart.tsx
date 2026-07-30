@@ -9,7 +9,13 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { ReportSection } from './report-section';
-import { CHART_COLORS, CHART_TOOLTIP_STYLE } from './chart-utils';
+import {
+  BRAND_CYAN,
+  BRAND_GREEN,
+  CHART_AXIS_TICK_FILL,
+  CHART_COLORS,
+  CHART_TOOLTIP_STYLE,
+} from './chart-utils';
 import { ReportChartTooltip } from './report-chart-tooltip';
 
 const SERIES = [
@@ -67,12 +73,30 @@ export function ReportIncomeExpenseChart({
               barCategoryGap={16}
               barSize={64}
             >
+              <defs>
+                <linearGradient id="ieGradReceitas" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={BRAND_CYAN} />
+                  <stop offset="100%" stopColor={BRAND_GREEN} />
+                </linearGradient>
+                <linearGradient id="ieGradDespesas" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#fb923c" />
+                  <stop offset="100%" stopColor="#ea580c" />
+                </linearGradient>
+                <linearGradient id="ieGradDoacoes" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="100%" stopColor="#0284c7" />
+                </linearGradient>
+                <linearGradient id="ieGradInvestimentos" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#a78bfa" />
+                  <stop offset="100%" stopColor="#7c3aed" />
+                </linearGradient>
+              </defs>
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
                 interval={0}
-                tick={{ fontSize: 12, fill: '#64748b', textAnchor: 'middle' }}
+                tick={{ fontSize: 12, fill: CHART_AXIS_TICK_FILL, textAnchor: 'middle' }}
               />
               <YAxis hide />
               <Tooltip
@@ -90,35 +114,38 @@ export function ReportIncomeExpenseChart({
                 dataKey="receitas"
                 name="Entradas"
                 stackId="total"
-                fill={SERIES[0].color}
+                fill="url(#ieGradReceitas)"
                 radius={[8, 8, 4, 4]}
               />
               <Bar
                 dataKey="despesas"
                 name="Despesas"
                 stackId="total"
-                fill={SERIES[1].color}
+                fill="url(#ieGradDespesas)"
               />
               <Bar
                 dataKey="doacoes"
                 name="Doações"
                 stackId="total"
-                fill={SERIES[2].color}
+                fill="url(#ieGradDoacoes)"
               />
               <Bar
                 dataKey="investimentos"
                 name="Investimentos"
                 stackId="total"
-                fill={SERIES[3].color}
+                fill="url(#ieGradInvestimentos)"
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <ul className="flex flex-wrap justify-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+        <ul className="flex flex-wrap justify-center gap-x-3 gap-y-2 text-xs font-medium text-slate-600 sm:text-sm dark:text-slate-300">
           {SERIES.map((item) => (
-            <li key={item.key} className="flex items-center gap-1.5">
-              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: item.color }} />
+            <li
+              key={item.key}
+              className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 dark:bg-white/[0.06]"
+            >
+              <span className="inline-block h-2 w-2 rounded-full" style={{ background: item.color }} />
               {item.label}
             </li>
           ))}

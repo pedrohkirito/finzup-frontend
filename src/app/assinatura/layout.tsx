@@ -4,9 +4,9 @@ import { MixpanelIdentify } from '@/components/analytics/mixpanel-identify';
 
 export default function AssinaturaLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-slate-50 bg-app-glow dark:bg-[#020618]">
       <MixpanelIdentify />
-      <header className="border-b border-slate-200/80 bg-white/90 px-4 py-4 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95">
+      <header className="border-b border-slate-200/80 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.04]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Logo size={36} className="h-9 w-9" />

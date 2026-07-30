@@ -54,8 +54,10 @@ export function HouseDownPaymentCard({ state }: HouseDownPaymentCardProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Home className="h-5 w-5 text-amber-600" />
+        <div className="flex items-center gap-3">
+          <span className="icon-chip bg-amber-500/15 text-amber-600 dark:text-amber-400">
+            <Home className="h-5 w-5" />
+          </span>
           <CardTitle>Entrada da casa (Passo 5)</CardTitle>
         </div>
         <CardDescription>
@@ -65,7 +67,7 @@ export function HouseDownPaymentCard({ state }: HouseDownPaymentCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {state.metrics.hasHomeFinancing && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/40">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-500/20 dark:bg-amber-500/[0.08]">
             Financiamento ativo detectado. Foque em 15% investidos + amortizar com a sobra.
             <ul className="mt-2 space-y-1">
               {state.metrics.homeFinancings.map((f) => (
@@ -80,16 +82,21 @@ export function HouseDownPaymentCard({ state }: HouseDownPaymentCardProps) {
         {state.metrics.houseDownPaymentTarget != null && state.metrics.houseDownPaymentTarget > 0 && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>
+              <span className="tabular-nums">
                 {formatCurrency(state.metrics.houseDownPaymentSaved)} de{' '}
                 {formatCurrency(state.metrics.houseDownPaymentTarget)}
               </span>
-              <span className="font-medium">{state.metrics.houseDownPaymentProgress}%</span>
+              <span className="font-semibold tabular-nums text-amber-600 dark:text-amber-400">
+                {state.metrics.houseDownPaymentProgress}%
+              </span>
             </div>
-            <Progress value={state.metrics.houseDownPaymentProgress} className="[&>div]:bg-amber-500" />
+            <Progress
+              value={state.metrics.houseDownPaymentProgress}
+              className="h-2.5 [&>div]:bg-amber-500"
+            />
           </div>
         )}
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <MoneyField
             id="house-target"
             label="Meta da entrada + custos"
@@ -103,7 +110,7 @@ export function HouseDownPaymentCard({ state }: HouseDownPaymentCardProps) {
             onChange={setSaved}
           />
         </div>
-        <Button onClick={save} disabled={update.isPending}>
+        <Button onClick={save} disabled={update.isPending} className="w-full sm:w-auto">
           {update.isPending ? 'Salvando…' : 'Salvar meta da casa'}
         </Button>
       </CardContent>

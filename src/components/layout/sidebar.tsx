@@ -48,7 +48,7 @@ export function Sidebar() {
   const { theme, toggle } = useTheme();
 
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-none md:flex md:h-screen md:overflow-hidden">
+    <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:border-white/[0.08] dark:bg-white/[0.03] dark:shadow-none dark:backdrop-blur-xl md:flex md:h-screen md:overflow-hidden">
       <div className="flex h-full flex-col p-4">
         <div className="mb-8 flex h-8 shrink-0 items-center gap-2 px-2">
           <Logo size={32} className="h-8 w-8 dark:hidden" />
@@ -65,8 +65,8 @@ export function Sidebar() {
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                   isNavLinkActive(pathname, href)
-                    ? 'bg-brand-100/70 font-semibold text-brand-700 shadow-[inset_3px_0_0_#0292b8] dark:bg-brand-950 dark:text-brand-400 dark:shadow-[inset_3px_0_0_#38c4eb]'
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900',
+                    ? 'bg-brand-100/70 font-semibold text-brand-700 shadow-[inset_3px_0_0_#0292b8] dark:bg-brand-500/10 dark:text-brand-300 dark:shadow-[inset_3px_0_0_#03b6e6]'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/[0.04]',
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -79,7 +79,7 @@ export function Sidebar() {
           </nav>
         </ScrollArea>
 
-        <div className="mt-auto flex shrink-0 flex-col gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+        <div className="mt-auto flex shrink-0 flex-col gap-2 border-t border-slate-200 pt-4 dark:border-white/[0.06]">
         <SupportLink />
         <Button variant="ghost" className="justify-start" onClick={toggle}>
           {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

@@ -20,11 +20,11 @@ export function SupportChannels() {
         href={SUPPORT_WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="block cursor-pointer rounded-lg border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-brand-green-300 hover:bg-brand-green-50 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-brand-green-700 dark:hover:bg-brand-green-950/40"
+        className="block cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-brand-green-300 hover:bg-brand-green-50 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:border-brand-green-500/40 dark:hover:bg-brand-green-500/10"
       >
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-green-100 dark:bg-brand-green-950/60">
-            <WhatsAppIcon className="h-4 w-4 text-brand-green-700 dark:text-brand-green-400" />
+          <div className="icon-chip bg-brand-green-100 text-brand-green-700 dark:bg-brand-green-500/15 dark:text-brand-green-400">
+            <WhatsAppIcon className="h-4 w-4" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-slate-900 dark:text-white">WhatsApp</p>
@@ -37,11 +37,11 @@ export function SupportChannels() {
 
       <a
         href={`mailto:${SUPPORT_EMAIL}`}
-        className="block cursor-pointer rounded-lg border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-brand-green-300 hover:bg-brand-green-50 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-brand-green-700 dark:hover:bg-brand-green-950/40"
+        className="block cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-brand-green-300 hover:bg-brand-green-50 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:border-brand-green-500/40 dark:hover:bg-brand-green-500/10"
       >
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-green-100 dark:bg-brand-green-950/60">
-            <Mail className="h-4 w-4 text-brand-green-700 dark:text-brand-green-400" />
+          <div className="icon-chip bg-brand-green-100 text-brand-green-700 dark:bg-brand-green-500/15 dark:text-brand-green-400">
+            <Mail className="h-4 w-4" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-slate-900 dark:text-white">E-mail</p>

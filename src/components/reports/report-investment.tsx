@@ -40,9 +40,9 @@ export function ReportInvestment({
       {items.length === 0 ? (
         <p className="py-8 text-center text-sm text-slate-500">Nenhum investimento registrado neste mês.</p>
       ) : (
-        <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/20">
+        <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
           <div className="mb-4 flex items-baseline justify-between gap-2">
-            <h4 className="text-sm font-semibold text-emerald-600">Aportes do mês</h4>
+            <h4 className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Aportes do mês</h4>
             <span className="text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">
               {formatCurrency(totalInvested)}
             </span>

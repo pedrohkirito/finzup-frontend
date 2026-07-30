@@ -31,14 +31,16 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
   const hasBudgets = (summary.budgets?.length ?? 0) > 0;
   const investmentProgress = Math.min(summary.investment.progress, 100);
 
+  const balancePositive = summary.balance >= 0;
+
   const cards = [
     {
       key: 'receitas' as const,
       title: 'Receitas',
       value: summary.totalIncome,
       icon: TrendingUp,
-      accent: 'text-emerald-600',
-      bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+      accent: 'text-emerald-600 dark:text-emerald-400',
+      chip: 'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400',
       itemCount: items.incomes.length,
     },
     {
@@ -46,8 +48,8 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       title: 'Despesas',
       value: summary.totalExpenses,
       icon: TrendingDown,
-      accent: 'text-orange-600',
-      bg: 'bg-orange-50 dark:bg-orange-950/60',
+      accent: 'text-orange-600 dark:text-orange-400',
+      chip: 'bg-orange-500/15 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400',
       itemCount: items.expenses.length,
     },
     {
@@ -55,70 +57,88 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       title: 'Doações',
       value: summary.totalDonations,
       icon: Heart,
-      accent: 'text-sky-600',
-      bg: 'bg-sky-50 dark:bg-sky-950/60',
+      accent: 'text-sky-600 dark:text-sky-400',
+      chip: 'bg-sky-500/15 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400',
       itemCount: items.donations.length,
-    },
-    {
-      key: 'saldo' as const,
-      title: 'Saldo',
-      value: summary.balance,
-      icon: Wallet,
-      accent: summary.balance >= 0 ? 'text-emerald-600' : 'text-red-500',
-      bg: summary.balance >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/60' : 'bg-red-50 dark:bg-red-950/60',
-      itemCount: null,
     },
     {
       key: 'fatura' as const,
       title: 'Fatura Cartão',
       value: summary.creditCardBill.total,
       icon: CreditCard,
-      accent: 'text-violet-600',
-      bg: 'bg-violet-50 dark:bg-violet-950/60',
+      accent: 'text-violet-600 dark:text-violet-400',
+      chip: 'bg-violet-500/15 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400',
       itemCount: creditCardItems.length,
     },
   ];
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        {cards.map(({ key, title, value, icon: Icon, accent, bg, itemCount }) => (
-          <Card
-            key={key}
-            className="cursor-pointer transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 dark:hover:border-slate-700"
-            onClick={() => setOpenDialog(key)}
-          >
-            <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">{title}</CardTitle>
-              <div className={cn('rounded-lg p-2', bg)}>
-                <Icon className={cn('h-4 w-4', accent)} />
+      <div className="space-y-4 sm:space-y-5">
+        <div
+          className="brand-gradient-border cursor-pointer rounded-2xl p-5 shadow-[0_2px_12px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] sm:p-6 dark:shadow-[0_8px_24px_rgba(2,6,23,0.35)]"
+          onClick={() => setOpenDialog('saldo')}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Saldo</p>
+              <p
+                className={cn(
+                  'mt-2 truncate text-3xl font-bold tracking-tight sm:text-4xl',
+                  balancePositive ? 'brand-gradient-text' : 'text-red-500 dark:text-red-400',
+                )}
+              >
+                {formatCurrency(summary.balance)}
+              </p>
+              <p className="mt-2.5 flex items-center gap-1 text-xs text-slate-400">
+                Ver composição
+                <ChevronRight className="h-3 w-3" />
+              </p>
+            </div>
+            <div
+              className={cn(
+                'icon-chip',
+                balancePositive
+                  ? 'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+                  : 'bg-red-500/15 text-red-500 dark:bg-red-500/15 dark:text-red-400',
+              )}
+            >
+              <Wallet className="h-4 w-4" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+          {cards.map(({ key, title, value, icon: Icon, accent, chip, itemCount }) => (
+            <Card
+              key={key}
+              className="cursor-pointer p-4 transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 dark:hover:border-white/[0.16] dark:hover:bg-white/[0.06]"
+              onClick={() => setOpenDialog(key)}
+            >
+              <div className={cn('icon-chip', chip)}>
+                <Icon className="h-4 w-4" />
               </div>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <p className={cn('text-2xl font-bold tracking-tight', accent)}>{formatCurrency(value)}</p>
+              <p className="mt-3 text-xs font-medium text-slate-500 dark:text-slate-400">{title}</p>
+              <p className={cn('mt-1 truncate text-lg font-bold tracking-tight sm:text-xl', accent)}>
+                {formatCurrency(value)}
+              </p>
               {itemCount !== null && (
                 <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                   {itemCount === 0 ? 'Nenhum item' : `${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`}
                   <ChevronRight className="h-3 w-3" />
                 </p>
               )}
-              {key === 'saldo' && (
-                <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
-                  Ver composição
-                  <ChevronRight className="h-3 w-3" />
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+            </Card>
+          ))}
+        </div>
 
         <Card
-          className="cursor-pointer transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 dark:hover:border-slate-700 sm:col-span-2 xl:col-span-5"
+          className="cursor-pointer transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 dark:hover:border-white/[0.16] dark:hover:bg-white/[0.06]"
           onClick={() => setOpenDialog('investimentos')}
         >
           <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
-            <div className="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-950/60">
-              <PiggyBank className="h-4 w-4 text-emerald-600" />
+            <div className="icon-chip bg-violet-500/15 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400">
+              <PiggyBank className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
               <CardTitle className="text-sm font-medium">Meta de Investimento</CardTitle>
@@ -128,7 +148,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
                   : 'Nenhum aporte registrado'}
               </p>
             </div>
-            <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
+            <span className="shrink-0 rounded-full bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-400">
               {investmentProgress.toFixed(0)}%
             </span>
             <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
@@ -148,15 +168,15 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
                 </span>
               </p>
             </div>
-            <Progress value={investmentProgress} />
+            <Progress value={investmentProgress} className="[&>div]:bg-violet-500" />
           </CardContent>
         </Card>
 
         {hasBudgets && (
-          <Card className="sm:col-span-2 xl:col-span-5">
+          <Card>
             <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
-              <div className="rounded-lg bg-amber-50 p-2 dark:bg-amber-950/60">
-                <Target className="h-4 w-4 text-amber-600" />
+              <div className="icon-chip bg-amber-500/15 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
+                <Target className="h-4 w-4" />
               </div>
               <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
             </CardHeader>
@@ -164,7 +184,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
               {summary.budgets!.map((budget) => (
                 <div
                   key={budget.id}
-                  className="cursor-pointer rounded-lg bg-slate-50/80 p-3 transition-all hover:bg-slate-100/80 hover:shadow-sm dark:bg-slate-800/30 dark:hover:bg-slate-800/50"
+                  className="cursor-pointer rounded-xl bg-slate-50/80 p-3 transition-all hover:bg-slate-100/80 hover:shadow-sm dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
                   onClick={() => setOpenBudget(budget)}
                 >
                   <div className="mb-2.5 flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
@@ -207,7 +227,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         title="Receitas do mês"
         items={items.incomes}
         total={summary.totalIncome}
-        valueColor="text-emerald-600"
+        valueColor="text-emerald-600 dark:text-emerald-400"
         href="/dashboard/receitas"
       />
 
@@ -217,7 +237,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         title="Despesas do mês"
         items={items.expenses}
         total={summary.totalExpenses}
-        valueColor="text-orange-600"
+        valueColor="text-orange-600 dark:text-orange-400"
         href="/dashboard/despesas"
         groupByCategory
       />
@@ -228,7 +248,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         title="Doações do mês"
         items={items.donations}
         total={summary.totalDonations}
-        valueColor="text-sky-600"
+        valueColor="text-sky-600 dark:text-sky-400"
         href="/dashboard/doacoes"
       />
 
@@ -247,7 +267,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         title="Fatura do cartão"
         items={creditCardItems}
         total={summary.creditCardBill.total}
-        valueColor="text-violet-600"
+        valueColor="text-violet-600 dark:text-violet-400"
         href="/dashboard/despesas"
         emptyMessage="Nenhum lançamento pendente no cartão"
       />
@@ -258,7 +278,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         title="Aportes do mês"
         items={items.investments}
         total={summary.investment.totalInvested}
-        valueColor="text-emerald-600"
+        valueColor="text-emerald-600 dark:text-emerald-400"
         href="/dashboard/investimentos"
         emptyMessage="Nenhum aporte registrado"
       />

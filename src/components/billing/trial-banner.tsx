@@ -32,9 +32,9 @@ export function TrialBanner({ billing }: TrialBannerProps) {
   };
 
   return (
-    <div className="mb-4 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 dark:border-brand-900 dark:bg-brand-950/40">
+    <div className="mb-4 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 backdrop-blur-sm dark:border-brand-400/20 dark:bg-brand-500/10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-brand-900 dark:text-brand-100">
+        <p className="text-sm text-brand-900 dark:text-slate-100">
           {canceled ? (
             <>
               Faltam{' '}
@@ -66,7 +66,7 @@ export function TrialBanner({ billing }: TrialBannerProps) {
         ) : (
           <Link
             href="/dashboard/configuracoes"
-            className="shrink-0 rounded-lg border border-brand-300 bg-white px-4 py-2 text-center text-sm font-semibold text-brand-800 hover:bg-brand-100 dark:border-brand-800 dark:bg-slate-900 dark:text-brand-100"
+            className="shrink-0 rounded-lg border border-brand-300 bg-white px-4 py-2 text-center text-sm font-semibold text-brand-800 hover:bg-brand-100 dark:border-brand-400/30 dark:bg-white/[0.06] dark:text-brand-100 dark:hover:bg-white/[0.1]"
           >
             Cancelar assinatura
           </Link>

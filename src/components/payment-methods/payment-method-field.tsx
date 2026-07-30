@@ -82,7 +82,7 @@ export function PaymentMethodField({
           </SelectContent>
         </Select>
       ) : (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-center dark:border-slate-700 dark:bg-slate-900/50">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center dark:border-white/[0.1] dark:bg-white/[0.04]">
           {isCreditOnly ? (
             <CreditCard className="mx-auto mb-2 h-8 w-8 text-brand-400 dark:text-brand-500" />
           ) : null}

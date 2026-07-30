@@ -43,7 +43,7 @@ export function SimulationSummaryTable({ yearly }: { yearly: SimulationYearProje
       <CardContent className="overflow-x-auto">
         <table className="w-full min-w-[560px] text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500 dark:border-slate-800">
+            <tr className="border-b border-slate-200 text-left text-slate-500 dark:border-white/[0.08] dark:text-slate-400">
               <th className="pb-2 pr-4 font-medium">Ano</th>
               <th className="pb-2 pr-4 font-medium">Patrimônio</th>
               <th className="pb-2 pr-4 font-medium">Juros</th>

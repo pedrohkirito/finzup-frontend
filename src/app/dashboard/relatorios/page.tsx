@@ -17,7 +17,7 @@ export default function RelatoriosPage() {
   if (!selectedMonthId || isLoading) {
     return (
       <div className="flex h-48 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#03b6e6] border-t-transparent" />
       </div>
     );
   }
@@ -34,14 +34,14 @@ export default function RelatoriosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Relatórios</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Análise detalhada de {formatMonth(report.month.year, report.month.month)}
         </p>
       </div>
 
       {!hasData && (
-        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center dark:border-slate-800 dark:bg-slate-900/50">
-          <p className="text-sm text-slate-500">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center dark:border-white/[0.08] dark:bg-white/[0.03]">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Este mês ainda não tem lançamentos. Adicione receitas e despesas para ver os relatórios.
           </p>
         </div>

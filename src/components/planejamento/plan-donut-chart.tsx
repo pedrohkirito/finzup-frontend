@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatCurrency, cn } from '@/lib/utils';
+import { glassSurfaceClassName } from '@/lib/glass';
 
 export type DonutSegment = {
   id: string;
@@ -76,7 +77,7 @@ function renderPieLabel(props: PieLabelProps, totalIncome: number) {
         y={ey - 6}
         textAnchor={textAnchor}
         dominantBaseline="middle"
-        fill="#475569"
+        className="fill-slate-600 dark:fill-slate-200"
         style={{ fontSize: 12, fontWeight: 600 }}
       >
         {shortenLabel(name, 18)}
@@ -86,7 +87,7 @@ function renderPieLabel(props: PieLabelProps, totalIncome: number) {
         y={ey + 10}
         textAnchor={textAnchor}
         dominantBaseline="middle"
-        fill="#94a3b8"
+        className="fill-slate-400 dark:fill-slate-500"
         style={{ fontSize: 11 }}
       >
         {pct}% · {formatCurrency(value)}
@@ -108,9 +109,9 @@ function CustomTooltip({
   const seg = payload[0].payload;
   const pct = totalIncome > 0 ? ((seg.value / totalIncome) * 100).toFixed(1) : '0.0';
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg dark:border-slate-700 dark:bg-slate-900">
+    <div className={cn('rounded-xl px-3 py-2 text-xs', glassSurfaceClassName)}>
       <p className="font-semibold text-slate-800 dark:text-white">{seg.name}</p>
-      <p className="mt-0.5 tabular-nums text-slate-500">
+      <p className="mt-0.5 tabular-nums text-slate-500 dark:text-slate-400">
         {formatCurrency(seg.value)} · {pct}%
       </p>
     </div>
@@ -125,10 +126,10 @@ export function PlanDonutChart({ totalIncome, segments }: PlanDonutChartProps) {
   const chartData: DonutSegment[] = [
     ...segments.filter((s) => s.value > 0),
     ...(free > 0
-      ? [{ id: '__free__', name: 'Livre', value: free, color: '#6ee7b7' }]
+      ? [{ id: '__free__', name: 'Livre', value: free, color: '#34d399' }]
       : []),
     ...(over
-      ? [{ id: '__over__', name: 'Excesso', value: allocated - totalIncome, color: '#fca5a5' }]
+      ? [{ id: '__over__', name: 'Excesso', value: allocated - totalIncome, color: '#f87171' }]
       : []),
   ];
 
@@ -136,7 +137,7 @@ export function PlanDonutChart({ totalIncome, segments }: PlanDonutChartProps) {
   const freePct = totalIncome > 0 ? ((free / totalIncome) * 100).toFixed(0) : '—';
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-[0_8px_32px_rgba(2,6,23,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] dark:backdrop-blur-xl">
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Distribuição</p>
 
       {isEmpty ? (
@@ -179,7 +180,7 @@ export function PlanDonutChart({ totalIncome, segments }: PlanDonutChartProps) {
           </ResponsiveContainer>
 
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-            <p className={cn('text-3xl font-bold xl:text-4xl', over ? 'text-red-500' : 'text-emerald-600')}>
+            <p className={cn('text-3xl font-bold xl:text-4xl', over ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400')}>
               {over ? '-' : `${freePct}%`}
             </p>
             <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">

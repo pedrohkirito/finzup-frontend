@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Bot, Loader2, Send, Sparkles, Check } from 'lucide-react';
+import { Loader2, Send, Sparkles, Check } from 'lucide-react';
 import { AssistantMessage } from '@/components/assistant/assistant-message';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -311,10 +311,10 @@ export function AssistantChat({
             {showOpening && (
               <div className="space-y-4 py-1">
                 <div className="flex justify-start gap-2.5">
-                  <div className="mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-green-500 text-white sm:flex">
-                    <Bot className="h-3.5 w-3.5" aria-hidden />
+                  <div className="brand-gradient-bg mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-brand-500/25 sm:flex">
+                    <Sparkles className="h-3.5 w-3.5" aria-hidden />
                   </div>
-                  <div className="max-w-[92%] rounded-2xl rounded-tl-md bg-white/[0.08] px-4 py-3.5 text-sm leading-relaxed text-slate-200 sm:max-w-[85%]">
+                  <div className="max-w-[92%] rounded-2xl rounded-tl-md border border-white/[0.08] bg-white/[0.06] px-4 py-3.5 text-sm leading-relaxed text-slate-200 sm:max-w-[85%]">
                     {pageFlow.openingMessage}
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export function AssistantChat({
                         className={cn(
                           'inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-semibold transition-opacity disabled:opacity-50',
                           action.variant === 'primary'
-                            ? 'bg-gradient-to-r from-brand-500 to-brand-green-500 font-bold text-white shadow-md shadow-brand-500/25'
+                            ? 'brand-gradient-bg-r font-bold text-white shadow-md shadow-brand-500/25'
                             : 'border border-white/[0.1] bg-white/[0.04] text-slate-400 hover:bg-white/[0.08] hover:text-slate-200',
                         )}
                       >
@@ -370,20 +370,20 @@ export function AssistantChat({
                 )}
               >
                 {msg.role === 'assistant' && (
-                  <div className="mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-green-500 text-white sm:flex">
-                    <Bot className="h-3.5 w-3.5" aria-hidden />
+                  <div className="brand-gradient-bg mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-brand-500/25 sm:flex">
+                    <Sparkles className="h-3.5 w-3.5" aria-hidden />
                   </div>
                 )}
                 <div
                   className={cn(
                     'max-w-[92%] sm:max-w-[85%]',
                     msg.role === 'user'
-                      ? 'rounded-2xl rounded-tr-md bg-brand-500/25 px-4 py-3 text-sm leading-relaxed text-brand-100'
+                      ? 'brand-gradient-bg rounded-2xl rounded-tr-md px-4 py-3 text-sm leading-relaxed text-white shadow-md shadow-brand-500/20'
                       : 'space-y-3',
                   )}
                 >
                   {msg.role === 'assistant' ? (
-                    <div className="rounded-2xl rounded-tl-md bg-white/[0.08] px-4 py-3.5">
+                    <div className="rounded-2xl rounded-tl-md border border-white/[0.08] bg-white/[0.06] px-4 py-3.5">
                       <AssistantMessage content={msg.content} />
                     </div>
                   ) : (
@@ -395,7 +395,7 @@ export function AssistantChat({
                         type="button"
                         onClick={() => void sendMessage('Confirmo')}
                         disabled={loading}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-500 to-brand-green-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-brand-500/25 disabled:opacity-50"
+                        className="brand-gradient-bg-r inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-brand-500/25 disabled:opacity-50"
                       >
                         <Check className="h-3.5 w-3.5" aria-hidden />
                         Confirmar
@@ -415,10 +415,10 @@ export function AssistantChat({
 
             {loading && (
               <div className="flex justify-start gap-2.5">
-                <div className="mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-green-500 text-white sm:flex">
-                  <Bot className="h-3.5 w-3.5" aria-hidden />
+                <div className="brand-gradient-bg mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-brand-500/25 sm:flex">
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden />
                 </div>
-                <div className="flex items-center gap-2 rounded-2xl rounded-tl-md bg-white/[0.08] px-4 py-3 text-sm text-slate-400">
+                <div className="flex items-center gap-2 rounded-2xl rounded-tl-md border border-white/[0.08] bg-white/[0.06] px-4 py-3 text-sm text-slate-400">
                   <Loader2 className="h-4 w-4 animate-spin text-brand-400" />
                   Pensando…
                 </div>
@@ -434,8 +434,10 @@ export function AssistantChat({
 
         <div
           className={cn(
-            'shrink-0 border-t border-white/[0.08]',
-            compact ? 'p-3' : 'p-4',
+            'shrink-0 border-t border-white/[0.08] bg-white/[0.02]',
+            compact
+              ? 'p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]'
+              : 'p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4',
           )}
         >
           {flowStarted && pageFlow?.suggestionAction && (
@@ -464,13 +466,13 @@ export function AssistantChat({
               onChange={(e) => setInput(e.target.value)}
               placeholder={credits > 0 ? 'Digite sua mensagem…' : 'Sem créditos disponíveis'}
               disabled={loading || credits <= 0}
-              className="flex-1 rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-brand-500/50 focus:bg-white/[0.06] disabled:opacity-50"
+              className="h-11 min-w-0 flex-1 rounded-full border border-white/[0.1] bg-white/[0.04] px-4 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-brand-500/50 focus:bg-white/[0.06] disabled:opacity-50"
             />
             <Button
               type="submit"
               size="icon"
               disabled={loading || credits <= 0 || !input.trim()}
-              className="shrink-0 rounded-xl bg-gradient-to-br from-brand-500 to-brand-green-500 text-white shadow-md shadow-brand-500/25 hover:opacity-90 disabled:opacity-40"
+              className="brand-gradient-bg h-11 w-11 shrink-0 rounded-full text-white shadow-md shadow-brand-500/25 hover:opacity-90 disabled:opacity-40"
             >
               <Send className="h-4 w-4" />
             </Button>

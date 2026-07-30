@@ -123,10 +123,10 @@ export function PlanSelector({ plans, selectedPlanId, onSelect, monthId }: PlanS
           type="button"
           onClick={() => onSelect(plan.id)}
           className={cn(
-            'flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+            'flex min-h-11 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors sm:min-h-9',
             selectedPlanId === plan.id
-              ? 'bg-brand-600 text-white shadow-sm'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',
+              ? 'brand-gradient-bg text-white shadow-md shadow-cyan-500/20'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/[0.06] dark:text-slate-300 dark:border dark:border-white/[0.08] dark:hover:bg-white/[0.1]',
           )}
         >
           <CalendarDays className="h-3.5 w-3.5 opacity-70" />
@@ -139,7 +139,7 @@ export function PlanSelector({ plans, selectedPlanId, onSelect, monthId }: PlanS
         type="button"
         size="sm"
         variant="ghost"
-        className="h-8 rounded-full px-3 text-slate-500"
+        className="h-11 rounded-full px-4 text-slate-500 dark:text-slate-400 dark:hover:bg-white/[0.05] sm:h-9"
         onClick={() => setCreateOpen(true)}
       >
         <Plus className="mr-1 h-3.5 w-3.5" />
@@ -148,13 +148,13 @@ export function PlanSelector({ plans, selectedPlanId, onSelect, monthId }: PlanS
 
       {/* Ações do cenário selecionado */}
       {selectedPlanId && (
-        <div className="flex items-center gap-1 border-l border-slate-200 pl-2 dark:border-slate-700">
+        <div className="flex items-center gap-1 border-l border-slate-200 pl-2 dark:border-white/[0.08]">
           {monthId && (
             <Button
               type="button"
               size="sm"
               variant="ghost"
-              className="h-8 rounded-full px-3 text-xs text-slate-400"
+              className="h-11 rounded-full px-3 text-xs text-slate-400 dark:hover:bg-white/[0.05] sm:h-9"
               onClick={() => setFromMonthOpen(true)}
             >
               Importar mês
@@ -164,7 +164,7 @@ export function PlanSelector({ plans, selectedPlanId, onSelect, monthId }: PlanS
             type="button"
             size="sm"
             variant="ghost"
-            className="h-8 rounded-full px-2 text-slate-400 hover:text-slate-600"
+            className="h-11 w-11 rounded-full px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 dark:hover:bg-white/[0.05] sm:h-9 sm:w-9"
             disabled={saving}
             onClick={openRename}
             title="Renomear cenário"
@@ -175,7 +175,7 @@ export function PlanSelector({ plans, selectedPlanId, onSelect, monthId }: PlanS
             type="button"
             size="sm"
             variant="ghost"
-            className="h-8 rounded-full px-2 text-slate-400 hover:text-slate-600"
+            className="h-11 w-11 rounded-full px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 dark:hover:bg-white/[0.05] sm:h-9 sm:w-9"
             disabled={saving}
             onClick={handleDuplicate}
             title="Duplicar cenário"
@@ -186,7 +186,7 @@ export function PlanSelector({ plans, selectedPlanId, onSelect, monthId }: PlanS
             type="button"
             size="sm"
             variant="ghost"
-            className="h-8 rounded-full px-2 text-slate-400 hover:text-red-600"
+            className="h-11 w-11 rounded-full px-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 dark:hover:bg-white/[0.05] sm:h-9 sm:w-9"
             disabled={saving}
             onClick={handleDelete}
             title="Excluir cenário"

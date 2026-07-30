@@ -35,9 +35,9 @@ function ReportPaymentMethodsContent({
 
   if (embedded) {
     return (
-      <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/20">
+      <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
         <div className="mb-4 flex items-baseline justify-between gap-2">
-          <h4 className="text-sm font-semibold text-violet-600">Forma de pagamento</h4>
+          <h4 className="text-sm font-semibold text-violet-600 dark:text-violet-400">Forma de pagamento</h4>
           <span className="text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">
             {formatCurrency(total)}
           </span>

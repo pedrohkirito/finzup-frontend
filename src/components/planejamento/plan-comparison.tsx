@@ -91,8 +91,8 @@ export function PlanComparison({ plans }: PlanComparisonProps) {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[480px] text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800">
-                  <th className="py-2 pr-4 text-left font-medium text-slate-500">Métrica</th>
+                <tr className="border-b border-slate-200 dark:border-white/[0.08]">
+                  <th className="py-2 pr-4 text-left font-medium text-slate-500 dark:text-slate-400">Métrica</th>
                   {selectedIds.map((id) => {
                     const plan = plans.find((p) => p.id === id);
                     return (
@@ -105,7 +105,7 @@ export function PlanComparison({ plans }: PlanComparisonProps) {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.label} className="border-b border-slate-100 dark:border-slate-800/50">
+                  <tr key={row.label} className="border-b border-slate-100 dark:border-white/[0.06]">
                     <td className="py-2.5 pr-4 text-slate-600 dark:text-slate-400">{row.label}</td>
                     {selectedIds.map((id, index) => {
                       const summary = summaries[index]?.data;

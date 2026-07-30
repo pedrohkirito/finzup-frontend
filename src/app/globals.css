@@ -11,9 +11,10 @@
 }
 
 .dark {
-  --background: #020617;
+  --background: #020618; /* deep navy — base do tema dark */
   --foreground: #f1f5f9;
-  --card-surface: #020617; /* slate-950 — fundo dos cards em dark mode */
+  --card-surface: rgb(15 23 42 / 0.85); /* fill interno p/ brand-gradient-border em glass */
+  --surface-overlay: rgb(15 23 42 / 0.72); /* dialogs, popovers, selects */
 }
 
 @theme inline {
@@ -59,6 +60,76 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== Dark glass fintech — utilities do redesign ===== */
+
+/* Fundo com profundidade: glow radial de cyan no topo + verde sutil no rodapé (só no dark) */
+@utility bg-app-glow {
+  @variant dark {
+    background-image:
+      radial-gradient(56rem 30rem at 50% -10rem, rgb(3 182 230 / 0.13), transparent 65%),
+      radial-gradient(40rem 26rem at 100% 110%, rgb(34 189 123 / 0.06), transparent 60%);
+  }
+}
+
+/* Superfície glass: card branco no light, vidro translúcido no dark */
+@utility glass-card {
+  border-radius: 1rem;
+  background-color: #ffffff;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+
+  @variant dark {
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background-color: rgb(255 255 255 / 0.06);
+    box-shadow:
+      0 8px 32px rgb(2 6 23 / 0.4),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}
+
+/* Painel glass leve — header, sidebar, nav, superfícies internas */
+@utility glass-panel {
+  @variant dark {
+    border-color: rgb(255 255 255 / 0.08);
+    background-color: rgb(255 255 255 / 0.045);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+}
+
+/* Overlay glass — espelha tokens de src/lib/glass.ts */
+@utility glass-overlay {
+  border: 1px solid rgb(226 232 240 / 0.8);
+  background-color: rgb(255 255 255 / 0.9);
+  box-shadow: 0 4px 16px rgb(15 23 42 / 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+
+  @variant dark {
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background-color: rgb(255 255 255 / 0.05);
+    box-shadow:
+      0 12px 32px rgb(2 6 23 / 0.55),
+      inset 0 1px 0 rgb(255 255 255 / 0.08);
+    backdrop-filter: blur(56px);
+    -webkit-backdrop-filter: blur(56px);
+  }
+}
+
+/* Chip de ícone tintado — cor vem via classes Tailwind (ex.: bg-emerald-500/15 text-emerald-400) */
+@utility icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
 }
 
 @utility safe-bottom {

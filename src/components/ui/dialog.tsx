@@ -3,6 +3,7 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { glassOverlayClassName, glassSurfaceClassName } from '@/lib/glass';
 import { scrollAreaVariants } from '@/components/ui/scroll-area';
 
 export const Dialog = DialogPrimitive.Root;
@@ -12,18 +13,19 @@ export const DialogClose = DialogPrimitive.Close;
 export function DialogContent({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50" />
+      <DialogPrimitive.Overlay className={cn('fixed inset-0 z-50', glassOverlayClassName)} />
       <DialogPrimitive.Content
         aria-describedby={undefined}
         className={cn(
-          'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-h-[min(85dvh,100%)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-lg sm:p-6 dark:border-slate-800 dark:bg-slate-900',
+          'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-h-[min(85dvh,100%)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl p-5 sm:p-6',
+          glassSurfaceClassName,
           scrollAreaVariants({ orientation: 'vertical' }),
           className,
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 cursor-pointer rounded-sm opacity-70 hover:opacity-100">
+        <DialogPrimitive.Close className="absolute right-4 top-4 cursor-pointer rounded-full p-1 opacity-70 transition-opacity hover:bg-slate-100 hover:opacity-100 dark:hover:bg-white/[0.08]">
           <X className="h-4 w-4" />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>

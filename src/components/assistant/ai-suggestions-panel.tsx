@@ -34,8 +34,8 @@ export function AiSuggestionsPanel() {
           key={suggestion.id}
           className={
             suggestion.tier === 'ai'
-              ? 'border-brand-200 bg-brand-50/60 dark:border-brand-900 dark:bg-brand-950/30'
-              : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50'
+              ? 'border-brand-200 bg-brand-50/60 dark:border-brand-500/25 dark:bg-brand-500/[0.08]'
+              : 'border-slate-200 bg-slate-50 dark:border-white/[0.08] dark:bg-white/[0.04]'
           }
         >
           <CardContent className="space-y-3 p-4">
@@ -57,7 +57,7 @@ export function AiSuggestionsPanel() {
               <button
                 type="button"
                 onClick={() => void dismiss(suggestion.id)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-600 dark:hover:bg-slate-800"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-600 dark:hover:bg-white/[0.08] dark:hover:text-slate-200"
                 aria-label="Dispensar sugestão"
               >
                 <X className="h-4 w-4" />
