@@ -71,7 +71,7 @@ function InlinePercentValue({
   return (
     <div className={cn('flex items-center gap-1.5', saving && 'opacity-50')}>
       {/* campo % */}
-      <div className="relative w-16">
+      <div className="relative w-[4.75rem] shrink-0">
         <Input
           type="text"
           inputMode="decimal"
@@ -84,7 +84,7 @@ function InlinePercentValue({
             setLocalAmount(amountFromPct(base, next));
           }}
           onBlur={() => commit(localAmount)}
-          className="h-9 border-0 bg-transparent pr-5 text-right text-sm tabular-nums text-slate-500 shadow-none focus:bg-slate-50 focus:shadow-none dark:text-slate-400 dark:focus:bg-white/[0.06]"
+          className="h-10 border-0 bg-transparent px-1 pr-5 text-right text-sm tabular-nums text-slate-500 shadow-none focus:bg-slate-50 focus:shadow-none sm:h-9 dark:text-slate-400 dark:focus:bg-white/[0.06]"
           placeholder="0"
         />
         <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">
@@ -95,7 +95,7 @@ function InlinePercentValue({
       <span className="text-slate-300 dark:text-slate-600">|</span>
 
       {/* campo R$ */}
-      <div className="w-28">
+      <div className="min-w-0 flex-1 sm:w-28 sm:flex-none">
         <CurrencyInput
           value={localAmount}
           onChange={(v) => {
@@ -104,7 +104,7 @@ function InlinePercentValue({
           }}
           onBlur={() => commit(localAmount)}
           placeholder="0,00"
-          className="h-9 border-0 bg-transparent text-right text-sm tabular-nums shadow-none focus:bg-slate-50 focus:shadow-none dark:focus:bg-white/[0.06]"
+          className="h-10 border-0 bg-transparent text-right text-sm tabular-nums shadow-none focus:bg-slate-50 focus:shadow-none sm:h-9 dark:focus:bg-white/[0.06]"
         />
       </div>
     </div>
@@ -130,29 +130,45 @@ function ItemRow({
 
   return (
     <div
-      className="group flex min-h-11 items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.05]"
+      className="group flex flex-col gap-1.5 rounded-lg px-2 py-2 transition-colors hover:bg-slate-50 sm:min-h-11 sm:flex-row sm:items-center sm:gap-3 sm:py-1.5 dark:hover:bg-white/[0.05]"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {dot && <span className={cn('h-2 w-2 shrink-0 rounded-full', dot)} />}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{name}</p>
-        {subtitle && <p className="truncate text-xs text-slate-400">{subtitle}</p>}
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        {dot && <span className={cn('h-2 w-2 shrink-0 rounded-full', dot)} />}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{name}</p>
+          {subtitle && <p className="truncate text-xs text-slate-400">{subtitle}</p>}
+        </div>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className={cn(
+              'shrink-0 rounded-md p-1.5 text-slate-300 transition-all hover:text-red-500 sm:hidden dark:text-slate-600 dark:hover:text-red-400',
+            )}
+            aria-label="Remover"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
-      <div className="shrink-0">{right}</div>
-      {onDelete && (
-        <button
-          type="button"
-          onClick={onDelete}
-          className={cn(
-            'shrink-0 rounded-md p-1.5 text-slate-300 transition-all hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400',
-            hovered ? 'opacity-100' : 'opacity-0 max-sm:opacity-100',
-          )}
-          aria-label="Remover"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
-      )}
+      <div className="flex items-center gap-1 pl-5 sm:shrink-0 sm:pl-0">
+        <div className="min-w-0 flex-1 sm:flex-none">{right}</div>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className={cn(
+              'hidden shrink-0 rounded-md p-1.5 text-slate-300 transition-all hover:text-red-500 sm:block dark:text-slate-600 dark:hover:text-red-400',
+              hovered ? 'opacity-100' : 'opacity-0',
+            )}
+            aria-label="Remover"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -207,21 +223,21 @@ function AddRow({
 
   return (
     <div className="space-y-1.5 rounded-xl bg-slate-50 px-2 py-2 dark:bg-white/[0.04] dark:border dark:border-white/[0.06]">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Input
           ref={nameRef}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nome…"
-          className="h-9 flex-1 border-0 bg-white text-sm shadow-sm dark:bg-white/[0.06]"
+          className="h-10 flex-1 border-0 bg-white text-sm shadow-sm sm:h-9 dark:bg-white/[0.06]"
           onKeyDown={(e) => e.key === 'Enter' && submit()}
         />
-        <div className="w-32 shrink-0">
+        <div className="w-full sm:w-32 sm:shrink-0">
           <CurrencyInput
             value={amount}
             onChange={setAmount}
             placeholder="R$ 0,00"
-            className="h-9 border-0 bg-white text-right text-sm shadow-sm dark:bg-white/[0.06]"
+            className="h-10 border-0 bg-white text-right text-sm shadow-sm sm:h-9 dark:bg-white/[0.06]"
           />
         </div>
       </div>
@@ -375,17 +391,17 @@ export function PlanEditor({
   return (
     <div className="space-y-1">
       {/* Receita total + saldo */}
-      <div className="flex flex-wrap items-start justify-between gap-3 pb-2">
+      <div className="flex flex-col gap-3 pb-2 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-slate-400">Receita estimada</p>
-          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+          <p className="text-2xl font-bold text-emerald-600 sm:text-3xl dark:text-emerald-400">
             {formatCurrency(totalIncome)}
           </p>
         </div>
         {summary && (
-          <div className="text-right">
+          <div className="sm:text-right">
             <p className="text-xs font-medium uppercase tracking-widest text-slate-400">Saldo livre</p>
-            <p className={cn('text-2xl font-bold', balanceOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+            <p className={cn('text-xl font-bold sm:text-2xl', balanceOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
               {formatCurrency(balance)}
             </p>
             <p className="text-xs text-slate-400">{(summary.savingsRate * 100).toFixed(0)}% da receita</p>
@@ -422,7 +438,7 @@ export function PlanEditor({
           dot="bg-emerald-400"
           name={item.name}
           right={
-            <div className="w-32">
+            <div className="w-full sm:w-32">
               <CurrencyInput
                 value={Number(item.amount)}
                 onChange={() => {}}
@@ -436,7 +452,7 @@ export function PlanEditor({
                   }
                 }}
                 placeholder="0,00"
-                className="h-8 border-0 bg-transparent text-right text-sm tabular-nums text-emerald-600 shadow-none focus:bg-slate-50 dark:text-emerald-400 dark:focus:bg-white/[0.06]"
+                className="h-10 border-0 bg-transparent text-right text-sm tabular-nums text-emerald-600 shadow-none focus:bg-slate-50 sm:h-8 dark:text-emerald-400 dark:focus:bg-white/[0.06]"
               />
             </div>
           }

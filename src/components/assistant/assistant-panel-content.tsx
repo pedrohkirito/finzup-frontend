@@ -8,6 +8,7 @@ import { glassOverlayClassName, glassSurfaceClassName } from '@/lib/glass';
 export function AssistantPanelContent({
   className,
   children,
+  onOpenAutoFocus,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
   return (
@@ -22,6 +23,13 @@ export function AssistantPanelContent({
           'md:inset-x-auto md:bottom-6 md:right-6 md:h-[min(720px,calc(100dvh-3rem))] md:w-[min(440px,calc(100vw-2rem))] md:rounded-3xl',
           className,
         )}
+        onOpenAutoFocus={(event) => {
+          // No mobile, não focar automaticamente (evita abrir o teclado no input).
+          if (window.matchMedia('(max-width: 767px)').matches) {
+            event.preventDefault();
+          }
+          onOpenAutoFocus?.(event);
+        }}
         {...props}
       >
         {children}

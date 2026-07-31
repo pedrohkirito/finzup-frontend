@@ -161,6 +161,8 @@ export function AssistantChat({
 
   useEffect(() => {
     if (!active || loading || credits <= 0) return;
+    // No mobile, não focar o input ao abrir — evita abrir o teclado virtual.
+    if (window.matchMedia('(max-width: 767px)').matches) return;
     inputRef.current?.focus();
   }, [active, loading, messages, credits]);
 

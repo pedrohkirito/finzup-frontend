@@ -147,7 +147,7 @@ export default function PlanejamentoPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_580px] xl:grid-cols-[1fr_680px]">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-[0_8px_32px_rgba(2,6,23,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] dark:backdrop-blur-xl">
+          <div className="order-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 lg:order-1 dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-[0_8px_32px_rgba(2,6,23,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] dark:backdrop-blur-xl">
             <PlanEditor
               planId={selectedPlanId}
               summary={summary}
@@ -158,7 +158,7 @@ export default function PlanejamentoPage() {
             />
           </div>
 
-          <div className="lg:sticky lg:top-4 lg:self-start">
+          <div className="order-1 lg:sticky lg:top-4 lg:order-2 lg:self-start">
             <PlanDonutChart totalIncome={totalIncome} segments={donutSegments} />
           </div>
         </div>
