@@ -13,6 +13,28 @@ import {
 import { SupportChannels } from '@/components/layout/support-channels';
 import { cn } from '@/lib/utils';
 
+type SupportDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Suporte</DialogTitle>
+          <DialogDescription>
+            Precisa de ajuda? Entre em contato pelo WhatsApp ou e-mail.
+          </DialogDescription>
+        </DialogHeader>
+
+        <SupportChannels />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 type SupportLinkProps = {
   className?: string;
   variant?: 'sidebar' | 'mobile' | 'header';
@@ -45,18 +67,7 @@ export function SupportLink({ className, variant = 'sidebar', onOpen }: SupportL
         Suporte
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Suporte</DialogTitle>
-            <DialogDescription>
-              Precisa de ajuda? Entre em contato pelo WhatsApp ou e-mail.
-            </DialogDescription>
-          </DialogHeader>
-
-          <SupportChannels />
-        </DialogContent>
-      </Dialog>
+      <SupportDialog open={open} onOpenChange={setOpen} />
     </>
   );
 }

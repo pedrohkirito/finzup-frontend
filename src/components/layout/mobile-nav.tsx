@@ -19,10 +19,11 @@ import {
   Sparkles,
   CalendarRange,
   Footprints,
+  Headset,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { SupportLink } from '@/components/layout/support-link';
+import { SupportDialog } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLogout } from '@/hooks/use-auth';
@@ -55,6 +56,7 @@ export function MobileNav() {
   const { theme, toggle } = useTheme();
   const { openAssistant } = useAssistant();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));
 
@@ -181,7 +183,17 @@ export function MobileNav() {
             })}
           </div>
           <div className="space-y-1 border-t border-slate-200 pt-3 dark:border-white/[0.08]">
-            <SupportLink variant="mobile" onOpen={() => setMoreOpen(false)} />
+            <Button
+              variant="ghost"
+              className="h-11 w-full justify-start gap-3 px-3"
+              onClick={() => {
+                setMoreOpen(false);
+                setSupportOpen(true);
+              }}
+            >
+              <Headset className="h-5 w-5" />
+              Suporte
+            </Button>
             <Button variant="ghost" className="h-11 w-full justify-start gap-3 px-3" onClick={toggle}>
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
@@ -197,6 +209,8 @@ export function MobileNav() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
     </>
   );
 }

@@ -114,7 +114,7 @@ export function AssistantChat({
     () => readAssistantChatSession(sessionKey).lastAwaitingConfirmation,
   );
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const skipNextPersistRef = useRef(false);
 
   useEffect(() => {
@@ -163,6 +163,13 @@ export function AssistantChat({
     if (!active || loading || credits <= 0) return;
     inputRef.current?.focus();
   }, [active, loading, messages, credits]);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, [input]);
 
   const sendToApi = async (
     text: string,
@@ -280,7 +287,12 @@ export function AssistantChat({
     if (!text || loading) return;
 
     if (!flowStarted) setFlowStarted(true);
-    if (!textOverride) setInput('');
+    if (!textOverride) {
+      setInput('');
+      if (inputRef.current) {
+        inputRef.current.style.height = 'auto';
+      }
+    }
 
     const userMsg: ChatMessage = { role: 'user', content: text };
     const nextMessages = [...messages, userMsg];
@@ -458,15 +470,22 @@ export function AssistantChat({
               e.preventDefault();
               void sendMessage();
             }}
-            className="flex gap-2"
+            className="flex items-end gap-2"
           >
-            <input
+            <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  void sendMessage();
+                }
+              }}
+              rows={1}
               placeholder={credits > 0 ? 'Digite sua mensagem…' : 'Sem créditos disponíveis'}
               disabled={loading || credits <= 0}
-              className="h-11 min-w-0 flex-1 rounded-full border border-white/[0.1] bg-white/[0.04] px-4 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-brand-500/50 focus:bg-white/[0.06] disabled:opacity-50"
+              className="max-h-40 min-h-11 min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl border border-white/[0.1] bg-white/[0.04] px-4 py-2.5 text-sm leading-relaxed text-slate-100 outline-none placeholder:text-slate-500 focus:border-brand-500/50 focus:bg-white/[0.06] disabled:opacity-50 scrollbar-none"
             />
             <Button
               type="submit"
