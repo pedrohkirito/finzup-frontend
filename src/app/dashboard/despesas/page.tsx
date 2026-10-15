@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { CreditPaymentToggle } from '@/components/despesas/credit-payment-toggle';
 import { ItemActions } from '@/components/despesas/item-actions';
 import { ExpenseCardLayout } from '@/components/despesas/expense-card-layout';
+import { InstallmentProgress } from '@/components/despesas/installment-progress';
 import { SortableList } from '@/components/despesas/sortable-list';
 import { PaymentMethodField } from '@/components/payment-methods/payment-method-field';
 import { formatCurrency } from '@/lib/utils';
@@ -660,13 +661,6 @@ export default function DespesasPage() {
                         )}
                       </span>
                     }
-                    progress={{
-                      value: (p.installmentsPaid / p.totalInstallments) * 100,
-                      className: '[&>div]:bg-violet-500',
-                      label: monthEntry
-                        ? `Parcela ${monthEntry.installmentNumber} deste mês · ${p.installmentsPaid}/${p.totalInstallments} pagas`
-                        : `${p.installmentsPaid}/${p.totalInstallments} parcelas pagas`,
-                    }}
                     status={
                       monthEntry && isCredit ? (
                         <CreditPaymentToggle
@@ -687,7 +681,9 @@ export default function DespesasPage() {
                         }}
                       />
                     }
-                  />
+                  >
+                    <InstallmentProgress plan={p} monthId={selectedMonthId} />
+                  </ExpenseCardLayout>
                 );
               }}
             </SortableList>
