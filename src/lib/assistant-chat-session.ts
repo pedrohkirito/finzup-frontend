@@ -3,6 +3,8 @@ import type { PageKey } from '@/lib/assistant-page-context';
 export type ChatMessage = {
   role: 'user' | 'assistant';
   content: string;
+  /** Pedido completo enviado ao modelo quando a bolha mostra um rótulo curto. */
+  prompt?: string;
 };
 
 export type AssistantChatSession = {

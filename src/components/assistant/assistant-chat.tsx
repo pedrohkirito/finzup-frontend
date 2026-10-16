@@ -196,7 +196,11 @@ export function AssistantChat({
     const requestId = beginAssistantRequest();
     const nextMessages: ChatMessage[] = [
       ...currentMessages,
-      { role: 'user', content: options?.displayText ?? text },
+      {
+        role: 'user',
+        content: options?.displayText ?? text,
+        ...(options?.displayText ? { prompt: text } : {}),
+      },
     ];
     updateAssistantChatSession({
       messages: nextMessages,
@@ -219,7 +223,10 @@ export function AssistantChat({
         actionsExecuted?: { type: string; name: string; amount?: number; simulationId?: string }[];
       }>('/ai/chat', {
         message: text,
-        history: currentMessages,
+        history: currentMessages.map((item) => ({
+          role: item.role,
+          content: item.prompt ?? item.content,
+        })),
         pageContext: screen.pageContext,
         pageLabel: screen.pageLabel,
         pageKey: screen.pageKey,
