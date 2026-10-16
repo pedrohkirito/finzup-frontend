@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from '@/components/brand/logo';
 import { Sidebar } from '@/components/layout/sidebar';
 import { MobileNav } from '@/components/layout/mobile-nav';
@@ -15,6 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, isError } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const reserveAssistantSpace = pathname !== '/dashboard/assistente';
 
   useEffect(() => {
     if (!isLoading && isError) {
@@ -68,11 +70,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
           </header>
-          <main className="min-h-0 flex-1 overflow-hidden">
-            <ScrollArea className="h-full bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
+          <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <ScrollArea className="min-h-0 flex-1 bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
               <TrialBanner billing={billing} />
               {children}
             </ScrollArea>
+            {reserveAssistantSpace && (
+              <div className="hidden h-32 shrink-0 md:block" aria-hidden />
+            )}
           </main>
         </div>
         <MobileNav />

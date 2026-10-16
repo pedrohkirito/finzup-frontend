@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { resetAssistantChatSession } from '@/lib/assistant-chat-session';
 import { resetMixpanel } from '@/lib/mixpanel';
 import type { User } from '@/types';
 
@@ -24,6 +25,7 @@ export function useLogout() {
       await api.post('/auth/logout');
     } finally {
       queryClient.clear();
+      resetAssistantChatSession();
       resetMixpanel();
       router.replace('/login');
     }

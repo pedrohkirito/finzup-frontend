@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, Send, Sparkles, Check } from 'lucide-react';
 import { AssistantMessage } from '@/components/assistant/assistant-message';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { api, ApiError } from '@/lib/api';
+import type { User } from '@/types';
 import { useAuth } from '@/hooks/use-auth';
 import { useMonthStore } from '@/hooks/use-month';
 import { useMonthSummary } from '@/hooks/use-month-summary';
@@ -32,9 +33,14 @@ import {
   syncInvestmentPageBridgeState,
 } from '@/lib/investment-page-bridge';
 import {
-  getAssistantChatSessionKey,
-  readAssistantChatSession,
-  writeAssistantChatSession,
+  assistantReplyShouldNotify,
+  beginAssistantRequest,
+  getAssistantChatSession,
+  getServerAssistantChatSession,
+  isAssistantRequestCurrent,
+  setAssistantCredits,
+  subscribeAssistantChatSession,
+  updateAssistantChatSession,
   type ChatMessage,
 } from '@/lib/assistant-chat-session';
 import { cn } from '@/lib/utils';
@@ -94,66 +100,46 @@ export function AssistantChat({
       screen.pageContext += `\nPróxima ação do método: ${babySteps.nextAction.label}`;
     }
   }
-  const sessionKey = getAssistantChatSessionKey(pathname, selectedMonthId);
-
-  const [messages, setMessages] = useState<ChatMessage[]>(
-    () => readAssistantChatSession(sessionKey).messages,
+  const session = useSyncExternalStore(
+    subscribeAssistantChatSession,
+    getAssistantChatSession,
+    getServerAssistantChatSession,
   );
-  const [input, setInput] = useState(
-    () => readAssistantChatSession(sessionKey).input || initialQuery,
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(
-    () => readAssistantChatSession(sessionKey).error,
-  );
+  const {
+    messages,
+    input,
+    error,
+    loading,
+    lastAwaitingConfirmation,
+    suggestionsHiddenForPage,
+  } = session;
   const [credits, setCredits] = useState(user?.aiCredits?.balance ?? 0);
-  const [flowStarted, setFlowStarted] = useState(
-    () => readAssistantChatSession(sessionKey).flowStarted,
-  );
-  const [lastAwaitingConfirmation, setLastAwaitingConfirmation] = useState(
-    () => readAssistantChatSession(sessionKey).lastAwaitingConfirmation,
-  );
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const skipNextPersistRef = useRef(false);
+  const creditsRef = useRef(credits);
+  creditsRef.current = credits;
+
+  const onCreditsChangeRef = useRef(onCreditsChange);
+  onCreditsChangeRef.current = onCreditsChange;
 
   useEffect(() => {
-    const session = readAssistantChatSession(sessionKey);
-    setMessages(session.messages);
-    setInput(session.input);
-    setFlowStarted(session.flowStarted);
-    setLastAwaitingConfirmation(session.lastAwaitingConfirmation);
-    setError(session.error);
-    skipNextPersistRef.current = true;
-  }, [sessionKey]);
-
-  useEffect(() => {
-    if (skipNextPersistRef.current) {
-      skipNextPersistRef.current = false;
-      return;
+    const hidden = getAssistantChatSession().suggestionsHiddenForPage;
+    if (hidden && hidden !== pageKey) {
+      updateAssistantChatSession({ suggestionsHiddenForPage: null });
     }
-
-    writeAssistantChatSession(sessionKey, {
-      messages,
-      input,
-      flowStarted,
-      lastAwaitingConfirmation,
-      error,
-    });
-  }, [sessionKey, messages, input, flowStarted, lastAwaitingConfirmation, error]);
+  }, [pageKey]);
 
   useEffect(() => {
     if (!initialQuery) return;
-    setInput(initialQuery);
-    setFlowStarted(true);
+    updateAssistantChatSession({ input: initialQuery });
   }, [initialQuery]);
 
   useEffect(() => {
-    if (user?.aiCredits) {
-      setCredits(user.aiCredits.balance);
-      onCreditsChange?.(user.aiCredits.balance);
-    }
-  }, [user?.aiCredits, onCreditsChange]);
+    if (!user?.aiCredits) return;
+    setCredits(user.aiCredits.balance);
+    setAssistantCredits(user.aiCredits.balance);
+    onCreditsChangeRef.current?.(user.aiCredits.balance);
+  }, [user?.aiCredits]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -173,25 +159,55 @@ export function AssistantChat({
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }, [input]);
 
+  const applyCredits = (balance: number) => {
+    setAssistantCredits(balance);
+    setCredits(balance);
+    onCreditsChange?.(balance);
+    queryClient.setQueryData<User>(['auth', 'me'], (current) => {
+      if (!current?.aiCredits) return current;
+      return {
+        ...current,
+        aiCredits: { ...current.aiCredits, balance },
+      };
+    });
+  };
+
   const sendToApi = async (
     text: string,
     currentMessages: ChatMessage[],
     flowIntent?: FlowIntent,
+    options?: { clearInput?: boolean; displayText?: string },
   ) => {
-    if (credits <= 0) {
-      setError('Seus créditos de IA acabaram. Eles renovam na próxima cobrança do plano.');
+    if (getAssistantChatSession().loading) return;
+
+    if (creditsRef.current <= 0) {
+      updateAssistantChatSession({
+        error: 'Seus créditos de IA acabaram. Eles renovam na próxima cobrança do plano.',
+      });
       return;
     }
 
     if (!selectedMonthId && !['configuracoes', 'generic', 'simulador_investimentos'].includes(pageKey)) {
-      setError('Selecione um mês para continuar.');
+      updateAssistantChatSession({ error: 'Selecione um mês para continuar.' });
       return;
     }
 
-    setError(null);
-    setLoading(true);
+    const requestId = beginAssistantRequest();
+    const nextMessages: ChatMessage[] = [
+      ...currentMessages,
+      { role: 'user', content: options?.displayText ?? text },
+    ];
+    updateAssistantChatSession({
+      messages: nextMessages,
+      error: null,
+      loading: true,
+      unread: false,
+      ...(options?.clearInput ? { input: '' } : {}),
+    });
 
-    const nextMessages: ChatMessage[] = [...currentMessages, { role: 'user', content: text }];
+    if (options?.clearInput && inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
 
     try {
       const result = await api.post<{
@@ -212,10 +228,15 @@ export function AssistantChat({
         ...(flowIntent ? { flowIntent } : {}),
       });
 
-      setMessages([...nextMessages, { role: 'assistant', content: result.reply }]);
-      setLastAwaitingConfirmation(result.awaitingConfirmation ?? false);
-      setCredits(result.creditsRemaining);
-      onCreditsChange?.(result.creditsRemaining);
+      if (!isAssistantRequestCurrent(requestId)) return;
+
+      updateAssistantChatSession({
+        messages: [...nextMessages, { role: 'assistant', content: result.reply }],
+        lastAwaitingConfirmation: result.awaitingConfirmation ?? false,
+        loading: false,
+        unread: assistantReplyShouldNotify(),
+      });
+      applyCredits(result.creditsRemaining);
 
       if (result.actionsExecuted?.length) {
         const createdSimulation = result.actionsExecuted.find(
@@ -236,73 +257,51 @@ export function AssistantChat({
         }
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao enviar mensagem.');
-    } finally {
-      setLoading(false);
+      if (!isAssistantRequestCurrent(requestId)) return;
+      updateAssistantChatSession({
+        loading: false,
+        error: err instanceof ApiError ? err.message : 'Erro ao enviar mensagem.',
+      });
     }
   };
 
   const handleOpeningAction = async (action: PageFlow['openingActions'][number]) => {
     if (action.intent === 'dismiss') {
-      setFlowStarted(true);
-      setMessages([
-        {
-          role: 'assistant',
-          content: pageFlow?.suggestionAction
-            ? `Ok! Se precisar, use **${pageFlow.suggestionAction.label}** ou digite sua pergunta abaixo.`
-            : 'Ok! Se precisar, digite sua pergunta abaixo.',
-        },
-      ]);
+      updateAssistantChatSession({ suggestionsHiddenForPage: pageKey });
       return;
     }
 
-    setFlowStarted(true);
-    const userMsg: ChatMessage = { role: 'user', content: action.label };
-    setMessages([userMsg]);
-    await sendToApi(action.message, [], action.intent);
+    const history = getAssistantChatSession().messages;
+    await sendToApi(action.message, history, action.intent, { displayText: action.label });
   };
 
   const handleFixedSuggestion = async () => {
     if (!pageFlow?.suggestionAction) return;
-    setFlowStarted(true);
-    const label = pageFlow.suggestionAction.label;
-    const userMsg: ChatMessage = { role: 'user', content: label };
-    const prevMessages = messages;
-    setMessages([...prevMessages, userMsg]);
+    const history = getAssistantChatSession().messages;
     const intent: FlowIntent =
       pageKey === 'simulador_investimentos' ? 'register' : 'suggest';
-    await sendToApi(pageFlow.suggestionAction.message, prevMessages, intent);
+    await sendToApi(pageFlow.suggestionAction.message, history, intent, {
+      displayText: pageFlow.suggestionAction.label,
+    });
   };
 
   const handleAnotherSuggestion = async () => {
-    setFlowStarted(true);
-    const label = 'Pedir outra sugestão';
-    const message = buildAnotherSuggestionMessage(pageKey);
-    const userMsg: ChatMessage = { role: 'user', content: label };
-    const prevMessages = messages;
-    setMessages([...prevMessages, userMsg]);
-    await sendToApi(message, prevMessages, 'suggest');
+    const history = getAssistantChatSession().messages;
+    await sendToApi(buildAnotherSuggestionMessage(pageKey), history, 'suggest', {
+      displayText: 'Pedir outra sugestão',
+    });
   };
 
   const sendMessage = async (textOverride?: string) => {
-    const text = (textOverride ?? input).trim();
-    if (!text || loading) return;
-
-    if (!flowStarted) setFlowStarted(true);
-    if (!textOverride) {
-      setInput('');
-      if (inputRef.current) {
-        inputRef.current.style.height = 'auto';
-      }
-    }
-
-    const userMsg: ChatMessage = { role: 'user', content: text };
-    const nextMessages = [...messages, userMsg];
-    setMessages(nextMessages);
-    await sendToApi(text, messages);
+    const current = getAssistantChatSession();
+    const text = (textOverride ?? current.input).trim();
+    if (!text || current.loading) return;
+    await sendToApi(text, current.messages, undefined, { clearInput: !textOverride });
   };
 
-  const showOpening = pageFlow && !flowStarted && messages.length === 0 && !summaryLoading;
+  const suggestionsHidden = suggestionsHiddenForPage === pageKey;
+  const showOpening = Boolean(pageFlow) && messages.length === 0 && !suggestionsHidden && !summaryLoading;
+  const showSuggestionStrip = Boolean(pageFlow) && !showOpening && !(summaryLoading && messages.length === 0);
 
   const lastMessage = messages[messages.length - 1];
   const showConfirmButton =
@@ -316,13 +315,13 @@ export function AssistantChat({
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <ScrollArea className={cn('flex-1', compact ? 'p-4' : 'p-4 sm:p-6')}>
           <div className="space-y-4 sm:space-y-5">
-            {summaryLoading && pageKey !== 'generic' && (
+            {summaryLoading && messages.length === 0 && pageKey !== 'generic' && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-5 w-5 animate-spin text-brand-400" />
               </div>
             )}
 
-            {showOpening && (
+            {showOpening && pageFlow && (
               <div className="space-y-4 py-1">
                 <div className="flex justify-start gap-2.5">
                   <div className="brand-gradient-bg mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-brand-500/25 sm:flex">
@@ -454,17 +453,49 @@ export function AssistantChat({
               : 'p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4',
           )}
         >
-          {flowStarted && pageFlow?.suggestionAction && (
-            <div className="mb-2">
-              <button
-                type="button"
-                onClick={() => void handleAnotherSuggestion()}
-                disabled={loading || credits <= 0}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-brand-300 transition-colors hover:bg-brand-500/10 hover:text-brand-200 disabled:opacity-50"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Pedir outra sugestão
-              </button>
+          {showSuggestionStrip && pageFlow && (
+            <div className="mb-2 space-y-1.5">
+              <p className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                Sugestões · {pageFlow.label}
+              </p>
+              <p className="text-xs leading-relaxed text-slate-400">{pageFlow.openingMessage}</p>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {pageFlow.openingActions
+                  .filter((action) => action.intent !== 'dismiss')
+                  .map((action, index) => (
+                    <button
+                      key={`${action.label}-${index}`}
+                      type="button"
+                      onClick={() => void handleOpeningAction(action)}
+                      disabled={loading || credits <= 0}
+                      className="inline-flex shrink-0 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                {pageFlow.suggestionAction && (
+                  <button
+                    type="button"
+                    onClick={() => void handleFixedSuggestion()}
+                    disabled={loading || credits <= 0}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1.5 text-xs font-semibold text-brand-300 transition-colors hover:bg-brand-500/20 disabled:opacity-50"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    {pageFlow.suggestionAction.label}
+                  </button>
+                )}
+                {messages.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => void handleAnotherSuggestion()}
+                    disabled={loading || credits <= 0}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-brand-300 transition-colors hover:bg-brand-500/10 hover:text-brand-200 disabled:opacity-50"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Pedir outra sugestão
+                  </button>
+                )}
+              </div>
             </div>
           )}
           <form
@@ -477,7 +508,7 @@ export function AssistantChat({
             <textarea
               ref={inputRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => updateAssistantChatSession({ input: e.target.value })}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();

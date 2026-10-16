@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
 import { Sparkles } from 'lucide-react';
 import { AssistantChat } from '@/components/assistant/assistant-chat';
@@ -8,6 +8,13 @@ import { AssistantTrigger } from '@/components/assistant/assistant-trigger';
 import { AssistantPanelContent } from '@/components/assistant/assistant-panel-content';
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getAssistantPageContext } from '@/lib/assistant-page-context';
+import {
+  getAssistantStatus,
+  getServerAssistantStatus,
+  markAssistantSeen,
+  setAssistantSurface,
+  subscribeAssistantStatus,
+} from '@/lib/assistant-chat-session';
 
 type OpenAssistantOptions = {
   query?: string;
@@ -15,6 +22,8 @@ type OpenAssistantOptions = {
 
 type AssistantContextValue = {
   open: boolean;
+  loading: boolean;
+  unread: boolean;
   openAssistant: (options?: OpenAssistantOptions) => void;
   closeAssistant: () => void;
 };
@@ -36,24 +45,43 @@ export function useAssistantOptional() {
 export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const pageContext = getAssistantPageContext(pathname);
+  const status = useSyncExternalStore(
+    subscribeAssistantStatus,
+    getAssistantStatus,
+    getServerAssistantStatus,
+  );
   const [open, setOpen] = useState(false);
   const [initialQuery, setInitialQuery] = useState('');
-  const [credits, setCredits] = useState<number | null>(null);
 
   const hideFab = pathname === '/dashboard/assistente';
+  setAssistantSurface({ panelOpen: open, pathname });
 
   const openAssistant = useCallback((options?: OpenAssistantOptions) => {
     setInitialQuery(options?.query ?? '');
     setOpen(true);
+    markAssistantSeen();
   }, []);
 
   const closeAssistant = useCallback(() => {
     setOpen(false);
   }, []);
 
+  useEffect(() => {
+    setAssistantSurface({ panelOpen: open, pathname });
+    if (open || pathname === '/dashboard/assistente') {
+      markAssistantSeen();
+    }
+  }, [open, pathname]);
+
   const value = useMemo(
-    () => ({ open, openAssistant, closeAssistant }),
-    [open, openAssistant, closeAssistant],
+    () => ({
+      open,
+      loading: status.loading,
+      unread: status.unread,
+      openAssistant,
+      closeAssistant,
+    }),
+    [open, status.loading, status.unread, openAssistant, closeAssistant],
   );
 
   return (
@@ -62,7 +90,22 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
 
       {!hideFab && <AssistantTrigger variant="fab" />}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <div className="sr-only" aria-live="polite">
+        {status.loading
+          ? 'O assistente está pensando.'
+          : status.unread
+            ? 'O assistente respondeu.'
+            : ''}
+      </div>
+
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setAssistantSurface({ panelOpen: next, pathname });
+          setOpen(next);
+          if (next) markAssistantSeen();
+        }}
+      >
         <AssistantPanelContent>
           <DialogHeader className="relative shrink-0 border-b border-white/[0.08] px-4 py-3.5 pr-12 text-left sm:px-5">
             <div className="flex items-center justify-between gap-3">
@@ -77,7 +120,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
                     <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-brand-green-400" />
                     <span className="truncate">
                       Online · {pageContext.label}
-                      {credits !== null && ` · ${credits} créditos`}
+                      {status.credits !== null && ` · ${status.credits} créditos`}
                     </span>
                   </span>
                 </span>
@@ -87,7 +130,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
               </span>
             </div>
             <DialogDescription className="sr-only">
-              Chat com assistente de IA da Finzup para a página {pageContext.label}
+              Conversa com o assistente de IA da Finzup. O histórico continua entre as telas e as sugestões seguem a página {pageContext.label}.
             </DialogDescription>
           </DialogHeader>
           <div className="min-h-0 flex-1 overflow-hidden">
@@ -95,7 +138,6 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
               initialQuery={initialQuery}
               compact
               active={open}
-              onCreditsChange={setCredits}
             />
           </div>
         </AssistantPanelContent>

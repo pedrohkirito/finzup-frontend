@@ -20,6 +20,7 @@ import {
   CalendarRange,
   Footprints,
   Headset,
+  Loader2,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 import { useAssistant } from '@/providers/assistant-provider';
+import { AssistantActivityMark } from '@/components/assistant/assistant-trigger';
 import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
 const primaryLinks = [
@@ -54,7 +56,8 @@ export function MobileNav() {
   const pathname = usePathname();
   const logout = useLogout();
   const { theme, toggle } = useTheme();
-  const { openAssistant } = useAssistant();
+  const { openAssistant, loading: assistantLoading, unread: assistantUnread } = useAssistant();
+  const assistantHasReply = assistantUnread && !assistantLoading;
   const [moreOpen, setMoreOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
@@ -94,12 +97,29 @@ export function MobileNav() {
             type="button"
             onClick={() => openAssistant()}
             className="relative -mt-5 flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 pb-1.5 text-[11px] font-semibold text-brand-600 dark:text-brand-300"
-            aria-label="Abrir assistente de IA"
+            aria-label={
+              assistantLoading
+                ? 'Assistente pensando'
+                : assistantHasReply
+                  ? 'Assistente tem uma nova resposta'
+                  : 'Abrir assistente de IA'
+            }
+            aria-busy={assistantLoading}
           >
-            <span className="brand-gradient-bg flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg shadow-brand-500/40 ring-4 ring-white dark:ring-[#020618]/90">
-              <Sparkles className="h-6 w-6" />
+            <span className="brand-gradient-bg relative flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg shadow-brand-500/40 ring-4 ring-white dark:ring-[#020618]/90">
+              {assistantLoading && (
+                <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-white/30" />
+              )}
+              {assistantLoading ? (
+                <Loader2 className="relative h-6 w-6 animate-spin" />
+              ) : (
+                <Sparkles className="relative h-6 w-6" />
+              )}
+              <AssistantActivityMark loading={assistantLoading} unread={assistantHasReply} className="-top-0.5 -right-0.5" />
             </span>
-            <span className="truncate">Assistente</span>
+            <span className="truncate">
+              {assistantLoading ? 'Pensando…' : assistantHasReply ? 'Nova resposta' : 'Assistente'}
+            </span>
           </button>
 
           {primaryLinks.slice(2).map(({ href, icon: Icon, label }) => {
