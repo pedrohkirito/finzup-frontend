@@ -16,7 +16,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { data: user, isLoading, isError } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const reserveAssistantSpace = pathname !== '/dashboard/assistente';
 
   useEffect(() => {
     if (!isLoading && isError) {
@@ -70,14 +69,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
           </header>
-          <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <ScrollArea className="min-h-0 flex-1 bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
+          <main className="min-h-0 flex-1 overflow-hidden">
+            <ScrollArea className="h-full bg-slate-50/70 p-4 pb-mobile-nav md:p-8 md:pb-8 dark:bg-transparent">
               <TrialBanner billing={billing} />
               {children}
+              {pathname !== '/dashboard/assistente' && (
+                <div className="h-16 md:h-28" aria-hidden />
+              )}
             </ScrollArea>
-            {reserveAssistantSpace && (
-              <div className="hidden h-32 shrink-0 md:block" aria-hidden />
-            )}
           </main>
         </div>
         <MobileNav />

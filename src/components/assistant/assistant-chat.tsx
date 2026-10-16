@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2, Send, Sparkles, Check } from 'lucide-react';
+import { Loader2, Send, Sparkles, Check, ChevronDown } from 'lucide-react';
 import { AssistantMessage } from '@/components/assistant/assistant-message';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -114,6 +114,7 @@ export function AssistantChat({
     suggestionsHiddenForPage,
   } = session;
   const [credits, setCredits] = useState(user?.aiCredits?.balance ?? 0);
+  const [suggestionsIntroOpen, setSuggestionsIntroOpen] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const creditsRef = useRef(credits);
@@ -323,16 +324,29 @@ export function AssistantChat({
 
             {showOpening && pageFlow && (
               <div className="space-y-4 py-1">
-                <div className="flex justify-start gap-2.5">
-                  <div className="brand-gradient-bg mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-brand-500/25 sm:flex">
-                    <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                {suggestionsIntroOpen && (
+                  <div className="flex justify-start gap-2.5">
+                    <div className="brand-gradient-bg mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-brand-500/25 sm:flex">
+                      <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                    </div>
+                    <div className="max-w-[92%] rounded-2xl rounded-tl-md border border-white/[0.08] bg-white/[0.06] px-4 py-3.5 text-sm leading-relaxed text-slate-200 sm:max-w-[85%]">
+                      {pageFlow.openingMessage}
+                    </div>
                   </div>
-                  <div className="max-w-[92%] rounded-2xl rounded-tl-md border border-white/[0.08] bg-white/[0.06] px-4 py-3.5 text-sm leading-relaxed text-slate-200 sm:max-w-[85%]">
-                    {pageFlow.openingMessage}
-                  </div>
-                </div>
+                )}
 
-                <div className="space-y-2.5 sm:pl-9">
+                <div className={cn('space-y-2.5', suggestionsIntroOpen && 'sm:pl-9')}>
+                  <button
+                    type="button"
+                    onClick={() => setSuggestionsIntroOpen((open) => !open)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 transition-colors hover:text-slate-200"
+                  >
+                    {suggestionsIntroOpen ? 'Minimizar texto' : 'Mostrar texto'}
+                    <ChevronDown
+                      className={cn('h-3.5 w-3.5 transition-transform', suggestionsIntroOpen && 'rotate-180')}
+                      aria-hidden
+                    />
+                  </button>
                   <div className="flex flex-wrap gap-2">
                     {pageFlow.openingActions.map((action, index) => (
                       <button
@@ -447,19 +461,34 @@ export function AssistantChat({
 
         <div
           className={cn(
-            'shrink-0 border-t border-white/[0.08] bg-white/[0.02]',
+            'shrink-0 min-w-0 border-t border-white/[0.08] bg-white/[0.02]',
             compact
               ? 'p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]'
               : 'p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4',
           )}
         >
           {showSuggestionStrip && pageFlow && (
-            <div className="mb-2 space-y-1.5">
-              <p className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                Sugestões · {pageFlow.label}
-              </p>
-              <p className="text-xs leading-relaxed text-slate-400">{pageFlow.openingMessage}</p>
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <div className="mb-2 min-w-0 space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                  Sugestões · {pageFlow.label}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSuggestionsIntroOpen((open) => !open)}
+                  className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-slate-400 transition-colors hover:text-slate-200"
+                >
+                  {suggestionsIntroOpen ? 'Minimizar' : 'Mostrar'}
+                  <ChevronDown
+                    className={cn('h-3.5 w-3.5 transition-transform', suggestionsIntroOpen && 'rotate-180')}
+                    aria-hidden
+                  />
+                </button>
+              </div>
+              {suggestionsIntroOpen && (
+                <p className="text-xs leading-relaxed text-slate-400">{pageFlow.openingMessage}</p>
+              )}
+              <div className="flex min-w-0 flex-wrap gap-2">
                 {pageFlow.openingActions
                   .filter((action) => action.intent !== 'dismiss')
                   .map((action, index) => (
@@ -468,7 +497,7 @@ export function AssistantChat({
                       type="button"
                       onClick={() => void handleOpeningAction(action)}
                       disabled={loading || credits <= 0}
-                      className="inline-flex shrink-0 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+                      className="inline-flex max-w-full items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-3 py-1.5 text-left text-xs font-semibold text-slate-300 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
                     >
                       {action.label}
                     </button>
@@ -478,9 +507,9 @@ export function AssistantChat({
                     type="button"
                     onClick={() => void handleFixedSuggestion()}
                     disabled={loading || credits <= 0}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1.5 text-xs font-semibold text-brand-300 transition-colors hover:bg-brand-500/20 disabled:opacity-50"
+                    className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1.5 text-left text-xs font-semibold text-brand-300 transition-colors hover:bg-brand-500/20 disabled:opacity-50"
                   >
-                    <Sparkles className="h-3.5 w-3.5" />
+                    <Sparkles className="h-3.5 w-3.5 shrink-0" />
                     {pageFlow.suggestionAction.label}
                   </button>
                 )}
@@ -489,9 +518,9 @@ export function AssistantChat({
                     type="button"
                     onClick={() => void handleAnotherSuggestion()}
                     disabled={loading || credits <= 0}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-brand-300 transition-colors hover:bg-brand-500/10 hover:text-brand-200 disabled:opacity-50"
+                    className="inline-flex max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-left text-xs font-medium text-brand-300 transition-colors hover:bg-brand-500/10 hover:text-brand-200 disabled:opacity-50"
                   >
-                    <Sparkles className="h-3.5 w-3.5" />
+                    <Sparkles className="h-3.5 w-3.5 shrink-0" />
                     Pedir outra sugestão
                   </button>
                 )}
