@@ -17,7 +17,7 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
   monthly: {
     id: 'monthly',
     label: 'Mensal',
-    total: 47.9,
+    total: 8.9,
     intervalMonths: 1,
     aiCredits: 250,
     description: 'Sem compromisso de longo prazo',
@@ -35,7 +35,7 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
   annual: {
     id: 'annual',
     label: 'Anual',
-    total: 297.9,
+    total: 70.8,
     intervalMonths: 12,
     aiCredits: 750,
     description: 'Cobrado uma vez por ano',
@@ -46,8 +46,8 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
 /** Parcelamento no cartão do plano anual (compra única, sem renovação). */
 export const ANNUAL_INSTALLMENT = {
   count: 12,
-  value: 27.9,
-  total: 334.8,
+  value: 5.9,
+  total: 70.8,
 } as const;
 
 export type CardChargeMode = 'recurrent' | 'installment';
