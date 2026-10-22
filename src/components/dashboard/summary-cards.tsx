@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { BudgetSummary, MonthSummary } from '@/types';
 import { TrendingUp, TrendingDown, Wallet, CreditCard, PiggyBank, Heart, Target, ChevronRight } from 'lucide-react';
@@ -12,6 +12,136 @@ import {
   BudgetDetailDialog,
   SummaryDetailDialog,
 } from '@/components/dashboard/summary-detail-dialog';
+
+function budgetTone(progress: number, overBudget: boolean) {
+  if (overBudget) {
+    return {
+      bar: '[&>div]:bg-red-500',
+      percent: 'text-red-500 dark:text-red-400',
+      chip: 'bg-red-500/15 text-red-600 dark:bg-red-500/15 dark:text-red-400',
+      remaining: 'text-red-500 dark:text-red-400',
+    };
+  }
+  if (progress >= 85) {
+    return {
+      bar: '[&>div]:bg-amber-400',
+      percent: 'text-amber-600 dark:text-amber-400',
+      chip: 'bg-amber-500/15 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400',
+      remaining: 'text-amber-600 dark:text-amber-400',
+    };
+  }
+  return {
+    bar: '[&>div]:bg-emerald-500',
+    percent: 'text-emerald-600 dark:text-emerald-400',
+    chip: 'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400',
+    remaining: 'text-emerald-600 dark:text-emerald-400',
+  };
+}
+
+function BudgetSection({
+  budgets,
+  onOpen,
+}: {
+  budgets: BudgetSummary[];
+  onOpen: (budget: BudgetSummary) => void;
+}) {
+  const sorted = [...budgets].sort((a, b) => {
+    if (a.overBudget !== b.overBudget) return a.overBudget ? -1 : 1;
+    return b.progress - a.progress;
+  });
+  const totalLimit = sorted.reduce((sum, budget) => sum + budget.limit, 0);
+  const totalSpent = sorted.reduce((sum, budget) => sum + budget.spent, 0);
+  const totalRemaining = totalLimit - totalSpent;
+  const overCount = sorted.filter((budget) => budget.overBudget).length;
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-start justify-between gap-3 px-0.5">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orçamentos</h2>
+          </div>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(totalSpent)}</span>
+            {' de '}
+            {formatCurrency(totalLimit)}
+            {' · '}
+            <span className={totalRemaining < 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
+              {formatCurrency(Math.abs(totalRemaining))} {totalRemaining < 0 ? 'acima' : 'restantes'}
+            </span>
+            {overCount > 0 && (
+              <>
+                {' · '}
+                <span className="text-red-500 dark:text-red-400">
+                  {overCount} {overCount === 1 ? 'estourado' : 'estourados'}
+                </span>
+              </>
+            )}
+          </p>
+        </div>
+        <Link
+          href="/dashboard/orcamentos"
+          className="mt-0.5 flex shrink-0 items-center gap-0.5 text-xs font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          Ver todos
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {sorted.map((budget) => {
+          const tone = budgetTone(budget.progress, budget.overBudget);
+          const entryCount = budget.entries?.length ?? 0;
+
+          return (
+            <Card
+              key={budget.id}
+              className={cn(
+                'cursor-pointer p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.12),0_1px_4px_rgba(0,0,0,0.06)] dark:hover:border-white/[0.16] dark:hover:bg-white/[0.06]',
+                sorted.length === 1 && 'sm:col-span-2',
+              )}
+              onClick={() => onOpen(budget)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className={cn('icon-chip', tone.chip)}>
+                    <Target className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{budget.name}</p>
+                    <p className="mt-0.5 text-xs text-slate-400">
+                      {entryCount === 0
+                        ? 'Nenhum gasto'
+                        : `${entryCount} ${entryCount === 1 ? 'gasto' : 'gastos'}`}
+                    </p>
+                  </div>
+                </div>
+                <span className={cn('shrink-0 text-sm font-bold tabular-nums', tone.percent)}>
+                  {budget.progress.toFixed(0)}%
+                </span>
+              </div>
+
+              <Progress value={Math.min(budget.progress, 100)} className={cn('mt-4 h-2', tone.bar)} />
+
+              <div className="mt-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <p className="min-w-0 truncate text-sm font-semibold tabular-nums text-slate-800 dark:text-slate-100">
+                  {formatCurrency(budget.spent)}
+                  <span className="text-xs font-normal text-slate-400"> / {formatCurrency(budget.limit)}</span>
+                </p>
+                <p className={cn('shrink-0 text-xs font-medium', tone.remaining)}>
+                  {budget.remaining >= 0
+                    ? `${formatCurrency(budget.remaining)} restantes`
+                    : `${formatCurrency(Math.abs(budget.remaining))} acima`}
+                </p>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 type DialogKey =
   | 'receitas'
@@ -173,51 +303,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         </Card>
 
         {hasBudgets && (
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
-              <div className="icon-chip bg-amber-500/15 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
-                <Target className="h-4 w-4" />
-              </div>
-              <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 p-4 pt-0">
-              {summary.budgets!.map((budget) => (
-                <div
-                  key={budget.id}
-                  className="cursor-pointer rounded-xl bg-slate-50/80 p-3 transition-all hover:bg-slate-100/80 hover:shadow-sm dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
-                  onClick={() => setOpenBudget(budget)}
-                >
-                  <div className="mb-2.5 flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                    <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-200">
-                      {budget.name}
-                      <ChevronRight className="h-3 w-3 text-slate-400" />
-                    </span>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {budget.overBudget && <Badge variant="destructive">Estourado</Badge>}
-                      <span className="text-slate-500">
-                        <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(budget.spent)}</span>
-                        {' / '}
-                        {formatCurrency(budget.limit)}
-                      </span>
-                    </div>
-                  </div>
-                  <Progress
-                    value={budget.progress}
-                    className={cn(
-                      budget.overBudget
-                        ? '[&>div]:bg-red-500'
-                        : '[&>div]:bg-amber-500',
-                    )}
-                  />
-                  {(budget.entries?.length ?? 0) > 0 && (
-                    <p className="mt-1.5 text-xs text-slate-400">
-                      {budget.entries!.length} {budget.entries!.length === 1 ? 'gasto' : 'gastos'}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <BudgetSection budgets={summary.budgets!} onOpen={setOpenBudget} />
         )}
       </div>
 
