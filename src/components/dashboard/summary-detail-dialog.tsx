@@ -147,6 +147,7 @@ export function BalanceDetailDialog({
   totalIncome,
   totalExpenses,
   totalDonations,
+  totalInvested,
   balance,
 }: {
   open: boolean;
@@ -154,12 +155,14 @@ export function BalanceDetailDialog({
   totalIncome: number;
   totalExpenses: number;
   totalDonations: number;
+  totalInvested: number;
   balance: number;
 }) {
   const rows = [
     { label: 'Receitas', value: totalIncome, color: 'text-emerald-600 dark:text-emerald-400', prefix: '+' },
     { label: 'Despesas', value: totalExpenses, color: 'text-orange-600 dark:text-orange-400', prefix: '−' },
     { label: 'Doações', value: totalDonations, color: 'text-sky-600 dark:text-sky-400', prefix: '−' },
+    { label: 'Investimentos', value: totalInvested, color: 'text-violet-600 dark:text-violet-400', prefix: '−' },
   ];
 
   return (

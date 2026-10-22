@@ -53,15 +53,6 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       itemCount: items.expenses.length,
     },
     {
-      key: 'doacoes' as const,
-      title: 'Doações',
-      value: summary.totalDonations,
-      icon: Heart,
-      accent: 'text-sky-600 dark:text-sky-400',
-      chip: 'bg-sky-500/15 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400',
-      itemCount: items.donations.length,
-    },
-    {
       key: 'fatura' as const,
       title: 'Fatura Cartão',
       value: summary.creditCardBill.total,
@@ -69,6 +60,15 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
       accent: 'text-violet-600 dark:text-violet-400',
       chip: 'bg-violet-500/15 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400',
       itemCount: creditCardItems.length,
+    },
+    {
+      key: 'doacoes' as const,
+      title: 'Doações',
+      value: summary.totalDonations,
+      icon: Heart,
+      accent: 'text-sky-600 dark:text-sky-400',
+      chip: 'bg-sky-500/15 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400',
+      itemCount: items.donations.length,
     },
   ];
 
@@ -258,6 +258,7 @@ export function SummaryCards({ summary }: { summary: MonthSummary }) {
         totalIncome={summary.totalIncome}
         totalExpenses={summary.totalExpenses}
         totalDonations={summary.totalDonations}
+        totalInvested={summary.investment.totalInvested}
         balance={summary.balance}
       />
 
