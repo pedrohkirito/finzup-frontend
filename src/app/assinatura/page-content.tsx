@@ -8,7 +8,7 @@ import { SubscriptionCheckout } from '@/components/billing/subscription-checkout
 import { Button } from '@/components/ui/button';
 import { type BillingPlanId } from '@/constants/billing-plans';
 import { useAuth, useLogout } from '@/hooks/use-auth';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 type CheckoutStep = 'plans' | 'checkout' | 'processing';
 
@@ -36,7 +36,9 @@ export default function AssinaturaPageContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const logout = useLogout();
-  const { data: user, isLoading, isError, refetch } = useAuth();
+  const { data: user, isPending, isFetching, error, refetch } = useAuth();
+  const sentToDashboard = useRef(false);
+  const sessionExpired = error instanceof ApiError && error.status === 401;
 
   const [step, setStep] = useState<CheckoutStep>('plans');
   const [selectedPlan, setSelectedPlan] = useState<BillingPlanId | null>(null);
@@ -101,22 +103,24 @@ export default function AssinaturaPageContent() {
   );
 
   useEffect(() => {
-    if (!isLoading && isError) {
-      router.replace('/login');
+    if (
+      sessionExpired ||
+      isPending ||
+      isFetching ||
+      !user?.billing?.hasAccess ||
+      sentToDashboard.current
+    ) {
+      return;
     }
-  }, [isLoading, isError, router]);
+    sentToDashboard.current = true;
+    router.replace('/dashboard');
+  }, [sessionExpired, isPending, isFetching, user, router]);
 
   useEffect(() => {
-    if (!isLoading && user?.billing?.hasAccess) {
-      router.replace('/dashboard');
-    }
-  }, [isLoading, user, router]);
-
-  useEffect(() => {
-    if (!sessionIdParam || isLoading || !user || processingStartedRef.current) return;
+    if (!sessionIdParam || isPending || !user || processingStartedRef.current) return;
     processingStartedRef.current = true;
     void startProcessing(sessionIdParam);
-  }, [sessionIdParam, isLoading, user, startProcessing]);
+  }, [sessionIdParam, isPending, user, startProcessing]);
 
   const handleSelectPlan = useCallback(
     async (plan: BillingPlanId) => {
@@ -163,7 +167,19 @@ export default function AssinaturaPageContent() {
     setErrorMessage(message);
   }, []);
 
-  if (isLoading || !user) {
+  if (isPending || !user) {
+    const unauthorized = error instanceof ApiError && error.status === 401;
+    if (!isPending && error && !unauthorized) {
+      return (
+        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
+          <p className="text-sm text-slate-600 dark:text-slate-400">Não foi possível carregar sua conta.</p>
+          <Button type="button" variant="outline" onClick={() => refetch()}>
+            Tentar novamente
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
