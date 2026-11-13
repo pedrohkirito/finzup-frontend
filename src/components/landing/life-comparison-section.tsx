@@ -43,8 +43,8 @@ const rows = [
   {
     withoutIcon: Banknote,
     withIcon: BadgeDollarSign,
-    without: 'Mais de R$ 1.200 perdidos todo ano',
-    with: 'Dívidas quitadas e dinheiro economizado todo mês',
+    without: 'O ano fecha sem você saber para onde foi',
+    with: 'Você vê o que sobrou e onde cortar',
   },
   {
     withoutIcon: RefreshCw,

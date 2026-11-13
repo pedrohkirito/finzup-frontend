@@ -39,11 +39,7 @@ interface ModalState {
 const CLOSED: ModalState = { isOpen: false, initialPlan: 'annual', returnOrderId: null };
 
 export function LandingPageClient() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
-      <LandingPageClientInner />
-    </Suspense>
-  );
+  return <LandingPageClientInner />;
 }
 
 function scrollTo(id: string) {
@@ -64,24 +60,26 @@ function readStoredReturnOrder() {
   }
 }
 
-function LandingPageClientInner() {
+function CheckoutQueryListener({
+  onCheckoutQuery,
+}: {
+  onCheckoutQuery: (query: { checkout: string | null; orderId: string | null }) => void;
+}) {
   const searchParams = useSearchParams();
+  const checkout = searchParams.get('checkout');
+  const orderId = searchParams.get('orderId');
+
+  useEffect(() => {
+    onCheckoutQuery({ checkout, orderId });
+  }, [checkout, orderId, onCheckoutQuery]);
+
+  return null;
+}
+
+function LandingPageClientInner() {
   useLandingEngagement();
-  const [modal, setModal] = useState<ModalState>(() => {
-    const checkoutParam = searchParams.get('checkout');
-    const orderId = searchParams.get('orderId');
-
-    if (checkoutParam === 'success' && orderId) {
-      return { isOpen: true, initialPlan: 'annual', returnOrderId: orderId };
-    }
-
-    if (checkoutParam === '1') {
-      return { isOpen: true, initialPlan: 'annual', returnOrderId: null };
-    }
-
-    return CLOSED;
-  });
-  const modalOpenRef = useRef(modal.isOpen);
+  const [modal, setModal] = useState<ModalState>(CLOSED);
+  const modalOpenRef = useRef(false);
   const pricingViewTrackedRef = useRef(false);
   const dismissedReturnRef = useRef(false);
 
@@ -89,24 +87,35 @@ function LandingPageClientInner() {
     rememberMetaClick();
   }, []);
 
-  useEffect(() => {
-    if (searchParams.get('checkout') !== 'success' || dismissedReturnRef.current) return;
+  const handleCheckoutQuery = useCallback(
+    (query: { checkout: string | null; orderId: string | null }) => {
+      if (dismissedReturnRef.current) return;
 
-    const orderIdFromUrl = searchParams.get('orderId');
-    if (orderIdFromUrl) {
-      try {
-        sessionStorage.setItem(CHECKOUT_RETURN_ORDER_KEY, orderIdFromUrl);
-      } catch {
-        // A URL ainda tem o pedido nesta visita.
+      if (query.checkout === '1') {
+        modalOpenRef.current = true;
+        setModal({ isOpen: true, initialPlan: 'annual', returnOrderId: null });
+        return;
       }
-      return;
-    }
 
-    const orderId = readStoredReturnOrder();
-    if (!orderId) return;
-    modalOpenRef.current = true;
-    setModal({ isOpen: true, initialPlan: 'annual', returnOrderId: orderId });
-  }, [searchParams]);
+      if (query.checkout !== 'success') return;
+
+      let orderId = query.orderId;
+      if (orderId) {
+        try {
+          sessionStorage.setItem(CHECKOUT_RETURN_ORDER_KEY, orderId);
+        } catch {
+          // A URL ainda tem o pedido nesta visita.
+        }
+      } else {
+        orderId = readStoredReturnOrder();
+      }
+
+      if (!orderId) return;
+      modalOpenRef.current = true;
+      setModal({ isOpen: true, initialPlan: 'annual', returnOrderId: orderId });
+    },
+    [],
+  );
 
   const openCheckout = useCallback((plan?: BillingPlanId, cta?: LandingCtaClick) => {
     if (modalOpenRef.current) return;
@@ -144,6 +153,9 @@ function LandingPageClientInner() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
+      <Suspense fallback={null}>
+        <CheckoutQueryListener onCheckoutQuery={handleCheckoutQuery} />
+      </Suspense>
       {/* Navbar */}
       <header className="fixed top-0 right-0 left-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-950/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
