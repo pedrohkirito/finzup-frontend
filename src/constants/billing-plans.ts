@@ -1,6 +1,5 @@
-export type BillingPlanId = 'monthly' | 'semester' | 'annual';
+export type BillingPlanId = 'monthly' | 'annual';
 
-/** Planos à venda. O semestral permanece só para quem já assinou. */
 export const BILLING_PLAN_ORDER: BillingPlanId[] = ['monthly', 'annual'];
 
 export interface BillingPlanConfig {
@@ -10,7 +9,7 @@ export interface BillingPlanConfig {
   intervalMonths: number;
   aiCredits: number;
   description: string;
-  icon: 'zap' | 'star' | 'sparkles';
+  icon: 'zap' | 'sparkles';
 }
 
 export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
@@ -22,15 +21,6 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
     aiCredits: 250,
     description: 'Sem compromisso de longo prazo',
     icon: 'zap',
-  },
-  semester: {
-    id: 'semester',
-    label: 'Semestral',
-    total: 197.9,
-    intervalMonths: 6,
-    aiCredits: 500,
-    description: 'Cobrado a cada 6 meses',
-    icon: 'star',
   },
   annual: {
     id: 'annual',
@@ -76,9 +66,8 @@ export function formatPriceParts(value: number): { int: string; dec: string } {
   return { int, dec };
 }
 
-export function planPriceIntervalSuffix(intervalMonths: number): '/mês' | '/semestre' | '/ano' {
+export function planPriceIntervalSuffix(intervalMonths: number): '/mês' | '/ano' {
   if (intervalMonths === 1) return '/mês';
-  if (intervalMonths === 6) return '/semestre';
   return '/ano';
 }
 
@@ -86,7 +75,6 @@ export function planBillingLabel(planId: BillingPlanId): string {
   const plan = BILLING_PLANS[planId];
   if (plan.intervalMonths === 1) return 'Cobrado mensalmente. Sem fidelidade.';
   const equiv = formatBRL(monthlyEquivalent(plan.total, plan.intervalMonths));
-  if (plan.intervalMonths === 6) return `Equivale a ~R$${equiv}/mês no semestre`;
   return `Equivale a ~R$${equiv}/mês no ano`;
 }
 
