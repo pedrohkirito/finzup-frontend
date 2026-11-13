@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
 import { LegalPageLayout } from '@/components/legal/legal-page-layout';
-import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL, WEBSITE_URL, LGPD_RESPONSE_DAYS } from '@/content/legal/constants';
+import {
+  LEGAL_LAST_UPDATED,
+  SUPPORT_EMAIL,
+  WEBSITE_URL,
+  LGPD_RESPONSE_DAYS,
+  COMPANY_LEGAL_NAME,
+  COMPANY_CNPJ,
+} from '@/content/legal/constants';
 
 export const metadata: Metadata = {
   title: 'Termos de Uso — Finzup',
@@ -14,7 +21,7 @@ const termsSections = [
       <>
         <p>
           Estes Termos de Uso regulam o acesso e a utilização da Finzup, plataforma de organização
-          financeira pessoal disponível em{' '}
+          financeira pessoal operada pela {COMPANY_LEGAL_NAME}, CNPJ {COMPANY_CNPJ}, disponível em{' '}
           <a href={WEBSITE_URL} className="text-emerald-600 hover:underline dark:text-emerald-400">
             {WEBSITE_URL}
           </a>

@@ -33,23 +33,15 @@ const privacySections = [
     content: (
       <>
         <p>
-          O controlador dos dados pessoais tratados nesta plataforma é o <strong>{COMPANY_LEGAL_NAME}</strong>
-          , responsável pela Finzup, disponível em{' '}
+          O controlador dos dados pessoais tratados nesta plataforma é a{' '}
+          <strong>{COMPANY_LEGAL_NAME}</strong>, CNPJ {COMPANY_CNPJ}, responsável pela Finzup, disponível
+          em{' '}
           <a href={WEBSITE_URL} className="text-emerald-600 hover:underline dark:text-emerald-400">
             {WEBSITE_URL}
           </a>
           .
         </p>
-        {COMPANY_CNPJ && COMPANY_ADDRESS ? (
-          <p>
-            Razão social: {COMPANY_LEGAL_NAME}. CNPJ: {COMPANY_CNPJ}. Endereço: {COMPANY_ADDRESS}.
-          </p>
-        ) : (
-          <p>
-            Os dados de identificação da pessoa jurídica (razão social, CNPJ e endereço) serão publicados
-            nesta página quando formalizados.
-          </p>
-        )}
+        {COMPANY_ADDRESS ? <p>Endereço: {COMPANY_ADDRESS}.</p> : null}
         <p>
           Para assuntos relacionados à privacidade e à LGPD, entre em contato pelo e-mail{' '}
           <a
