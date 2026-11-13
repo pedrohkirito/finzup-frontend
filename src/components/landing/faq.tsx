@@ -44,7 +44,8 @@ const faqs = [
   },
   {
     question: 'Quais formas de pagamento são aceitas?',
-    answer: 'PIX e cartão de crédito, processados com segurança pela Asaas. Planos mensal ou anual.',
+    answer:
+      'PIX e cartão de crédito, processados com segurança pela Asaas. Planos mensal ou anual. No cartão, o preço é o mesmo do PIX — os juros já estão inclusos.',
   },
 ];
 

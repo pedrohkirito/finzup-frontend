@@ -6,17 +6,24 @@ export interface BillingPlanConfig {
   id: BillingPlanId;
   label: string;
   total: number;
+  /** Preço de tabela riscado durante a promoção. */
+  compareAt?: number;
   intervalMonths: number;
   aiCredits: number;
   description: string;
   icon: 'zap' | 'sparkles';
 }
 
+export const BLACK_FRIDAY_PROMO = {
+  active: true,
+  label: 'Black Friday',
+} as const;
+
 export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
   monthly: {
     id: 'monthly',
     label: 'Mensal',
-    total: 8.9,
+    total: 19.9,
     intervalMonths: 1,
     aiCredits: 250,
     description: 'Sem compromisso de longo prazo',
@@ -25,7 +32,8 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
   annual: {
     id: 'annual',
     label: 'Anual',
-    total: 70.8,
+    total: 59.9,
+    compareAt: 119.9,
     intervalMonths: 12,
     aiCredits: 750,
     description: 'Cobrado uma vez por ano',
@@ -33,11 +41,15 @@ export const BILLING_PLANS: Record<BillingPlanId, BillingPlanConfig> = {
   },
 };
 
-/** Parcelamento no cartão do plano anual (compra única, sem renovação). */
+/**
+ * Parcelamento no cartão do plano anual (compra única, sem renovação).
+ * O total é igual ao PIX e ao cartão à vista; os juros já estão inclusos.
+ * `value` é a parcela média (a última pode ajustar centavos para fechar o total).
+ */
 export const ANNUAL_INSTALLMENT = {
   count: 12,
-  value: 5.9,
-  total: 70.8,
+  value: 4.99,
+  total: 59.9,
 } as const;
 
 export type CardChargeMode = 'recurrent' | 'installment';
@@ -79,16 +91,20 @@ export function planBillingLabel(planId: BillingPlanId): string {
 }
 
 export function planDiscountPercent(planId: BillingPlanId): number | null {
-  const monthly = BILLING_PLANS.monthly.total;
   const plan = BILLING_PLANS[planId];
+  if (plan.compareAt != null && plan.compareAt > plan.total) {
+    return Math.round(((plan.compareAt - plan.total) / plan.compareAt) * 100);
+  }
+  const monthly = BILLING_PLANS.monthly.total;
   if (plan.intervalMonths === 1) return null;
   const equiv = monthlyEquivalent(plan.total, plan.intervalMonths);
   return Math.round(((monthly - equiv) / monthly) * 100);
 }
 
-/** Total que o usuário pagaria no mesmo período escolhendo o plano mensal. */
-export function planMonthlyEquivalentTotal(planId: BillingPlanId): number | null {
+/** Preço riscado do plano: tabela da promoção ou o equivalente no mensal. */
+export function planCompareAtTotal(planId: BillingPlanId): number | null {
   const plan = BILLING_PLANS[planId];
+  if (plan.compareAt != null && plan.compareAt > plan.total) return plan.compareAt;
   if (plan.intervalMonths === 1) return null;
   return BILLING_PLANS.monthly.total * plan.intervalMonths;
 }

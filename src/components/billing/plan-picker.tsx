@@ -10,11 +10,12 @@ import {
   BILLING_FEATURES,
   BILLING_PLAN_ORDER,
   BILLING_PLANS,
+  BLACK_FRIDAY_PROMO,
   type BillingPlanId,
   formatPriceParts,
   planBillingLabel,
+  planCompareAtTotal,
   planDiscountPercent,
-  planMonthlyEquivalentTotal,
   planPriceIntervalSuffix,
   formatBRL,
 } from '@/constants/billing-plans';
@@ -64,9 +65,8 @@ export function PlanPicker({
   const renderPrice = (planId: BillingPlanId) => {
     const plan = BILLING_PLANS[planId];
     const isAnnual = planId === 'annual';
-    const displayTotal = isAnnual ? ANNUAL_INSTALLMENT.value : plan.total;
-    const { int, dec } = formatPriceParts(displayTotal);
-    const intervalSuffix = isAnnual ? '/mês' : planPriceIntervalSuffix(plan.intervalMonths);
+    const { int, dec } = formatPriceParts(plan.total);
+    const intervalSuffix = planPriceIntervalSuffix(plan.intervalMonths);
 
     return (
       <>
@@ -77,25 +77,19 @@ export function PlanPicker({
           </span>
           <span className="mb-0.5 text-sm text-slate-500 dark:text-slate-400">{intervalSuffix}</span>
         </div>
-        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          {isAnnual
-            ? `Em ${ANNUAL_INSTALLMENT.count}x no cartão`
-            : planBillingLabel(planId)}
-        </p>
-        {/* Mesma altura em todos os cards para manter o alinhamento do grid */}
-        <p
-          className={`mt-1.5 text-sm font-medium ${
-            isAnnual
-              ? 'text-slate-600 dark:text-slate-300'
-              : 'invisible select-none'
-          }`}
-          aria-hidden={!isAnnual}
-        >
-          ou{' '}
-          <span className="font-bold text-slate-900 dark:text-white">
-            R${formatBRL(plan.total)}
-          </span>{' '}
-          à vista
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{planBillingLabel(planId)}</p>
+        <p className="mt-1.5 text-sm font-medium text-slate-600 dark:text-slate-300">
+          {isAnnual ? (
+            <>
+              No cartão, à vista ou em até {ANNUAL_INSTALLMENT.count}x ·{' '}
+              <span className="font-bold text-slate-900 dark:text-white">
+                total R${formatBRL(ANNUAL_INSTALLMENT.total)}
+              </span>
+              , juros inclusos
+            </>
+          ) : (
+            'No cartão, o mesmo valor — juros inclusos'
+          )}
         </p>
       </>
     );
@@ -154,6 +148,15 @@ export function PlanPicker({
 
   return (
     <div>
+      {BLACK_FRIDAY_PROMO.active && (
+        <div className={`flex justify-center ${compactHeader ? 'mb-6' : 'mb-4'}`}>
+          <div className="inline-flex items-center gap-2 rounded-full bg-black px-3 py-1.5 text-xs font-bold tracking-[0.16em] text-amber-300 uppercase shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden />
+            {BLACK_FRIDAY_PROMO.label}
+          </div>
+        </div>
+      )}
+
       {!compactHeader && (
         <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-12">
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:mb-4 sm:text-4xl dark:text-white">
@@ -169,7 +172,7 @@ export function PlanPicker({
           </h2>
           {mode === 'landing' ? (
             <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
-              PIX ou cartão. Cancele quando quiser, sem burocracia.
+              PIX ou cartão, no mesmo preço. Cancele quando quiser, sem burocracia.
             </p>
           ) : (
             <p className="text-base text-slate-600 sm:text-lg dark:text-slate-400">
@@ -219,7 +222,7 @@ export function PlanPicker({
         {BILLING_PLAN_ORDER.map((planId) => {
           const plan = BILLING_PLANS[planId];
           const discount = planDiscountPercent(planId);
-          const monthlyEquivalentTotal = planMonthlyEquivalentTotal(planId);
+          const compareAtTotal = planCompareAtTotal(planId);
 
           return (
             <div
@@ -232,8 +235,18 @@ export function PlanPicker({
             >
               {(planId === 'annual' || isSelected(planId)) && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="brand-gradient-bg-r flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white shadow-md">
-                    {planId === 'annual' ? 'Mais escolhido · Melhor custo-benefício' : 'Selecionado'}
+                  <span
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold shadow-md ${
+                      planId === 'annual' && BLACK_FRIDAY_PROMO.active
+                        ? 'bg-black text-amber-300'
+                        : 'brand-gradient-bg-r text-white'
+                    }`}
+                  >
+                    {planId === 'annual'
+                      ? BLACK_FRIDAY_PROMO.active
+                        ? 'Black Friday · Mais escolhido'
+                        : 'Mais escolhido · Melhor custo-benefício'
+                      : 'Selecionado'}
                   </span>
                 </div>
               )}
@@ -243,19 +256,13 @@ export function PlanPicker({
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Plano {plan.label}</h3>
                   </div>
-                  {discount != null && discount > 0 && monthlyEquivalentTotal != null && (
+                  {discount != null && discount > 0 && compareAtTotal != null && (
                     <div className="flex flex-shrink-0 items-center gap-2">
                       <span className="text-xs font-medium text-slate-400 line-through decoration-slate-400/80 dark:text-slate-500 dark:decoration-slate-500/80">
-                        R$ {formatBRL(monthlyEquivalentTotal)}{planPriceIntervalSuffix(plan.intervalMonths)}
+                        R$ {formatBRL(compareAtTotal)}{planPriceIntervalSuffix(plan.intervalMonths)}
                       </span>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                          planId === 'annual'
-                            ? 'bg-brand-green-100 text-brand-green-700 dark:bg-brand-green-950 dark:text-brand-green-400'
-                            : 'bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300'
-                        }`}
-                      >
-                        Poupe {discount}%
+                      <span className="rounded-full bg-black px-2.5 py-1 text-xs font-bold text-amber-300">
+                        −{discount}%
                       </span>
                     </div>
                   )}

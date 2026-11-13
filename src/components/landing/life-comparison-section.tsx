@@ -16,7 +16,13 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { type BillingPlanId, BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
+import {
+  type BillingPlanId,
+  BILLING_PLANS,
+  BLACK_FRIDAY_PROMO,
+  formatBRL,
+  monthlyEquivalent,
+} from '@/constants/billing-plans';
 import { type LandingCtaClick } from '@/lib/funnel-analytics';
 import { Reveal } from '@/components/landing/reveal';
 import { RefundNote } from '@/components/landing/refund-note';
@@ -156,9 +162,19 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
         {/* Price + CTA */}
         <Reveal delay={140} className="mx-auto mt-14 max-w-md text-center sm:mt-16">
           <div className="mb-8 inline-flex flex-col items-center gap-1 rounded-2xl border border-brand-200/60 bg-white/80 px-6 py-4 dark:border-brand-500/20 dark:bg-slate-900/60">
+            {BLACK_FRIDAY_PROMO.active ? (
+              <span className="text-[10px] font-black tracking-[0.18em] text-amber-700 uppercase dark:text-amber-300">
+                Black Friday
+              </span>
+            ) : null}
             <span className="text-xs font-semibold tracking-[0.18em] text-brand-600 uppercase dark:text-brand-400">
               Tudo isso por apenas
             </span>
+            {BILLING_PLANS.annual.compareAt != null && (
+              <p className="text-sm font-medium text-slate-400 line-through dark:text-slate-500">
+                R$ {formatBRL(monthlyEquivalent(BILLING_PLANS.annual.compareAt, 12))}/mês
+              </p>
+            )}
             <p className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
               R$ {monthlyEquiv.toFixed(2).replace('.', ',')}
               <span className="text-base font-semibold text-slate-500 dark:text-slate-400">/mês</span>

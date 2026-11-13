@@ -34,7 +34,7 @@ export default function OpenGraphImage() {
           </div>
         </div>
         <div style={{ display: 'flex', fontSize: 24, fontWeight: 700, color: '#67e8f9' }}>
-          Plano anual · R$ 70,80 · reembolso integral em 7 dias
+          Black Friday · plano anual de R$ 119,90 por R$ 59,90
         </div>
       </div>
     ),

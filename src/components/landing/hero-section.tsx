@@ -1,12 +1,13 @@
 import { ChevronRight } from 'lucide-react';
 import { HeroPlatformMock } from '@/components/landing/hero-platform-mock';
 import { RefundNote } from '@/components/landing/refund-note';
+import { BILLING_PLANS, BLACK_FRIDAY_PROMO, formatBRL } from '@/constants/billing-plans';
 
 export function HeroSection({ onCheckout }: { onCheckout: () => void }) {
   return (
     <section
       data-landing-section="hero"
-      className="relative overflow-hidden pt-28 pb-10 sm:pt-36 sm:pb-16 lg:pb-20"
+      className="relative overflow-hidden pt-36 pb-10 sm:pt-44 sm:pb-16 lg:pb-20"
     >
       <div className="absolute inset-0 -z-10" aria-hidden>
         <div className="absolute inset-0 bg-slate-950" />
@@ -19,6 +20,21 @@ export function HeroSection({ onCheckout }: { onCheckout: () => void }) {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-4xl flex-col items-center text-center lg:max-w-5xl">
+          {BLACK_FRIDAY_PROMO.active && (
+            <a
+              href="#pricing"
+              className="hero-reveal mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-black/70 px-3 py-1.5 text-xs font-semibold text-amber-200"
+            >
+              <span className="font-black tracking-widest text-amber-300">BLACK FRIDAY</span>
+              <span>
+                Anual de{' '}
+                <span className="line-through opacity-70">
+                  R$ {formatBRL(BILLING_PLANS.annual.compareAt ?? 0)}
+                </span>{' '}
+                por R$ {formatBRL(BILLING_PLANS.annual.total)}
+              </span>
+            </a>
+          )}
           <h1
             className="hero-reveal text-balance text-[2.15rem] leading-[1.12] font-extrabold tracking-tight text-white sm:text-5xl sm:leading-[1.1] lg:text-6xl lg:leading-[1.08] xl:text-7xl"
             style={{ animationDelay: '0ms' }}

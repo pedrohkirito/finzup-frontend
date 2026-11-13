@@ -23,6 +23,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   ANNUAL_INSTALLMENT,
   BILLING_PLANS,
+  BLACK_FRIDAY_PROMO,
   type BillingPlanId,
   type CardChargeMode,
   formatBRL,
@@ -373,11 +374,25 @@ function CheckoutStep({
   return (
     <div>
       <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Você selecionou</p>
-      <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">
+      {planConfig.compareAt != null && BLACK_FRIDAY_PROMO.active ? (
+        <p className="mt-1 text-xs font-bold tracking-[0.14em] text-amber-700 uppercase dark:text-amber-300">
+          Black Friday
+        </p>
+      ) : null}
+      <h2 className="mb-1 text-2xl font-bold text-slate-900 dark:text-white">
         Plano {planConfig.label}
-        <span className="mx-2 font-normal text-slate-400 dark:text-white">·</span>
+        {planConfig.compareAt != null ? (
+          <span className="mx-2 text-base font-medium text-slate-400 line-through dark:text-slate-500">
+            R$ {formatBRL(planConfig.compareAt)}
+          </span>
+        ) : (
+          <span className="mx-2 font-normal text-slate-400 dark:text-white">·</span>
+        )}
         R$ {formatBRL(planConfig.total)}
       </h2>
+      <p className="mb-5 text-xs text-slate-500">
+        PIX ou cartão, o mesmo valor — juros inclusos.
+      </p>
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
@@ -432,7 +447,7 @@ function CheckoutStep({
                 <span className="block text-sm font-semibold text-slate-900 dark:text-white">
                   À vista · R${formatBRL(planConfig.total)}/ano
                 </span>
-                <span className="text-xs text-slate-500">Renovação automática</span>
+                <span className="text-xs text-slate-500">Renovação automática · juros inclusos</span>
               </button>
               <button
                 type="button"
@@ -444,19 +459,19 @@ function CheckoutStep({
                 }`}
               >
                 <span className="block text-sm font-semibold text-slate-900 dark:text-white">
-                  Em até {ANNUAL_INSTALLMENT.count}x de R${formatBRL(ANNUAL_INSTALLMENT.value)}
+                  Em até {ANNUAL_INSTALLMENT.count}x no cartão
                 </span>
                 <span className="text-xs text-slate-500">
-                  Total: R${formatBRL(ANNUAL_INSTALLMENT.total)} · Compra única
+                  Total: R${formatBRL(ANNUAL_INSTALLMENT.total)} · juros inclusos · compra única
                 </span>
               </button>
             </div>
             {isInstallment ? (
               <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
-                Compra única em até {ANNUAL_INSTALLMENT.count}x de R$
-                {formatBRL(ANNUAL_INSTALLMENT.value)} (total R${formatBRL(ANNUAL_INSTALLMENT.total)})
-                — você escolhe as parcelas na próxima tela. Sem renovação automática; as parcelas
-                seguem na fatura do cartão até quitar o total.
+                Compra única em até {ANNUAL_INSTALLMENT.count}x. O total continua R$
+                {formatBRL(ANNUAL_INSTALLMENT.total)}, com os juros já inclusos — você escolhe as
+                parcelas na próxima tela. Sem renovação automática; as parcelas seguem na fatura do
+                cartão até quitar o total.
               </p>
             ) : null}
           </div>

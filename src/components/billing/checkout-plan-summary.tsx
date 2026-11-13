@@ -51,6 +51,12 @@ export function CheckoutPlanSummary({ planId }: CheckoutPlanSummaryProps) {
           <div className="flex items-center justify-between gap-4 py-4">
             <span className="text-sm text-slate-600 dark:text-slate-400">Total a pagar</span>
             <div className="text-right">
+              {plan.compareAt != null && (
+                <p className="text-xs font-medium text-slate-400 line-through dark:text-slate-500">
+                  R$ {formatBRL(plan.compareAt)}
+                  {intervalSuffix}
+                </p>
+              )}
               <div className="flex items-end justify-end gap-0.5">
                 <span className="pb-1 text-xs font-medium text-slate-500 dark:text-slate-400">R$</span>
                 <span className="text-2xl font-extrabold leading-none text-slate-900 dark:brand-gradient-text">
@@ -64,6 +70,7 @@ export function CheckoutPlanSummary({ planId }: CheckoutPlanSummaryProps) {
                   Equivalente a R$ {formatBRL(monthly)}/mês
                 </p>
               )}
+              <p className="mt-0.5 text-xs text-slate-500">No cartão, o mesmo valor — juros inclusos</p>
             </div>
           </div>
         </div>

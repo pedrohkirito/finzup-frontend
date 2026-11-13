@@ -19,7 +19,7 @@ import { LifeComparisonSection } from '@/components/landing/life-comparison-sect
 import { ContactSection } from '@/components/landing/contact-section';
 import { LandingCheckoutModal } from '@/components/landing/landing-checkout-modal';
 import { Reveal } from '@/components/landing/reveal';
-import { type BillingPlanId } from '@/constants/billing-plans';
+import { BILLING_PLANS, BLACK_FRIDAY_PROMO, formatBRL, type BillingPlanId } from '@/constants/billing-plans';
 import {
   trackInitiateCheckout,
   trackLandingCtaClick,
@@ -158,6 +158,25 @@ function LandingPageClientInner() {
       </Suspense>
       {/* Navbar */}
       <header className="fixed top-0 right-0 left-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-950/80">
+        {BLACK_FRIDAY_PROMO.active && (
+          <a
+            href="#pricing"
+            onClick={(e) => handleAnchorClick(e, 'pricing')}
+            className="flex h-9 items-center justify-center gap-2 bg-black px-4 text-center text-[11px] font-semibold text-amber-200 sm:text-xs"
+          >
+            <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-black tracking-widest text-black">
+              BLACK FRIDAY
+            </span>
+            <span>
+              Anual de{' '}
+              <span className="line-through opacity-70">
+                R$ {formatBRL(BILLING_PLANS.annual.compareAt ?? BILLING_PLANS.annual.total)}
+              </span>{' '}
+              por <span className="font-extrabold text-white">R$ {formatBRL(BILLING_PLANS.annual.total)}</span>
+              <span className="hidden sm:inline"> · mesmo preço no cartão</span>
+            </span>
+          </a>
+        )}
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" aria-label="Finzup">
             <Logo variant="isologo" size={32} className="h-8 w-auto" priority />
