@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  flushQueuedMetaPurchases,
   prepareMetaTrackingUrl,
   trackMetaEvent,
 } from '@/lib/meta-pixel';
@@ -27,7 +28,9 @@ export function MetaPixel() {
   }, [pathname, pixelId]);
 
   const trackPageView = useCallback(() => {
-    if (!enabled || lastPageViewRef.current === pathname) return;
+    if (!enabled) return;
+    flushQueuedMetaPurchases();
+    if (lastPageViewRef.current === pathname) return;
     if (trackMetaEvent('PageView')) {
       lastPageViewRef.current = pathname;
     }
@@ -55,6 +58,7 @@ export function MetaPixel() {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('consent', 'grant');
             fbq('init', '${pixelId}');
           `,
         }}

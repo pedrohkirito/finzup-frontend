@@ -299,10 +299,9 @@ const privacySections = [
           </li>
         </ul>
         <p>
-          O aceite dos Termos de Uso e desta Política de Privacidade no cadastro <strong>não</strong>{' '}
-          equivale automaticamente à autorização para receber e-mails de marketing. No formulário de
-          cadastro, a opção de receber comunicações de marketing pode aparecer pré-selecionada para sua
-          conveniência; você pode desmarcá-la antes de concluir o registro.
+          O aceite dos Termos de Uso e desta Política de Privacidade no checkout <strong>não</strong>{' '}
+          equivale à autorização para receber e-mails de marketing. A opção de receber novidades aparece
+          desmarcada. Essas mensagens só são enviadas se você marcar essa opção.
         </p>
       </>
     ),
@@ -324,8 +323,10 @@ const privacySections = [
             o site é utilizado e como os usuários percorrem etapas como cadastro e assinatura;
           </li>
           <li>
-            <strong>Marketing e medição:</strong> Meta (Facebook Pixel), para medir a visualização de
-            ofertas, o início do checkout e compras originadas de campanhas.
+            <strong>Marketing e medição:</strong> Meta (pixel no navegador e API de Conversões no
+            servidor), para medir a visualização de ofertas, o início do checkout e compras originadas de
+            campanhas. O evento de compra do servidor usa o mesmo identificador do navegador, para a Meta
+            contar a compra uma vez.
           </li>
         </ul>
         <p>

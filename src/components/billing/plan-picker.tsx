@@ -301,7 +301,7 @@ export function PlanPicker({
 
       {mode === 'landing' && (
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-8">
-          {['Sem taxa de cancelamento', 'Dados 100% seguros', 'Suporte em português'].map((badge) => (
+          {['Reembolso integral em 7 dias', 'Sem taxa de cancelamento', 'Dados 100% seguros', 'Suporte em português'].map((badge) => (
             <div key={badge} className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <Check className="h-4 w-4 text-brand-green-500" />
               {badge}

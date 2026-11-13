@@ -1,4 +1,4 @@
-import { BILLING_PLANS, type BillingPlanId } from '@/constants/billing-plans';
+import { BILLING_PLAN_ORDER, BILLING_PLANS, type BillingPlanId } from '@/constants/billing-plans';
 
 export type MetaEventParams = Record<string, unknown>;
 
@@ -23,6 +23,10 @@ declare global {
 
 const PURCHASE_STORAGE_KEY = 'finzup:meta:purchase-event-ids';
 const MAX_STORED_PURCHASES = 100;
+const PURCHASE_RETRY_MS = 20_000;
+const pendingPurchases = new Map<string, MetaPurchase>();
+let purchaseRetryTimer: number | null = null;
+let purchaseRetryStartedAt = 0;
 const META_TRACKING_PATHS = new Set(['/']);
 const SENSITIVE_QUERY_PARAMS = new Set([
   'token',
@@ -96,6 +100,60 @@ export function trackMetaCustomEvent(
   return track('trackCustom', event, params, options);
 }
 
+function rememberPurchase(eventId: string) {
+  try {
+    const ids = [...getTrackedPurchaseIds(), eventId].slice(-MAX_STORED_PURCHASES);
+    window.localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    // O evento ainda é enviado quando o storage está indisponível.
+  }
+}
+
+function sendPurchase(purchase: MetaPurchase) {
+  const { eventId } = purchase;
+  if (!eventId || getTrackedPurchaseIds().includes(eventId)) return true;
+  const orderId = eventId.replace(/^finzup_purchase_/, '');
+  const params = {
+    ...getPlanParams(purchase.plan),
+    currency: purchase.currency,
+    value: purchase.value,
+    order_id: orderId,
+    plan: purchase.plan,
+    payment_method: purchase.paymentMethod,
+    charge_mode: purchase.chargeMode,
+  };
+  if (!trackMetaEvent('Purchase', params, { eventId })) return false;
+  rememberPurchase(eventId);
+  return true;
+}
+
+export function flushQueuedMetaPurchases() {
+  if (typeof window === 'undefined') return;
+
+  for (const [eventId, purchase] of pendingPurchases) {
+    if (sendPurchase(purchase)) pendingPurchases.delete(eventId);
+  }
+
+  if (pendingPurchases.size === 0 && purchaseRetryTimer !== null) {
+    window.clearInterval(purchaseRetryTimer);
+    purchaseRetryTimer = null;
+  }
+}
+
+function queuePurchase(purchase: MetaPurchase) {
+  pendingPurchases.set(purchase.eventId, purchase);
+  if (purchaseRetryTimer !== null) return;
+
+  purchaseRetryStartedAt = Date.now();
+  purchaseRetryTimer = window.setInterval(() => {
+    flushQueuedMetaPurchases();
+    if (Date.now() - purchaseRetryStartedAt < PURCHASE_RETRY_MS) return;
+    if (purchaseRetryTimer !== null) window.clearInterval(purchaseRetryTimer);
+    purchaseRetryTimer = null;
+    pendingPurchases.clear();
+  }, 400);
+}
+
 function getTrackedPurchaseIds(): string[] {
   if (typeof window === 'undefined') return [];
 
@@ -111,27 +169,13 @@ function getTrackedPurchaseIds(): string[] {
 
 export function trackPurchase(purchase: MetaPurchase) {
   const { eventId } = purchase;
-  if (!eventId || getTrackedPurchaseIds().includes(eventId)) return false;
-  const orderId = eventId.replace(/^finzup_purchase_/, '');
-  const params = {
-    ...getPlanParams(purchase.plan),
-    currency: purchase.currency,
-    value: purchase.value,
-    order_id: orderId,
-    plan: purchase.plan,
-    payment_method: purchase.paymentMethod,
-    charge_mode: purchase.chargeMode,
-  };
-  if (!trackMetaEvent('Purchase', params, { eventId })) return false;
-
-  try {
-    const ids = [...getTrackedPurchaseIds(), eventId].slice(-MAX_STORED_PURCHASES);
-    window.localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    // O evento ainda é enviado quando o storage está indisponível.
+  if (!eventId || typeof window === 'undefined' || getTrackedPurchaseIds().includes(eventId)) {
+    return false;
   }
-
-  return true;
+  if (!isMetaTrackingAllowed()) return false;
+  if (sendPurchase(purchase)) return true;
+  queuePurchase(purchase);
+  return false;
 }
 
 /** Dispara conversão após cadastro concluído com sucesso. */
@@ -149,7 +193,7 @@ export function trackInitiateCheckout(planId: BillingPlanId) {
 
 export function trackPricingView() {
   trackMetaEvent('ViewContent', {
-    content_ids: Object.keys(BILLING_PLANS).map((planId) => `finzup_${planId}`),
+    content_ids: BILLING_PLAN_ORDER.map((planId) => `finzup_${planId}`),
     content_type: 'product_group',
   });
 }

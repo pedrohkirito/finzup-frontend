@@ -1,6 +1,6 @@
 export type BillingPlanId = 'monthly' | 'semester' | 'annual';
 
-/** Planos exibidos no frontend (semestral oculto). */
+/** Planos à venda. O semestral permanece só para quem já assinou. */
 export const BILLING_PLAN_ORDER: BillingPlanId[] = ['monthly', 'annual'];
 
 export interface BillingPlanConfig {

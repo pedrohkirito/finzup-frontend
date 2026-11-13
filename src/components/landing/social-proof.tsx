@@ -2,6 +2,7 @@
 
 import { ChevronRight, Star } from 'lucide-react';
 import { Reveal } from '@/components/landing/reveal';
+import { RefundNote } from '@/components/landing/refund-note';
 import { trackLandingCtaClick } from '@/lib/funnel-analytics';
 
 const testimonials: { quote: string; name: string; detail?: string }[] = [
@@ -70,6 +71,7 @@ export function SocialProof() {
             Assinar agora
             <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </a>
+          <RefundNote className="mt-4" />
         </Reveal>
       </div>
     </section>

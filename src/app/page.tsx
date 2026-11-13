@@ -5,7 +5,7 @@ import { Utmify } from '@/components/analytics/utmify';
 export const metadata: Metadata = {
   title: 'Finzup — Método Finzup para sair das dívidas e ter liberdade financeira',
   description:
-    'O Método Finzup, baseado no método de Dave Ramsey, já ajudou milhões de pessoas a saírem das dívidas no mundo. Conheça a plataforma e o Assistente de IA que trazem esse método para a sua realidade.',
+    'A Finzup organiza o que entra e o que sai, mostra para onde o dinheiro está indo e monta o próximo passo com um assistente de IA. O caminho é baseado no método de Dave Ramsey.',
   keywords:
     'sair das dívidas, método finzup, liberdade financeira, controle financeiro, quitar dívidas, dave ramsey, assistente de ia financeiro, app financeiro, orçamento pessoal',
   authors: [{ name: 'Finzup' }],
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     url: 'https://finzup.com.br',
     title: 'Finzup — Método Finzup para sair das dívidas e ter liberdade financeira',
     description:
-      'O Método Finzup, baseado no método de Dave Ramsey, já ajudou milhões de pessoas a saírem das dívidas no mundo. Conheça a plataforma e o Assistente de IA que trazem esse método para a sua realidade.',
+      'A Finzup organiza o que entra e o que sai, mostra para onde o dinheiro está indo e monta o próximo passo com um assistente de IA. O caminho é baseado no método de Dave Ramsey.',
     siteName: 'Finzup',
     images: [
       {
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Finzup — Método Finzup para sair das dívidas e ter liberdade financeira',
     description:
-      'O Método Finzup, baseado no método de Dave Ramsey, já ajudou milhões de pessoas a saírem das dívidas no mundo. Conheça a plataforma e o Assistente de IA que trazem esse método para a sua realidade.',
+      'A Finzup organiza o que entra e o que sai, mostra para onde o dinheiro está indo e monta o próximo passo com um assistente de IA. O caminho é baseado no método de Dave Ramsey.',
     images: ['/images/finzup_isologo.png'],
   },
 };

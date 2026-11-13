@@ -19,6 +19,7 @@ import {
 import { type BillingPlanId, BILLING_PLANS, monthlyEquivalent } from '@/constants/billing-plans';
 import { type LandingCtaClick } from '@/lib/funnel-analytics';
 import { Reveal } from '@/components/landing/reveal';
+import { RefundNote } from '@/components/landing/refund-note';
 
 const rows = [
   {
@@ -182,6 +183,7 @@ export function LifeComparisonSection({ onCta }: LifeComparisonSectionProps) {
                 <ChevronRight className="h-4 w-4" />
               </span>
             </button>
+            <RefundNote className="mt-4" />
           </div>
         </Reveal>
       </div>

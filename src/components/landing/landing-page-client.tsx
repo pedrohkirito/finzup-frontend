@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
@@ -27,6 +27,8 @@ import {
 } from '@/lib/funnel-analytics';
 import { trackPricingView } from '@/lib/meta-pixel';
 import { useLandingEngagement } from '@/hooks/use-landing-engagement';
+import { CHECKOUT_RETURN_ORDER_KEY, rememberMetaClick } from '@/lib/meta-attribution';
+import { RefundNote } from '@/components/landing/refund-note';
 
 interface ModalState {
   isOpen: boolean;
@@ -53,6 +55,15 @@ function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
   scrollTo(id);
 }
 
+function readStoredReturnOrder() {
+  if (typeof window === 'undefined') return null;
+  try {
+    return sessionStorage.getItem(CHECKOUT_RETURN_ORDER_KEY);
+  } catch {
+    return null;
+  }
+}
+
 function LandingPageClientInner() {
   const searchParams = useSearchParams();
   useLandingEngagement();
@@ -72,6 +83,30 @@ function LandingPageClientInner() {
   });
   const modalOpenRef = useRef(modal.isOpen);
   const pricingViewTrackedRef = useRef(false);
+  const dismissedReturnRef = useRef(false);
+
+  useEffect(() => {
+    rememberMetaClick();
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('checkout') !== 'success' || dismissedReturnRef.current) return;
+
+    const orderIdFromUrl = searchParams.get('orderId');
+    if (orderIdFromUrl) {
+      try {
+        sessionStorage.setItem(CHECKOUT_RETURN_ORDER_KEY, orderIdFromUrl);
+      } catch {
+        // A URL ainda tem o pedido nesta visita.
+      }
+      return;
+    }
+
+    const orderId = readStoredReturnOrder();
+    if (!orderId) return;
+    modalOpenRef.current = true;
+    setModal({ isOpen: true, initialPlan: 'annual', returnOrderId: orderId });
+  }, [searchParams]);
 
   const openCheckout = useCallback((plan?: BillingPlanId, cta?: LandingCtaClick) => {
     if (modalOpenRef.current) return;
@@ -92,6 +127,12 @@ function LandingPageClientInner() {
 
   const closeModal = useCallback(() => {
     modalOpenRef.current = false;
+    dismissedReturnRef.current = true;
+    try {
+      sessionStorage.removeItem(CHECKOUT_RETURN_ORDER_KEY);
+    } catch {
+      // Nada a limpar se o storage estiver indisponível.
+    }
     setModal(CLOSED);
   }, []);
 
@@ -132,27 +173,36 @@ function LandingPageClientInner() {
             >
               Entrar
             </Link>
-            <a
-              href="#pricing"
-              onClick={(e) => {
-                trackLandingCtaClick({
+            <button
+              type="button"
+              onClick={() =>
+                openCheckout('annual', {
                   ctaLocation: 'navbar',
                   ctaLabel: 'Começar agora',
-                  action: 'scroll_to_pricing',
-                });
-                handleAnchorClick(e, 'pricing');
-              }}
+                  action: 'open_checkout',
+                  planId: 'annual',
+                })
+              }
               className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-4 py-2.5 pr-9 text-sm font-semibold sm:px-5 sm:py-3 sm:pr-10"
             >
               Começar agora
               <span className="btn-arrow-bg absolute right-2 sm:right-2.5"><ChevronRight className="h-3.5 w-3.5" /></span>
-            </a>
+            </button>
           </div>
         </div>
       </header>
 
       {/* 1. Hero — dor clara */}
-      <HeroSection />
+      <HeroSection
+        onCheckout={() =>
+          openCheckout('annual', {
+            ctaLocation: 'hero',
+            ctaLabel: 'Quero descobrir',
+            action: 'open_checkout',
+            planId: 'annual',
+          })
+        }
+      />
 
       {/* 2. Reforço da dor */}
       <PainSymptomsSection />
@@ -215,7 +265,8 @@ function LandingPageClientInner() {
             Assinar agora
             <span className="btn-arrow-bg absolute right-3"><ChevronRight className="h-4 w-4" /></span>
           </button>
-          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Sem taxa de cancelamento · Acesso imediato</p>
+          <RefundNote className="mt-4" />
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sem taxa de cancelamento · Acesso imediato</p>
         </Reveal>
       </section>
 
@@ -247,6 +298,7 @@ function LandingPageClientInner() {
 
       {/* CTA fixo mobile */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95">
+        <RefundNote className="mb-1.5 text-center text-[11px]" />
         <button
           type="button"
           onClick={() =>

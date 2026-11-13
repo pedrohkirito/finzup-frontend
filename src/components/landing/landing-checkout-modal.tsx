@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   ANNUAL_INSTALLMENT,
@@ -39,6 +40,11 @@ import {
   trackPurchase,
   type MetaPurchase,
 } from '@/lib/meta-pixel';
+import {
+  CHECKOUT_RETURN_ORDER_KEY,
+  getMetaBrowserContext,
+  metaContextHeaders,
+} from '@/lib/meta-attribution';
 
 type ModalStep = 'checkout' | 'pix' | 'waiting' | 'success';
 type PaymentMethod = 'pix' | 'credit_card';
@@ -50,6 +56,7 @@ const checkoutSchema = z
     email: z.string().optional(),
     paymentMethod: z.enum(['pix', 'credit_card']),
     cardChargeMode: z.enum(['recurrent', 'installment']),
+    marketingOptIn: z.boolean(),
   })
   .superRefine((data, ctx) => {
     if (data.paymentMethod !== 'pix') return;
@@ -150,6 +157,7 @@ export function LandingCheckoutModal({
     defaultValues: {
       paymentMethod: 'pix',
       cardChargeMode: 'recurrent',
+      marketingOptIn: false,
     },
   });
 
@@ -159,6 +167,7 @@ export function LandingCheckoutModal({
       try {
         const status = await api.get<CheckoutStatusResponse>(
           `/billing/checkout/${id}/status`,
+          { headers: metaContextHeaders() },
         );
         if (status.status === 'paid') {
           if (pollRef.current) clearInterval(pollRef.current);
@@ -193,7 +202,7 @@ export function LandingCheckoutModal({
     setCheckoutError(null);
     setSuccessEmail('');
     setNeedsPasswordSetup(true);
-    form.reset({ paymentMethod: 'pix', cardChargeMode: 'recurrent' });
+    form.reset({ paymentMethod: 'pix', cardChargeMode: 'recurrent', marketingOptIn: false });
     if (!trackedOpenRef.current) {
       trackedOpenRef.current = true;
       trackLandingCheckoutModalOpened(initialPlan);
@@ -222,14 +231,16 @@ export function LandingCheckoutModal({
               plan: selectedPlan,
               paymentMethod: data.paymentMethod,
               acceptedTerms: true,
-              marketingOptIn: true,
+              marketingOptIn: data.marketingOptIn,
+              meta: getMetaBrowserContext(),
             }
           : {
               plan: selectedPlan,
               paymentMethod: data.paymentMethod,
               cardChargeMode: cardChargeModePayload,
               acceptedTerms: true,
-              marketingOptIn: true,
+              marketingOptIn: data.marketingOptIn,
+              meta: getMetaBrowserContext(),
             };
 
       const result = await api.post<CheckoutStartResponse>('/billing/checkout/start', payload);
@@ -243,6 +254,11 @@ export function LandingCheckoutModal({
       }
 
       if (result.checkoutUrl) {
+        try {
+          sessionStorage.setItem(CHECKOUT_RETURN_ORDER_KEY, result.orderId);
+        } catch {
+          // O retorno da Asaas ainda traz o pedido na URL.
+        }
         window.location.href = result.checkoutUrl;
         return;
       }
@@ -479,7 +495,12 @@ function CheckoutStep({
           </div>
         ) : null}
 
-        <CheckoutConsentNotice />
+        <CheckoutConsentNotice
+          marketingOptIn={form.watch('marketingOptIn')}
+          onMarketingOptInChange={(checked) =>
+            form.setValue('marketingOptIn', checked, { shouldDirty: true })
+          }
+        />
 
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">{error}</div>
@@ -530,19 +551,38 @@ function PixIcon() {
   );
 }
 
-function CheckoutConsentNotice() {
+function CheckoutConsentNotice({
+  marketingOptIn,
+  onMarketingOptInChange,
+}: {
+  marketingOptIn: boolean;
+  onMarketingOptInChange: (checked: boolean) => void;
+}) {
   return (
-    <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center text-[11px] leading-relaxed text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-      Ao continuar, você concorda com os{' '}
-      <Link href="/termos-de-uso" target="_blank" className="text-brand-600 hover:underline">
-        Termos de Uso
-      </Link>
-      {' '}e a{' '}
-      <Link href="/politica-de-privacidade" target="_blank" className="text-brand-600 hover:underline">
-        Política de Privacidade
-      </Link>
-      , e em receber comunicações por e-mail e WhatsApp sobre sua conta, suporte e novidades da Finzup. Prometemos zero spam!
-    </p>
+    <div className="space-y-3">
+      <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center text-[11px] leading-relaxed text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+        Ao continuar, você concorda com os{' '}
+        <Link href="/termos-de-uso" target="_blank" className="text-brand-600 hover:underline">
+          Termos de Uso
+        </Link>
+        {' '}e a{' '}
+        <Link href="/politica-de-privacidade" target="_blank" className="text-brand-600 hover:underline">
+          Política de Privacidade
+        </Link>
+        . Mensagens sobre a conta e o suporte fazem parte do serviço.
+      </p>
+      <div className="flex items-start gap-2.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+        <Checkbox
+          id="checkout-marketing"
+          checked={marketingOptIn}
+          onCheckedChange={(checked) => onMarketingOptInChange(checked === true)}
+          className="mt-0.5"
+        />
+        <label htmlFor="checkout-marketing" className="cursor-pointer">
+          Quero receber novidades e dicas da Finzup por e-mail.
+        </label>
+      </div>
+    </div>
   );
 }
 

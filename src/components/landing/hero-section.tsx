@@ -1,8 +1,8 @@
 import { ChevronRight } from 'lucide-react';
 import { HeroPlatformMock } from '@/components/landing/hero-platform-mock';
-import { trackLandingCtaClick } from '@/lib/funnel-analytics';
+import { RefundNote } from '@/components/landing/refund-note';
 
-export function HeroSection() {
+export function HeroSection({ onCheckout }: { onCheckout: () => void }) {
   return (
     <section
       data-landing-section="hero"
@@ -36,22 +36,17 @@ export function HeroSection() {
           </p>
 
           <div className="hero-reveal mt-8 sm:mt-10" style={{ animationDelay: '280ms' }}>
-            <a
-              href="#metodo"
-              onClick={() =>
-                trackLandingCtaClick({
-                  ctaLocation: 'hero',
-                  ctaLabel: 'Quero descobrir',
-                  action: 'scroll_to_section',
-                })
-              }
+            <button
+              type="button"
+              onClick={onCheckout}
               className="btn-brand-gradient relative inline-flex items-center justify-center rounded-full px-10 py-5 pr-14 text-base font-semibold"
             >
               Quero descobrir
               <span className="btn-arrow-bg absolute right-3.5">
                 <ChevronRight className="h-4 w-4" />
               </span>
-            </a>
+            </button>
+            <RefundNote className="mt-4 text-slate-400" />
           </div>
         </div>
 

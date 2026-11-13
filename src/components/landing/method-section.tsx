@@ -49,13 +49,14 @@ export function MethodSection() {
           <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Existe um caminho.
             <br />
-            <span className="brand-gradient-text-light">E ele já tirou milhões das dívidas.</span>
+            <span className="brand-gradient-text-light">
+              O método de Dave Ramsey já tirou milhões das dívidas.
+            </span>
           </h2>
 
           <p className="mx-auto mt-6 max-w-xl text-lg text-slate-400">
-            Um método criado pela{' '}
-            <span className="font-semibold text-white">Finzup</span>, baseado no método de{' '}
-            <span className="font-semibold text-white">Dave Ramsey</span>.
+            A <span className="font-semibold text-white">Finzup</span> traz esse caminho para a sua
+            realidade, já preparado com os seus números.
           </p>
         </Reveal>
 
