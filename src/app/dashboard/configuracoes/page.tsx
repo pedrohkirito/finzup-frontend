@@ -25,6 +25,9 @@ import {
 } from '@/components/ui/dialog';
 import { AddPaymentMethodDialog } from '@/components/payment-methods/add-payment-method-dialog';
 import { SupportChannels } from '@/components/layout/support-channels';
+import { DueDaySelect } from '@/components/payment-methods/due-day-select';
+import { BankAccountsCard } from '@/components/settings/bank-accounts-card';
+import { BusinessScopeCard } from '@/components/settings/business-scope-card';
 import type { PaymentMethod, User as UserProfile } from '@/types';
 import {
   ArrowLeftRight,
@@ -426,6 +429,19 @@ export default function ConfiguracoesPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-slate-900 dark:text-white">{m.name}</p>
                     <p className={cn('text-xs font-medium', style.iconText)}>{paymentMethodTypeLabels[m.type]}</p>
+                    {m.type === 'credit' && (
+                      <div className="mt-1.5">
+                        <DueDaySelect
+                          compact
+                          value={m.dueDay}
+                          onChange={async (dueDay) => {
+                            await api.patch(`/payment-methods/${m.id}`, { dueDay });
+                            await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+                            await queryClient.invalidateQueries({ queryKey: ['months'] });
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* ações */}
@@ -460,6 +476,10 @@ export default function ConfiguracoesPage() {
       </Card>
 
       <AddPaymentMethodDialog open={addMethodOpen} onOpenChange={setAddMethodOpen} />
+
+      {/* ── Contas bancárias e PF/PJ ── */}
+      <BankAccountsCard />
+      <BusinessScopeCard />
 
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-sm">

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
-import type { UseFormReturn } from 'react-hook-form';
+import { useWatch, type UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 import { ChevronDown, Plus } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
@@ -40,7 +40,7 @@ export function extrasFormValues(entry: EntryExtras): EntryExtrasFormValues {
 }
 
 /** Qualquer formulário do react-hook-form cujo schema inclua `entryExtrasFormShape`. */
-type FormWithExtras = { watch: unknown; setValue: unknown };
+type FormWithExtras = { control: unknown; setValue: unknown };
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 const NEW_ACCOUNT = '__new__';
@@ -61,9 +61,13 @@ export function EntryExtrasFields({
   showScope?: boolean;
 }) {
   const f = form as unknown as UseFormReturn<EntryExtrasFormValues>;
-  const day = f.watch('day') ?? null;
-  const scope = f.watch('scope') ?? 'personal';
-  const bankAccountId = f.watch('bankAccountId') ?? null;
+  const [watchedDay, watchedScope, watchedAccount] = useWatch({
+    control: f.control,
+    name: ['day', 'scope', 'bankAccountId'],
+  });
+  const day = watchedDay ?? null;
+  const scope = watchedScope ?? 'personal';
+  const bankAccountId = watchedAccount ?? null;
   const businessEnabled = useBusinessEnabled();
   const scopeVisible = showScope ?? (businessEnabled || scope === 'business');
   const { data: accounts } = useBankAccounts();
