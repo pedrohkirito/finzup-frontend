@@ -21,6 +21,8 @@ export interface User {
   email: string;
   emailVerifiedAt: string | null;
   createdAt: string;
+  /** Liga o fluxo PJ (separação PF/PJ) na interface. */
+  businessEnabled?: boolean;
   billing: UserBilling;
   aiCredits?: {
     balance: number;
@@ -42,16 +44,40 @@ export interface PaymentMethod {
   name: string;
   type: 'cash' | 'debit' | 'credit' | 'pix' | 'transfer' | 'other';
   isDefault: boolean;
+  /** Dia de vencimento da fatura (só cartão de crédito). */
+  dueDay?: number | null;
 }
 
-export interface IncomeEntry {
+/** PF (`personal`) ou PJ (`business`). */
+export type FinanceScope = 'personal' | 'business';
+/** Filtro de visão: consolidado (`all`), só PF ou só PJ. */
+export type ScopeFilter = 'all' | FinanceScope;
+
+/** Campos opcionais de todos os lançamentos: dia do mês, PF/PJ e conta bancária. */
+export interface EntryExtras {
+  day?: number | null;
+  scope?: FinanceScope;
+  bankAccountId?: string | null;
+}
+
+export interface BankAccount {
+  id: string;
+  name: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  /** Quantos lançamentos estão ligados à conta. */
+  linkedCount: number;
+}
+
+export interface IncomeEntry extends EntryExtras {
   id: string;
   name: string;
   amount: string | number;
   carryForward: boolean;
 }
 
-export interface ExpenseEntry {
+export interface ExpenseEntry extends EntryExtras {
   id: string;
   type: 'one_off' | 'fixed';
   name: string;
@@ -102,7 +128,7 @@ export interface BudgetSummary {
   entries?: { id: string; name: string; amount: number }[];
 }
 
-export interface FixedExpenseTemplate {
+export interface FixedExpenseTemplate extends EntryExtras {
   id: string;
   name: string;
   defaultAmount: string | number;
@@ -121,7 +147,7 @@ export interface InstallmentEntry {
   paidAt?: string | null;
 }
 
-export interface InstallmentPlan {
+export interface InstallmentPlan extends EntryExtras {
   id: string;
   name: string;
   totalInstallments: number;
@@ -142,7 +168,7 @@ export interface SubscriptionEntry {
   paidAt?: string | null;
 }
 
-export interface Subscription {
+export interface Subscription extends EntryExtras {
   id: string;
   name: string;
   amount: string | number;
@@ -161,7 +187,7 @@ export interface FinancingEntry {
   discountApplied: boolean;
 }
 
-export interface Financing {
+export interface Financing extends EntryExtras {
   id: string;
   name: string;
   totalAmount: string | number;
@@ -174,14 +200,16 @@ export interface Financing {
   financingEntries?: FinancingEntry[];
 }
 
-export interface InvestmentEntry {
+export interface InvestmentEntry extends EntryExtras {
   id: string;
   name: string;
   amount: string | number;
   notes?: string | null;
+  /** Aporte recorrente: repete no mês seguinte ao fechar o mês. */
+  carryForward?: boolean;
 }
 
-export interface DonationEntry {
+export interface DonationEntry extends EntryExtras {
   id: string;
   name: string;
   amount: string | number;
@@ -193,8 +221,24 @@ export interface DonationEntry {
   carryForward: boolean;
 }
 
+export interface ScopeTotals {
+  totalIncome: number;
+  totalExpenses: number;
+  totalDonations: number;
+  totalInvested: number;
+  balance: number;
+}
+
+export interface ScopeBreakdown {
+  personal: ScopeTotals;
+  business: ScopeTotals;
+}
+
 export interface MonthSummary {
   month: FinancialMonth;
+  scope?: ScopeFilter;
+  /** Só no consolidado: totais de PF e PJ separados. */
+  scopeBreakdown?: ScopeBreakdown | null;
   totalIncome: number;
   totalExpenses: number;
   totalDonations: number;
@@ -216,6 +260,8 @@ export interface MonthSummary {
 
 export interface MonthReport {
   month: FinancialMonth;
+  scope?: ScopeFilter;
+  scopeBreakdown?: ScopeBreakdown | null;
   overview: {
     totalIncome: number;
     totalExpenses: number;
@@ -457,4 +503,65 @@ export interface BabyStepSettingsInput {
   emergencyFundTarget?: number | null;
   houseDownPaymentTarget?: number | null;
   houseDownPaymentSaved?: number;
+}
+
+export type CashFlowSource =
+  | 'income'
+  | 'expense'
+  | 'fixed_expense'
+  | 'installment'
+  | 'subscription'
+  | 'financing'
+  | 'donation'
+  | 'investment'
+  | 'credit_card_bill';
+
+export interface CashFlowMovement {
+  id: string;
+  source: CashFlowSource;
+  name: string;
+  amount: number;
+  direction: 'in' | 'out';
+  day: number | null;
+  scope: FinanceScope | 'mixed';
+  bankAccountId: string | null;
+  paid?: boolean;
+  creditCardId?: string;
+  items?: CashFlowMovement[];
+}
+
+export interface CashFlowDay {
+  day: number;
+  date: string;
+  inflow: number;
+  outflow: number;
+  net: number;
+  balance: number;
+  movements: CashFlowMovement[];
+}
+
+export interface CashFlow {
+  monthId: string;
+  status: 'open' | 'closed';
+  year: number;
+  month: number;
+  daysInMonth: number;
+  undatedRule: 'start_of_month';
+  filter: { scope: ScopeFilter; bankAccountId: string | null };
+  openingBalance: number;
+  undated: { inflow: number; outflow: number; net: number; movements: CashFlowMovement[] };
+  days: CashFlowDay[];
+  totals: {
+    inflow: number;
+    outflow: number;
+    net: number;
+    closingBalance: number;
+    lowestBalance: number;
+    lowestBalanceDay: number;
+    firstNegativeDay: number | null;
+    datedCount: number;
+    undatedCount: number;
+  };
+  byAccount: { bankAccountId: string | null; name: string; inflow: number; outflow: number; net: number }[];
+  byScope: { scope: FinanceScope; inflow: number; outflow: number; net: number }[];
 }
