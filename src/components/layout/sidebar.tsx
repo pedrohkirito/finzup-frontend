@@ -14,6 +14,7 @@ import {
   Sun,
   Target,
   BarChart3,
+  CalendarDays,
   CalendarRange,
   Footprints,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ const links = [
     ? [{ href: '/dashboard/metodo', label: 'Método', icon: Footprints, isNew: true }]
     : []),
   { href: '/dashboard/relatorios', label: 'Relatórios', icon: BarChart3 },
+  { href: '/dashboard/fluxo', label: 'Fluxo de caixa', icon: CalendarDays, isNew: true },
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
