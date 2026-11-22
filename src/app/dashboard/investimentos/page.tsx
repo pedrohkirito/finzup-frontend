@@ -26,8 +26,11 @@ import {
   syncInvestmentPageBridgeState,
 } from '@/lib/investment-page-bridge';
 import { formatCurrency } from '@/lib/utils';
-import type { InvestmentSimulation } from '@/types';
-import { Plus, Trash2, TrendingUp } from 'lucide-react';
+import type { InvestmentEntry, InvestmentSimulation } from '@/types';
+import { Pencil, Plus, RefreshCw, Trash2, TrendingUp } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { EntryExtrasFields, entryExtrasFormShape, extrasFormValues } from '@/components/finance/entry-extras-fields';
+import { EntryExtrasMeta } from '@/components/finance/entry-extras-meta';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 import { EmergencyFundCard } from '@/components/baby-steps/emergency-fund-card';
 import { HouseDownPaymentCard } from '@/components/baby-steps/house-down-payment-card';
@@ -39,6 +42,8 @@ const entrySchema = z.object({
   name: z.string().min(1),
   amount: z.coerce.number().positive(),
   notes: z.string().optional(),
+  carryForward: z.boolean().optional(),
+  ...entryExtrasFormShape,
 });
 
 function InvestmentAportesTab() {
@@ -47,6 +52,7 @@ function InvestmentAportesTab() {
   const selectedMonth = months?.find((m) => m.id === selectedMonthId);
   const isMonthOpen = selectedMonth?.status === 'open';
   const [open, setOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<InvestmentEntry | null>(null);
   const queryClient = useQueryClient();
 
   const { data: goal } = useQuery({
@@ -57,14 +63,54 @@ function InvestmentAportesTab() {
 
   const { data: entries } = useQuery({
     queryKey: ['investments', selectedMonthId],
-    queryFn: () => api.get<{ id: string; name: string; amount: string | number; notes?: string | null }[]>(
-      `/months/${selectedMonthId}/investments`,
-    ),
+    queryFn: () => api.get<InvestmentEntry[]>(`/months/${selectedMonthId}/investments`),
     enabled: !!selectedMonthId,
   });
 
   const goalForm = useForm({ resolver: zodResolver(goalSchema) });
-  const entryForm = useForm({ resolver: zodResolver(entrySchema) });
+  const entryForm = useForm({ resolver: zodResolver(entrySchema), defaultValues: { carryForward: false } });
+  const editForm = useForm({ resolver: zodResolver(entrySchema), defaultValues: { carryForward: false } });
+
+  const openEdit = (entry: InvestmentEntry) => {
+    editForm.reset({
+      name: entry.name,
+      amount: Number(entry.amount),
+      notes: entry.notes ?? undefined,
+      carryForward: !!entry.carryForward,
+      ...extrasFormValues(entry),
+    });
+    setEditTarget(entry);
+  };
+
+  const renderEntryFields = (form: typeof entryForm) => (
+    <>
+      <div className="space-y-2">
+        <Label>Nome</Label>
+        <Input placeholder="Ex: Tesouro Direto" {...form.register('name')} />
+      </div>
+      <div className="space-y-2">
+        <Label>Valor</Label>
+        <FormCurrencyInput control={form.control} name="amount" placeholder="0,00" />
+      </div>
+      <div className="space-y-2">
+        <Label>Notas (opcional)</Label>
+        <Input {...form.register('notes')} />
+      </div>
+      <div className="flex items-start gap-2">
+        <Checkbox
+          id={`carryForward-${form === entryForm ? 'new' : 'edit'}`}
+          checked={!!form.watch('carryForward')}
+          onCheckedChange={(v) => form.setValue('carryForward', !!v)}
+          className="mt-0.5"
+        />
+        <Label htmlFor={`carryForward-${form === entryForm ? 'new' : 'edit'}`} className="leading-snug">
+          Aporte recorrente
+          <span className="block text-xs font-normal text-slate-400">Repete no mês seguinte ao fechar o mês.</span>
+        </Label>
+      </div>
+      <EntryExtrasFields form={form} recurring={!!form.watch('carryForward')} />
+    </>
+  );
 
   useEffect(() => {
     if (goal) {
@@ -150,18 +196,7 @@ function InvestmentAportesTab() {
               })}
               className="space-y-4"
             >
-              <div className="space-y-2">
-                <Label>Nome</Label>
-                <Input placeholder="Ex: Tesouro Direto" {...entryForm.register('name')} />
-              </div>
-              <div className="space-y-2">
-                <Label>Valor</Label>
-                <FormCurrencyInput control={entryForm.control} name="amount" placeholder="0,00" />
-              </div>
-              <div className="space-y-2">
-                <Label>Notas (opcional)</Label>
-                <Input {...entryForm.register('notes')} />
-              </div>
+              {renderEntryFields(entryForm)}
               <Button type="submit" className="w-full">
                 Salvar
               </Button>
@@ -185,6 +220,15 @@ function InvestmentAportesTab() {
                       {entry.notes}
                     </p>
                   )}
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    {entry.carryForward && (
+                      <span className="flex items-center gap-1 text-xs text-slate-400">
+                        <RefreshCw className="h-3 w-3" />
+                        Recorrente
+                      </span>
+                    )}
+                    <EntryExtrasMeta entry={entry} recurring={!!entry.carryForward} />
+                  </div>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-1">
@@ -192,9 +236,15 @@ function InvestmentAportesTab() {
                   {formatCurrency(Number(entry.amount))}
                 </span>
                 {isMonthOpen && (
+                  <Button variant="ghost" size="icon" aria-label={`Editar ${entry.name}`} onClick={() => openEdit(entry)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+                {isMonthOpen && (
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label={`Remover ${entry.name}`}
                     onClick={async () => {
                       await api.delete(`/months/${selectedMonthId}/investments/${entry.id}`);
                       await queryClient.invalidateQueries();
@@ -208,6 +258,29 @@ function InvestmentAportesTab() {
           </Card>
         ))}
       </div>
+
+      <Dialog open={!!editTarget} onOpenChange={(isOpen) => !isOpen && setEditTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar aporte</DialogTitle>
+          </DialogHeader>
+          {editTarget && (
+            <form
+              onSubmit={editForm.handleSubmit(async (data) => {
+                await api.patch(`/months/${selectedMonthId}/investments/${editTarget.id}`, data);
+                await queryClient.invalidateQueries();
+                setEditTarget(null);
+              })}
+              className="space-y-4"
+            >
+              {renderEntryFields(editForm)}
+              <Button type="submit" className="w-full">
+                Salvar alterações
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

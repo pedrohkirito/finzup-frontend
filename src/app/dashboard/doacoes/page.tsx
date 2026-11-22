@@ -23,6 +23,8 @@ import { formatCurrency } from '@/lib/utils';
 import type { DonationEntry, PaymentMethod, BudgetTemplate } from '@/types';
 import { Heart, Plus, RefreshCw } from 'lucide-react';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
+import { EntryExtrasFields, entryExtrasFormShape, extrasFormValues } from '@/components/finance/entry-extras-fields';
+import { EntryExtrasMeta } from '@/components/finance/entry-extras-meta';
 
 const entrySchema = z.object({
   name: z.string().min(1),
@@ -31,6 +33,7 @@ const entrySchema = z.object({
   budgetTemplateId: z.string().uuid().optional().nullable(),
   notes: z.string().optional(),
   carryForward: z.boolean(),
+  ...entryExtrasFormShape,
 });
 
 type EntryFormValues = z.infer<typeof entrySchema>;
@@ -109,6 +112,7 @@ function DonationForm({
         />
         <Label htmlFor="carryForward">Repetir todo mês</Label>
       </div>
+      <EntryExtrasFields form={form} recurring={form.watch('carryForward')} />
       <Button type="submit" className="w-full">{submitLabel}</Button>
     </form>
   );
@@ -160,6 +164,7 @@ export default function DoacoesPage() {
       budgetTemplateId: entry.budgetTemplateId ?? null,
       notes: entry.notes ?? undefined,
       carryForward: entry.carryForward,
+      ...extrasFormValues(entry),
     });
     setEditTarget(entry);
   };
@@ -261,6 +266,7 @@ export default function DoacoesPage() {
                         <p className="text-xs text-slate-500 dark:text-slate-400">Orçamento: {entry.budgetTemplate.name}</p>
                       )}
                       {entry.notes && <p className="text-xs text-slate-500 dark:text-slate-400">{entry.notes}</p>}
+                      <EntryExtrasMeta entry={entry} recurring={entry.carryForward} />
                     </div>
                   </div>
                   <div className="flex items-center justify-end gap-2">
