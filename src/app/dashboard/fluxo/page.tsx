@@ -42,13 +42,15 @@ function StatCard({
   }[tone];
   return (
     <Card>
-      <CardContent className="flex items-center gap-3 p-4">
-        <div className={cn('icon-chip h-10 w-10', toneClass)}>
-          <Icon className="h-5 w-5" />
+      <CardContent className="flex items-center gap-3 p-3 sm:p-4">
+        <div className="hidden sm:block">
+          <div className={cn('icon-chip h-10 w-10', toneClass)}>
+            <Icon className="h-5 w-5" />
+          </div>
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
-          <p className={cn('truncate text-lg font-bold tabular-nums sm:text-xl', tone === 'red' ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white')}>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 sm:text-xs dark:text-slate-400">{label}</p>
+          <p className={cn('truncate text-base font-bold tabular-nums sm:text-xl', tone === 'red' ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white')}>
             {value}
           </p>
           {hint && <p className="truncate text-xs text-slate-400">{hint}</p>}
@@ -199,7 +201,7 @@ export default function FluxoDeCaixaPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Entradas" value={formatCurrency(totals.inflow)} icon={ArrowUpRight} tone="green" />
         <StatCard label="Saídas" value={formatCurrency(totals.outflow)} icon={ArrowDownRight} tone="orange" />
         <StatCard

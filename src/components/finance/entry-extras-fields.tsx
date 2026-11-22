@@ -82,8 +82,11 @@ export function EntryExtrasFields({
   const summary = [
     day ? (recurring ? `todo dia ${day}` : `dia ${day}`) : null,
     account?.name ?? null,
-    scopeVisible ? (scope === 'business' ? 'PJ' : 'PF') : null,
   ].filter(Boolean);
+  // PF é o padrão: só entra no resumo quando já há outro detalhe ou quando é PJ.
+  if (scopeVisible && (scope === 'business' || summary.length > 0)) {
+    summary.push(scope === 'business' ? 'PJ' : 'PF');
+  }
 
   return (
     <div className="rounded-xl border border-slate-200 dark:border-white/[0.08]">
