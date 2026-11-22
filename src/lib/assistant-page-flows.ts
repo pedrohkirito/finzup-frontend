@@ -17,12 +17,13 @@ const PAGES_WITH_OPENING_FLOW: PageKey[] = [
   ...REGISTRATION_PAGES,
   'planejamento',
   'relatorios',
+  'fluxo',
   'resumo',
   'assistente',
   'metodo',
 ];
 
-const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'resumo', 'metodo'];
+const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'resumo', 'metodo'];
 
 export type PageSnapshot = {
   incomeCount: number;
@@ -246,6 +247,23 @@ export function getPageFlow(
             'Analise meus gastos e indique possíveis pontos de melhoria com base nos relatórios do mês.',
         },
       };
+    case 'fluxo':
+      return {
+        ...base,
+        openingMessage: 'Quer que eu veja os dias de aperto do seu fluxo de caixa?',
+        openingActions: [
+          yesSuggest(
+            'Sim, analisar o fluxo',
+            'Analise meu fluxo de caixa deste mês: em que dia o saldo fica mais baixo, se fica negativo e o que posso mudar de data para evitar aperto.',
+          ),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Analisar meu fluxo',
+          message:
+            'Analise meu fluxo de caixa do mês e diga os dias de aperto e o que mudar de data.',
+        },
+      };
     case 'resumo':
       return {
         ...base,
@@ -344,6 +362,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Traga novos insights sobre saldo, cadastros pendentes, orçamentos estourados, economia ou metas do mês.`;
     case 'relatorios':
       return `${avoidRepeat} Traga novos insights sobre gastos, categorias, tendências ou oportunidades de melhoria.`;
+    case 'fluxo':
+      return `${avoidRepeat} Use o fluxo de caixa diário: dias de aperto, saldo por conta ou PF/PJ e datas que valem mudar.`;
     case 'despesas':
       return `${avoidRepeat} Pense em economia, categorias relevantes ou despesas que possam estar faltando.`;
     case 'receitas':
@@ -475,6 +495,33 @@ export type AiExecutedAction = {
 };
 
 const ACTION_QUERY_KEYS: Record<string, string[][]> = {
+  create_bank_account: [['bank-accounts']],
+  update_bank_account: [['bank-accounts'], ['months']],
+  delete_bank_account: [
+    ['bank-accounts'],
+    ['months'],
+    ['incomes'],
+    ['expenses'],
+    ['fixed-templates'],
+    ['installments'],
+    ['subscriptions'],
+    ['financings'],
+    ['investments'],
+    ['donations'],
+  ],
+  set_entry_details: [
+    ['months'],
+    ['incomes'],
+    ['expenses'],
+    ['fixed-templates'],
+    ['installments'],
+    ['subscriptions'],
+    ['financings'],
+    ['investments'],
+    ['donations'],
+    ['bank-accounts'],
+    ['auth', 'me'],
+  ],
   create_expense: [['expenses'], ['fixed-templates'], ['months']],
   update_expense: [['expenses'], ['fixed-templates'], ['months']],
   create_fixed_expense: [['fixed-templates'], ['expenses'], ['months']],
@@ -511,6 +558,10 @@ export function invalidateQueriesAfterAiActions(
   for (const action of actions) {
     const actionKeys = ACTION_QUERY_KEYS[action.type];
     if (actionKeys) keys.push(...actionKeys);
+  }
+  // Cadastros pela IA podem criar uma conta bancária pelo nome ou ligar o fluxo PJ.
+  if (actions.some((action) => action.type.startsWith('create_') && !action.type.includes('simulation'))) {
+    keys.push(['bank-accounts'], ['auth', 'me']);
   }
   if (
     actions.some(

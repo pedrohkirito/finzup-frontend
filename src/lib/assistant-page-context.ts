@@ -8,6 +8,7 @@ export type PageKey =
   | 'orcamentos'
   | 'planejamento'
   | 'relatorios'
+  | 'fluxo'
   | 'configuracoes'
   | 'assistente'
   | 'metodo'
@@ -92,12 +93,19 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     guidance:
       'Priorize explicar gráficos, categorias, tendências e comparativos com base nos dados. Relacione insights ao Baby Step atual. Não cadastre itens aqui.',
   },
+  '/dashboard/fluxo': {
+    key: 'fluxo',
+    label: 'Fluxo de caixa',
+    description: 'Fluxo de caixa diário do mês: saldo previsto dia a dia, com filtros de conta bancária e PF/PJ.',
+    guidance:
+      'Use o fluxo de caixa (get_cash_flow) para dizer o saldo em um dia, o menor saldo e quando fica negativo. Sugira mudar datas de entradas/saídas para evitar aperto. Lançamentos sem data contam no início do mês.',
+  },
   '/dashboard/configuracoes': {
     key: 'configuracoes',
     label: 'Configurações',
-    description: 'Página de configurações da conta, métodos de pagamento e assinatura.',
+    description: 'Página de configurações da conta, métodos de pagamento (com vencimento da fatura), contas bancárias, fluxo PJ e assinatura.',
     guidance:
-      'Priorize orientar sobre conta, métodos de pagamento, assinatura e créditos de IA. Encaminhe suporte para cobrança.',
+      'Priorize orientar sobre conta, métodos de pagamento, contas bancárias, fluxo PJ, assinatura e créditos de IA. Encaminhe suporte para cobrança.',
   },
   '/dashboard/assistente': {
     key: 'assistente',
