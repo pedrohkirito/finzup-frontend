@@ -17,5 +17,7 @@ export function useCashFlow(monthId: string | null | undefined, scope: ScopeFilt
     queryKey: ['months', monthId, 'cash-flow', scope, account],
     queryFn: () => api.get<CashFlow>(`/months/${monthId}/cash-flow${qs ? `?${qs}` : ''}`),
     enabled: !!monthId,
+    // Ao trocar filtros no mesmo mês, mantém o fluxo na tela até chegar o novo.
+    placeholderData: (prev) => (prev?.monthId === monthId ? prev : undefined),
   });
 }

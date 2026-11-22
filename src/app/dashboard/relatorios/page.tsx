@@ -9,10 +9,14 @@ import { ReportIncomeExpenseChart } from '@/components/reports/report-income-exp
 import { ReportIncomeByItemChart } from '@/components/reports/report-income-by-item-chart';
 import { ReportInvestment } from '@/components/reports/report-investment';
 import { ReportMonthlyTrendChart } from '@/components/reports/report-monthly-trend-chart';
+import { ScopeSwitch } from '@/components/finance/scope-switch';
+import { useBusinessEnabled, useScopeFilter, SCOPE_LONG_LABELS } from '@/hooks/use-finance-scope';
 
 export default function RelatoriosPage() {
   const { selectedMonthId } = useMonthStore();
-  const { data: report, isLoading } = useMonthReport(selectedMonthId);
+  const [scope] = useScopeFilter();
+  const businessEnabled = useBusinessEnabled();
+  const { data: report, isLoading } = useMonthReport(selectedMonthId, scope);
 
   if (!selectedMonthId || isLoading) {
     return (
@@ -32,11 +36,15 @@ export default function RelatoriosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Relatórios</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Análise detalhada de {formatMonth(report.month.year, report.month.month)}
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Relatórios</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Análise detalhada de {formatMonth(report.month.year, report.month.month)}
+            {businessEnabled ? ` · ${SCOPE_LONG_LABELS[scope]}` : ''}
+          </p>
+        </div>
+        <ScopeSwitch className="w-full sm:w-auto" />
       </div>
 
       {!hasData && (

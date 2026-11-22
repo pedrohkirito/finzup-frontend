@@ -8,10 +8,15 @@ import { OnboardingTour } from '@/components/onboarding/tour';
 import { BabyStepCompass } from '@/components/baby-steps/baby-step-compass';
 import { AiSuggestionsPanel } from '@/components/assistant/ai-suggestions-panel';
 import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
+import { ScopeSwitch } from '@/components/finance/scope-switch';
+import { ScopeBreakdownCard } from '@/components/dashboard/scope-breakdown-card';
+import { useBusinessEnabled, useScopeFilter, SCOPE_LONG_LABELS } from '@/hooks/use-finance-scope';
 
 export default function DashboardPage() {
   const { selectedMonthId } = useMonthStore();
-  const { data: summary, isLoading } = useMonthSummary(selectedMonthId);
+  const [scope] = useScopeFilter();
+  const businessEnabled = useBusinessEnabled();
+  const { data: summary, isLoading } = useMonthSummary(selectedMonthId, scope);
 
   if (!selectedMonthId || isLoading) {
     return (
@@ -25,14 +30,22 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-7 sm:space-y-8">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Resumo do mês</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Visão geral das suas finanças</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Resumo do mês</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {businessEnabled ? `Visão geral das suas finanças · ${SCOPE_LONG_LABELS[scope]}` : 'Visão geral das suas finanças'}
+          </p>
+        </div>
+        <ScopeSwitch className="w-full sm:w-auto" />
       </div>
       <OnboardingTour />
       {BABY_STEPS_ENABLED && <BabyStepCompass />}
       <AiSuggestionsPanel />
       <CloseMonthBanner month={summary.month} />
+      {businessEnabled && scope === 'all' && summary.scopeBreakdown && (
+        <ScopeBreakdownCard breakdown={summary.scopeBreakdown} />
+      )}
       <SummaryCards summary={summary} />
     </div>
   );
