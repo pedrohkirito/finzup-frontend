@@ -1,5 +1,6 @@
 'use client';
 
+import { ExportButton } from '@/components/export/export-button';
 import { useMonthStore } from '@/hooks/use-month';
 import { useMonthSummary } from '@/hooks/use-month-summary';
 import { SummaryCards } from '@/components/dashboard/summary-cards';
@@ -37,6 +38,7 @@ export default function DashboardPage() {
             {scopeLabel ? `Visão geral das suas finanças · ${scopeLabel}` : 'Visão geral das suas finanças'}
           </p>
         </div>
+        <ExportButton />
       </div>
       <OnboardingTour />
       {BABY_STEPS_ENABLED && <BabyStepCompass />}

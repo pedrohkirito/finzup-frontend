@@ -1,5 +1,6 @@
 'use client';
 
+import { ExportButton } from '@/components/export/export-button';
 import Link from 'next/link';
 import { AlertTriangle, Briefcase, Building2, ChevronRight, Gauge, HandCoins, Info, Landmark, Loader2, OctagonAlert, PiggyBank, TrendingDown, TrendingUp, User, Wallet } from 'lucide-react';
 import { cn, formatCurrency, formatMonth } from '@/lib/utils';
@@ -203,13 +204,16 @@ export default function PainelDonoPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
-      <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-white">
           <Briefcase className="h-6 w-6 text-brand-500" aria-hidden /> Painel do dono
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Empresa e pessoal numa tela só{data?.month ? ` · ${formatMonth(data.month.year, data.month.month)}` : ''}.
         </p>
+        </div>
+        {canUse && <ExportButton primary="owner_dashboard" />}
       </div>
 
       {!canUse ? (

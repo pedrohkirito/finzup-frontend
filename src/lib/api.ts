@@ -123,7 +123,32 @@ async function request<T>(path: string, options: InternalRequestInit = {}): Prom
   return json.data as T;
 }
 
+/** Baixa um arquivo da API (exportação) com a sessão e o espaço atuais e dispara o download no navegador. */
+async function download(path: string, retry = true): Promise<string> {
+  const res = await fetch(`${API_URL}${path}`, { credentials: 'include', headers: { ...spaceHeader() } });
+  if (!res.ok) {
+    const json = (await res.json().catch(() => ({}))) as ErrorBody;
+    if (retry && isSessionExpiredError(json) && (await refreshSession())) return download(path, false);
+    if (isSessionExpiredError(json)) redirectToLogin();
+    throw new ApiError(res.status, json.error?.code || 'UNKNOWN', json.error?.message || 'Não foi possível exportar.', json.error);
+  }
+  const filename =
+    res.headers.get('X-Export-Filename') ||
+    /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') ?? '')?.[1] ||
+    'finzup-exportacao';
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  return filename;
+}
+
 export const api = {
+  download: (path: string) => download(path),
   get: <T>(path: string, init?: { headers?: HeadersInit }) =>
     request<T>(path, { headers: init?.headers }),
   post: <T>(path: string, body?: unknown) =>

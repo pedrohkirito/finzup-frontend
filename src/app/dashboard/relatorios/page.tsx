@@ -1,5 +1,6 @@
 'use client';
 
+import { ExportButton } from '@/components/export/export-button';
 import { useMonthStore } from '@/hooks/use-month';
 import { useMonthReport } from '@/hooks/use-month-summary';
 import { formatMonth } from '@/lib/utils';
@@ -49,6 +50,7 @@ export default function RelatoriosPage() {
             {scopeLabel ? ` · ${scopeLabel}` : ''}
           </p>
         </div>
+        <ExportButton />
       </div>
 
       {(business || (businessEnabled && scope === 'all')) && <AccountantNotice />}
