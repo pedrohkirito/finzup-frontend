@@ -18,6 +18,7 @@ import {
   CalendarRange,
   Footprints,
   Crown,
+  Tags,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -39,6 +40,7 @@ const links = [
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
+  { href: '/dashboard/categorias', label: 'Categorias', icon: Tags },
   { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange },
   { href: '/dashboard/investimentos', label: 'Investimentos', icon: PiggyBank },
   { href: '/dashboard/doacoes', label: 'Doações', icon: Heart },

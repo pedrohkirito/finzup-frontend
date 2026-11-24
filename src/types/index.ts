@@ -77,6 +77,8 @@ export interface IncomeEntry extends EntryExtras {
   name: string;
   amount: string | number;
   carryForward: boolean;
+  categoryId?: string | null;
+  category?: { id: string; name: string } | null;
 }
 
 export interface ExpenseEntry extends EntryExtras {
@@ -98,11 +100,33 @@ export interface BudgetTemplate {
   id: string;
   name: string;
   defaultLimit: string | number;
+  kind?: CategoryKind;
+  scope?: FinanceScope;
+  archivedAt?: string | null;
+}
+
+export type CategoryKind = 'expense' | 'income';
+
+/** Categoria independente (despesa ou receita, PF ou PJ). Despesa com limite > 0 é um orçamento. */
+export interface Category {
+  id: string;
+  name: string;
+  kind: CategoryKind;
+  scope: FinanceScope;
+  defaultLimit: number;
+  sortOrder: number;
+  isDefault: boolean;
+  archived: boolean;
 }
 
 export interface MonthBudget {
   templateId: string;
   name: string;
+  scope?: FinanceScope;
+  isDefault?: boolean;
+  archived?: boolean;
+  /** Tem limite definido (> 0). Sem limite a categoria só acompanha o gasto. */
+  hasLimit?: boolean;
   defaultLimit: number;
   limit: number;
   spent: number;

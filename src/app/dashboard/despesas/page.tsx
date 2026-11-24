@@ -33,13 +33,13 @@ import type {
   Financing,
   FinancingEntry,
   PaymentMethod,
-  BudgetTemplate,
   MonthSummary,
 } from '@/types';
 import { Plus, RefreshCw, TrendingDown } from 'lucide-react';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 import { SnowballDebtsCard } from '@/components/baby-steps/snowball-debts-card';
 import { useBabySteps } from '@/hooks/use-baby-steps';
+import { CategorySelect } from '@/components/finance/category-select';
 import { EntryExtrasFields, entryExtrasFormShape, extrasFormValues } from '@/components/finance/entry-extras-fields';
 import { EntryExtrasMeta } from '@/components/finance/entry-extras-meta';
 
@@ -128,31 +128,6 @@ function canCancelFinancingEntry(entry: FinancingEntry, installmentsPaid: number
   return entry.installmentNumber === installmentsPaid || entry.installmentNumber === installmentsPaid + 1;
 }
 
-function BudgetSelect({
-  budgets,
-  value,
-  onChange,
-}: {
-  budgets: BudgetTemplate[];
-  value?: string | null;
-  onChange: (v: string | null) => void;
-}) {
-  return (
-    <Select
-      value={value ?? 'none'}
-      onValueChange={(v) => onChange(v === 'none' ? null : v)}
-    >
-      <SelectTrigger><SelectValue placeholder="Orçamento (opcional)" /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value="none">Nenhum</SelectItem>
-        {budgets.map((b) => (
-          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
 export default function DespesasPage() {
   const { selectedMonthId } = useMonthStore();
   const { data: months } = useMonths();
@@ -213,10 +188,6 @@ export default function DespesasPage() {
     queryFn: () => api.get<Financing[]>('/financings'),
   });
 
-  const { data: budgetTemplates } = useQuery({
-    queryKey: ['budget-templates'],
-    queryFn: () => api.get<BudgetTemplate[]>('/budget-templates'),
-  });
 
   const { data: summary } = useQuery({
     queryKey: ['months', selectedMonthId, 'summary'],
@@ -374,16 +345,12 @@ export default function DespesasPage() {
                   value={expenseForm.watch('paymentMethodId') || defaultMethod}
                   onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
                 />
-                {budgetTemplates && budgetTemplates.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Orçamento</Label>
-                    <BudgetSelect
-                      budgets={budgetTemplates}
-                      value={expenseForm.watch('budgetTemplateId')}
-                      onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
-                    />
-                  </div>
-                )}
+                <CategorySelect
+                  kind="expense"
+                  scope={expenseForm.watch('scope') ?? 'personal'}
+                  value={expenseForm.watch('budgetTemplateId')}
+                  onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
+                />
                 <EntryExtrasFields form={expenseForm} />
                 <Button type="submit" className="w-full">Salvar</Button>
               </form>
@@ -490,16 +457,12 @@ export default function DespesasPage() {
                       onChange={(v) => fixedTemplateForm.setValue('paymentMethodId', v)}
                     />
                   )}
-                  {budgetTemplates && budgetTemplates.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Orçamento</Label>
-                      <BudgetSelect
-                        budgets={budgetTemplates}
-                        value={fixedTemplateForm.watch('budgetTemplateId')}
-                        onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
-                      />
-                    </div>
-                  )}
+                  <CategorySelect
+                  kind="expense"
+                  scope={fixedTemplateForm.watch('scope') ?? 'personal'}
+                  value={fixedTemplateForm.watch('budgetTemplateId')}
+                  onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
+                />
                   <EntryExtrasFields form={fixedTemplateForm} recurring />
                   <Button type="submit" className="w-full">Salvar</Button>
                 </form>
@@ -615,16 +578,12 @@ export default function DespesasPage() {
                   value={installmentForm.watch('paymentMethodId')}
                   onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
                 />
-                {budgetTemplates && budgetTemplates.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Orçamento</Label>
-                    <BudgetSelect
-                      budgets={budgetTemplates}
-                      value={installmentForm.watch('budgetTemplateId')}
-                      onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
-                    />
-                  </div>
-                )}
+                <CategorySelect
+                  kind="expense"
+                  scope={installmentForm.watch('scope') ?? 'personal'}
+                  value={installmentForm.watch('budgetTemplateId')}
+                  onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
+                />
                 <EntryExtrasFields form={installmentForm} recurring />
                 <Button type="submit" className="w-full" disabled={!installmentForm.watch('paymentMethodId')}>Salvar</Button>
               </form>
@@ -742,16 +701,12 @@ export default function DespesasPage() {
                   value={subscriptionForm.watch('paymentMethodId')}
                   onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
                 />
-                {budgetTemplates && budgetTemplates.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Orçamento</Label>
-                    <BudgetSelect
-                      budgets={budgetTemplates}
-                      value={subscriptionForm.watch('budgetTemplateId')}
-                      onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
-                    />
-                  </div>
-                )}
+                <CategorySelect
+                  kind="expense"
+                  scope={subscriptionForm.watch('scope') ?? 'personal'}
+                  value={subscriptionForm.watch('budgetTemplateId')}
+                  onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
+                />
                 <EntryExtrasFields form={subscriptionForm} recurring />
                 <Button type="submit" className="w-full">Salvar</Button>
               </form>
@@ -996,16 +951,12 @@ export default function DespesasPage() {
                 value={expenseForm.watch('paymentMethodId') || defaultMethod}
                 onChange={(v) => expenseForm.setValue('paymentMethodId', v)}
               />
-              {budgetTemplates && budgetTemplates.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Orçamento</Label>
-                  <BudgetSelect
-                    budgets={budgetTemplates}
-                    value={expenseForm.watch('budgetTemplateId')}
-                    onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
-                  />
-                </div>
-              )}
+              <CategorySelect
+                  kind="expense"
+                  scope={expenseForm.watch('scope') ?? 'personal'}
+                  value={expenseForm.watch('budgetTemplateId')}
+                  onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
+                />
               <EntryExtrasFields form={expenseForm} />
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>
@@ -1031,16 +982,12 @@ export default function DespesasPage() {
                 value={fixedTemplateForm.watch('paymentMethodId') || defaultMethod}
                 onChange={(v) => fixedTemplateForm.setValue('paymentMethodId', v)}
               />
-              {budgetTemplates && budgetTemplates.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Orçamento</Label>
-                  <BudgetSelect
-                    budgets={budgetTemplates}
-                    value={fixedTemplateForm.watch('budgetTemplateId')}
-                    onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
-                  />
-                </div>
-              )}
+              <CategorySelect
+                  kind="expense"
+                  scope={fixedTemplateForm.watch('scope') ?? 'personal'}
+                  value={fixedTemplateForm.watch('budgetTemplateId')}
+                  onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
+                />
               <EntryExtrasFields form={fixedTemplateForm} recurring />
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>
@@ -1070,16 +1017,12 @@ export default function DespesasPage() {
                 value={installmentForm.watch('paymentMethodId')}
                 onChange={(v) => installmentForm.setValue('paymentMethodId', v)}
               />
-              {budgetTemplates && budgetTemplates.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Orçamento</Label>
-                  <BudgetSelect
-                    budgets={budgetTemplates}
-                    value={installmentForm.watch('budgetTemplateId')}
-                    onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
-                  />
-                </div>
-              )}
+              <CategorySelect
+                  kind="expense"
+                  scope={installmentForm.watch('scope') ?? 'personal'}
+                  value={installmentForm.watch('budgetTemplateId')}
+                  onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
+                />
               <EntryExtrasFields form={installmentForm} recurring />
               <Button type="submit" className="w-full" disabled={!installmentForm.watch('paymentMethodId')}>Salvar alterações</Button>
             </form>
@@ -1104,16 +1047,12 @@ export default function DespesasPage() {
                 value={subscriptionForm.watch('paymentMethodId')}
                 onChange={(v) => subscriptionForm.setValue('paymentMethodId', v)}
               />
-              {budgetTemplates && budgetTemplates.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Orçamento</Label>
-                  <BudgetSelect
-                    budgets={budgetTemplates}
-                    value={subscriptionForm.watch('budgetTemplateId')}
-                    onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
-                  />
-                </div>
-              )}
+              <CategorySelect
+                  kind="expense"
+                  scope={subscriptionForm.watch('scope') ?? 'personal'}
+                  value={subscriptionForm.watch('budgetTemplateId')}
+                  onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
+                />
               <EntryExtrasFields form={subscriptionForm} recurring />
               <Button type="submit" className="w-full">Salvar alterações</Button>
             </form>

@@ -22,12 +22,14 @@ import type { IncomeEntry } from '@/types';
 import { Plus, TrendingUp, RefreshCw } from 'lucide-react';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 import { EntryExtrasFields, entryExtrasFormShape, extrasFormValues } from '@/components/finance/entry-extras-fields';
+import { CategorySelect } from '@/components/finance/category-select';
 import { EntryExtrasMeta } from '@/components/finance/entry-extras-meta';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatório'),
   amount: z.number().positive('Valor deve ser positivo'),
   carryForward: z.boolean(),
+  categoryId: z.string().nullable().optional(),
   ...entryExtrasFormShape,
 });
 
@@ -52,6 +54,12 @@ function IncomeForm({
         <Label>Valor</Label>
         <FormCurrencyInput control={form.control} name="amount" placeholder="0,00" />
       </div>
+      <CategorySelect
+        kind="income"
+        scope={form.watch('scope') ?? 'personal'}
+        value={form.watch('categoryId')}
+        onChange={(v) => form.setValue('categoryId', v)}
+      />
       <div className="flex items-center gap-2">
         <Checkbox
           id="carryForward"
@@ -106,6 +114,7 @@ export default function ReceitasPage() {
       name: income.name,
       amount: Number(income.amount),
       carryForward: income.carryForward,
+      categoryId: income.categoryId ?? null,
       ...extrasFormValues(income),
     });
     setEditTarget(income);
@@ -215,6 +224,11 @@ export default function ReceitasPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-slate-900 dark:text-white">{income.name}</p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      {income.category && (
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-white/[0.06] dark:text-slate-300">
+                          {income.category.name}
+                        </span>
+                      )}
                       {income.carryForward && (
                         <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-400">
                           <RefreshCw className="h-3 w-3" />

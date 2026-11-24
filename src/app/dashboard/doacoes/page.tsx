@@ -15,14 +15,14 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PaymentMethodField } from '@/components/payment-methods/payment-method-field';
 import { ItemActions } from '@/components/despesas/item-actions';
 import { SortableList } from '@/components/despesas/sortable-list';
 import { formatCurrency } from '@/lib/utils';
-import type { DonationEntry, PaymentMethod, BudgetTemplate } from '@/types';
+import type { DonationEntry, PaymentMethod } from '@/types';
 import { Heart, Plus, RefreshCw } from 'lucide-react';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
+import { CategorySelect } from '@/components/finance/category-select';
 import { EntryExtrasFields, entryExtrasFormShape, extrasFormValues } from '@/components/finance/entry-extras-fields';
 import { EntryExtrasMeta } from '@/components/finance/entry-extras-meta';
 
@@ -38,41 +38,14 @@ const entrySchema = z.object({
 
 type EntryFormValues = z.infer<typeof entrySchema>;
 
-function BudgetSelect({
-  budgets,
-  value,
-  onChange,
-}: {
-  budgets: BudgetTemplate[];
-  value?: string | null;
-  onChange: (v: string | null) => void;
-}) {
-  return (
-    <Select
-      value={value ?? 'none'}
-      onValueChange={(v) => onChange(v === 'none' ? null : v)}
-    >
-      <SelectTrigger><SelectValue placeholder="Orçamento (opcional)" /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value="none">Nenhum</SelectItem>
-        {budgets.map((b) => (
-          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
 function DonationForm({
   form,
   paymentMethods,
-  budgets,
   onSubmit,
   submitLabel,
 }: {
   form: UseFormReturn<EntryFormValues>;
   paymentMethods?: PaymentMethod[];
-  budgets?: BudgetTemplate[];
   onSubmit: (data: EntryFormValues) => Promise<void>;
   submitLabel: string;
 }) {
@@ -91,14 +64,14 @@ function DonationForm({
         value={form.watch('paymentMethodId') ?? ''}
         onChange={(v) => form.setValue('paymentMethodId', v)}
       />
-      <div className="space-y-2">
-        <Label>Orçamento</Label>
-        <BudgetSelect
-          budgets={budgets ?? []}
+      <div className="space-y-1">
+        <CategorySelect
+          kind="expense"
+          scope={form.watch('scope') ?? 'personal'}
           value={form.watch('budgetTemplateId')}
           onChange={(v) => form.setValue('budgetTemplateId', v)}
         />
-        <p className="text-xs text-slate-500">O valor será abatido do orçamento selecionado.</p>
+        <p className="text-xs text-slate-500">Se a categoria tiver limite, o valor é abatido dele.</p>
       </div>
       <div className="space-y-2">
         <Label>Notas (opcional)</Label>
@@ -139,10 +112,6 @@ export default function DoacoesPage() {
     queryFn: () => api.get<PaymentMethod[]>('/payment-methods'),
   });
 
-  const { data: budgets } = useQuery({
-    queryKey: ['budget-templates'],
-    queryFn: () => api.get<BudgetTemplate[]>('/budget-templates'),
-  });
 
   const entryForm = useForm<EntryFormValues>({
     resolver: zodResolver(entrySchema),
@@ -207,7 +176,6 @@ export default function DoacoesPage() {
             <DonationForm
               form={entryForm}
               paymentMethods={paymentMethods}
-              budgets={budgets}
               submitLabel="Salvar"
               onSubmit={async (data) => {
                 await api.post(`/months/${selectedMonthId}/donations`, {
@@ -263,7 +231,7 @@ export default function DoacoesPage() {
                         <p className="text-xs text-slate-500 dark:text-slate-400">{entry.paymentMethod.name}</p>
                       )}
                       {entry.budgetTemplate && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Orçamento: {entry.budgetTemplate.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Categoria: {entry.budgetTemplate.name}</p>
                       )}
                       {entry.notes && <p className="text-xs text-slate-500 dark:text-slate-400">{entry.notes}</p>}
                       <EntryExtrasMeta entry={entry} recurring={entry.carryForward} />
@@ -296,7 +264,6 @@ export default function DoacoesPage() {
             <DonationForm
               form={editForm}
               paymentMethods={paymentMethods}
-              budgets={budgets}
               submitLabel="Salvar alterações"
               onSubmit={async (data) => {
                 await api.patch(`/months/${selectedMonthId}/donations/${editTarget.id}`, {

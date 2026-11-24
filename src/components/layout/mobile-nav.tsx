@@ -23,6 +23,7 @@ import {
   Headset,
   Loader2,
   Crown,
+  Tags,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,7 @@ const moreLinks = [
     ? [{ href: '/dashboard/metodo', icon: Footprints, label: 'Método', isNew: true }]
     : []),
   { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
+  { href: '/dashboard/categorias', icon: Tags, label: 'Categorias' },
   { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento' },
   { href: '/dashboard/assistente', icon: Sparkles, label: 'Assistente IA (tela cheia)' },
   { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },
