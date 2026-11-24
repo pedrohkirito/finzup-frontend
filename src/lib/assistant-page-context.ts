@@ -10,6 +10,7 @@ export type PageKey =
   | 'relatorios'
   | 'fluxo'
   | 'importar'
+  | 'pro_labore'
   | 'configuracoes'
   | 'assistente'
   | 'metodo'
@@ -107,6 +108,13 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     description: 'Importação de extrato OFX/CSV: o usuário envia o arquivo, revisa as categorias sugeridas e confirma.',
     guidance:
       'Ajude a revisar a importação em andamento (get_statement_import) e a ajustar linhas ou criar regras (categorize_statement_lines). Só confirme a importação depois do "Confirmo".',
+  },
+  '/dashboard/pro-labore': {
+    key: 'pro_labore',
+    label: 'Pró-labore',
+    description: 'Pró-labore sustentável da empresa, quanto ainda dá para retirar no mês, definido x retiradas e alertas.',
+    guidance:
+      'Use get_pro_labore (com amount para "posso retirar R$ X?") e responda com o número devolvido. Definir pró-labore/reserva: set_pro_labore. Registrar retirada: record_owner_withdrawal. Sempre com confirmação.',
   },
   '/dashboard/configuracoes': {
     key: 'configuracoes',

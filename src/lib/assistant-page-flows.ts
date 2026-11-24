@@ -19,12 +19,13 @@ const PAGES_WITH_OPENING_FLOW: PageKey[] = [
   'relatorios',
   'fluxo',
   'importar',
+  'pro_labore',
   'resumo',
   'assistente',
   'metodo',
 ];
 
-const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'importar', 'resumo', 'metodo'];
+const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'importar', 'pro_labore', 'resumo', 'metodo'];
 
 export type PageSnapshot = {
   incomeCount: number;
@@ -265,6 +266,19 @@ export function getPageFlow(
             'Analise meu fluxo de caixa do mês e diga os dias de aperto e o que mudar de data.',
         },
       };
+    case 'pro_labore':
+      return {
+        ...base,
+        openingMessage: 'Quer saber quanto dá para tirar da empresa este mês sem apertar o caixa?',
+        openingActions: [
+          yesSuggest('Sim, quanto posso retirar?', 'Quanto posso retirar da empresa este mês? Explique o limite, o pró-labore sustentável e os alertas.'),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Analisar meu pró-labore',
+          message: 'Analise meu pró-labore: sustentável x definido, retiradas extras e o caixa da empresa.',
+        },
+      };
     case 'importar':
       return {
         ...base,
@@ -376,6 +390,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Traga novos insights sobre saldo, cadastros pendentes, orçamentos estourados, economia ou metas do mês.`;
     case 'relatorios':
       return `${avoidRepeat} Traga novos insights sobre gastos, categorias, tendências ou oportunidades de melhoria.`;
+    case 'pro_labore':
+      return `${avoidRepeat} Olhe o pró-labore: limite do mês, sustentável x definido, retiradas extras e dias de caixa da empresa.`;
     case 'importar':
       return `${avoidRepeat} Olhe a importação em revisão: linhas sem categoria, duplicadas e regras que valem a pena.`;
     case 'fluxo':
@@ -512,7 +528,7 @@ export type AiExecutedAction = {
 
 const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   // Transferências ficam em ['months', id, 'transfers'] e mudam resumo e fluxo do mês.
-  create_transfer: [['months'], ['bank-accounts'], ['auth', 'me'], ['baby-steps']],
+  create_transfer: [['months'], ['bank-accounts'], ['auth', 'me'], ['baby-steps'], ['pro-labore'], ['owner-dashboard']],
   update_transfer: [['months'], ['bank-accounts'], ['baby-steps']],
   delete_transfer: [['months'], ['bank-accounts'], ['baby-steps']],
   create_bank_account: [['bank-accounts']],
@@ -563,6 +579,8 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   categorize_statement_lines: [['statement-imports'], ['categorization-rules'], ['categories']],
   create_categorization_rule: [['categorization-rules'], ['categories']],
   delete_categorization_rule: [['categorization-rules']],
+  set_pro_labore: [['pro-labore'], ['owner-dashboard']],
+  record_owner_withdrawal: [['pro-labore'], ['owner-dashboard'], ['months'], ['bank-accounts'], ['baby-steps']],
   commit_statement_import: [['statement-imports'], ['months'], ['bank-accounts'], ['baby-steps'], ['incomes'], ['expenses']],
 };
 

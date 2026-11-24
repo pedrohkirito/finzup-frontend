@@ -940,3 +940,65 @@ export interface CategorizationRule {
   renameTo: string | null;
   matchCount: number;
 }
+
+// ── Pró-labore (item 6) ──
+export type ProLaboreAlertCode =
+  | 'limit_exceeded'
+  | 'extra_withdrawal'
+  | 'defined_above_sustainable'
+  | 'cash_below_reserve'
+  | 'negative_profit'
+  | 'cash_unknown'
+  | 'no_history';
+
+export interface ProLaboreAlert {
+  code: ProLaboreAlertCode;
+  level: 'danger' | 'warning' | 'info';
+  message: string;
+}
+
+export interface ProLaboreSettings {
+  definedAmount: number | null;
+  payDay: number | null;
+  minReserveMonths: number;
+  minReserveAmount: number | null;
+  lookbackMonths: number;
+  configured: boolean;
+}
+
+export type OwnerWithdrawalKind = 'pro_labore' | 'withdrawal' | 'profit_distribution';
+
+export interface ProLaboreStatus {
+  basis: 'history' | 'current_month' | 'none';
+  monthsUsed: number;
+  avgRevenue: number;
+  avgCosts: number;
+  avgProfit: number;
+  sustainable: number;
+  minReserve: number;
+  cashCurrent: number | null;
+  cashProjectedEnd: number | null;
+  daysOfCash: number | null;
+  definedAmount: number | null;
+  monthLimit: number;
+  withdrawnProLabore: number;
+  withdrawnExtra: number;
+  withdrawnTotal: number;
+  remaining: number;
+  exceededBy: number;
+  alerts: ProLaboreAlert[];
+  space: { id: string; name: string };
+  month: { id: string; year: number; month: number; status: 'open' | 'closed' } | null;
+  settings: ProLaboreSettings;
+  accountsCount: number;
+  history: Array<{ year: number; month: number; revenue: number; costs: number; profit: number; proLabore: number; extra: number; defined: number | null }>;
+}
+
+export interface WithdrawalCheck {
+  amount: number;
+  allowed: boolean;
+  remainingBefore: number;
+  remainingAfter: number;
+  exceedBy: number;
+  message: string;
+}
