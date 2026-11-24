@@ -857,3 +857,86 @@ export interface AdminUser {
   billingStatus: string;
   currentPeriodEnd: string | null;
 }
+
+// ---------------------------------------------------------------- Importação de extrato (fase 2, item 5)
+
+export type StatementLineKind = 'expense' | 'income' | 'transfer' | 'ignore';
+export type StatementLineStatus = 'pending' | 'imported' | 'duplicate' | 'ignored';
+export type CategorySuggestionSource = 'rule' | 'history' | 'ai' | 'keyword' | 'manual';
+export type StatementImportStatus = 'review' | 'committed' | 'discarded';
+
+export interface StatementLine {
+  id: string;
+  date: string;
+  amount: number;
+  description: string;
+  name: string;
+  kind: StatementLineKind;
+  status: StatementLineStatus;
+  categoryId: string | null;
+  categoryName: string | null;
+  categorySource: CategorySuggestionSource | null;
+  transferKind: TransferKind | null;
+  possibleDuplicate: { type: string; id: string; name: string } | null;
+  entryType: string | null;
+  entryId: string | null;
+  suggestedPattern: string;
+}
+
+export interface StatementImportSummary {
+  pending: number;
+  expenses: number;
+  incomes: number;
+  transfers: number;
+  ignored: number;
+  uncategorized: number;
+  possibleDuplicates: number;
+  duplicates: number;
+  totalOut: number;
+  totalIn: number;
+}
+
+export interface StatementImportListItem {
+  id: string;
+  spaceId: string;
+  bankAccountId: string | null;
+  fileName: string;
+  format: 'ofx' | 'csv';
+  bankLabel: string | null;
+  status: StatementImportStatus;
+  periodStart: string | null;
+  periodEnd: string | null;
+  totalLines: number;
+  duplicateLines: number;
+  importedLines: number;
+  createdAt: string;
+  committedAt: string | null;
+  pendingLines?: number;
+}
+
+export interface StatementImport extends StatementImportListItem {
+  summary: StatementImportSummary;
+  lines: StatementLine[];
+}
+
+export interface StatementCommitResult {
+  expenses: number;
+  incomes: number;
+  transfers: number;
+  transfersLinked: number;
+  ignored: number;
+  monthsCreated: string[];
+  import: StatementImport;
+}
+
+export interface CategorizationRule {
+  id: string;
+  spaceId: string | null;
+  pattern: string;
+  kind: StatementLineKind;
+  categoryId: string | null;
+  categoryName: string | null;
+  transferKind: TransferKind | null;
+  renameTo: string | null;
+  matchCount: number;
+}

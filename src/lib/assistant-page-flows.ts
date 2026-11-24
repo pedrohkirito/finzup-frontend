@@ -18,12 +18,13 @@ const PAGES_WITH_OPENING_FLOW: PageKey[] = [
   'planejamento',
   'relatorios',
   'fluxo',
+  'importar',
   'resumo',
   'assistente',
   'metodo',
 ];
 
-const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'resumo', 'metodo'];
+const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'importar', 'resumo', 'metodo'];
 
 export type PageSnapshot = {
   incomeCount: number;
@@ -264,6 +265,19 @@ export function getPageFlow(
             'Analise meu fluxo de caixa do mês e diga os dias de aperto e o que mudar de data.',
         },
       };
+    case 'importar':
+      return {
+        ...base,
+        openingMessage: 'Posso revisar o extrato com você: o que ficou sem categoria, o que parece duplicado e o que vale virar regra.',
+        openingActions: [
+          yesSuggest('Sim, revisar comigo', 'Revise a importação de extrato em andamento: o que pede atenção e o que você sugere ajustar ou virar regra?'),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Revisar o extrato',
+          message: 'Revise a importação de extrato em andamento e diga o que ajustar antes de confirmar.',
+        },
+      };
     case 'resumo':
       return {
         ...base,
@@ -362,6 +376,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Traga novos insights sobre saldo, cadastros pendentes, orçamentos estourados, economia ou metas do mês.`;
     case 'relatorios':
       return `${avoidRepeat} Traga novos insights sobre gastos, categorias, tendências ou oportunidades de melhoria.`;
+    case 'importar':
+      return `${avoidRepeat} Olhe a importação em revisão: linhas sem categoria, duplicadas e regras que valem a pena.`;
     case 'fluxo':
       return `${avoidRepeat} Use o fluxo de caixa diário: dias de aperto, saldo por conta ou PF/PJ e datas que valem mudar.`;
     case 'despesas':
@@ -544,6 +560,10 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   create_investment_simulation: [['investment-simulations']],
   update_investment_simulation: [['investment-simulations']],
   create_company: [['spaces'], ['auth']],
+  categorize_statement_lines: [['statement-imports'], ['categorization-rules'], ['categories']],
+  create_categorization_rule: [['categorization-rules'], ['categories']],
+  delete_categorization_rule: [['categorization-rules']],
+  commit_statement_import: [['statement-imports'], ['months'], ['bank-accounts'], ['baby-steps'], ['incomes'], ['expenses']],
 };
 
 function dedupeQueryKeys(keys: string[][]): string[][] {

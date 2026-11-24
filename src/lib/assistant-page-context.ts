@@ -9,6 +9,7 @@ export type PageKey =
   | 'planejamento'
   | 'relatorios'
   | 'fluxo'
+  | 'importar'
   | 'configuracoes'
   | 'assistente'
   | 'metodo'
@@ -99,6 +100,13 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     description: 'Fluxo de caixa diário do mês: saldo previsto dia a dia, com filtros de conta bancária e PF/PJ.',
     guidance:
       'Use o fluxo de caixa (get_cash_flow) para dizer o saldo em um dia, o menor saldo e quando fica negativo. Sugira mudar datas de entradas/saídas para evitar aperto. Lançamentos sem data contam no início do mês.',
+  },
+  '/dashboard/importar': {
+    key: 'importar',
+    label: 'Importar extrato',
+    description: 'Importação de extrato OFX/CSV: o usuário envia o arquivo, revisa as categorias sugeridas e confirma.',
+    guidance:
+      'Ajude a revisar a importação em andamento (get_statement_import) e a ajustar linhas ou criar regras (categorize_statement_lines). Só confirme a importação depois do "Confirmo".',
   },
   '/dashboard/configuracoes': {
     key: 'configuracoes',

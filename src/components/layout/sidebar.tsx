@@ -20,6 +20,7 @@ import {
   Crown,
   Tags,
   Building2,
+  FileUp,
   Gauge,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
@@ -40,6 +41,7 @@ const links = [
     : []),
   { href: '/dashboard/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/dashboard/fluxo', label: 'Fluxo de caixa', icon: CalendarDays, isNew: true },
+  { href: '/dashboard/importar', label: 'Extratos', icon: FileUp, isNew: true },
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
