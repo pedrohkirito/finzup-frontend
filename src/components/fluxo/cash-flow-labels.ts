@@ -10,6 +10,7 @@ export const CASH_FLOW_SOURCE_LABELS: Record<CashFlowSource, string> = {
   donation: 'Doação',
   investment: 'Aporte',
   credit_card_bill: 'Fatura do cartão',
+  transfer: 'Transferência',
 };
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];

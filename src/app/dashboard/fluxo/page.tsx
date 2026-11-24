@@ -264,6 +264,7 @@ export default function FluxoDeCaixaPage() {
                       key={m.id}
                       movement={m}
                       accountName={m.bankAccountId ? accountNames.get(m.bankAccountId) : undefined}
+                      accountNames={accountNames}
                       showScope={scopeVisible}
                     />
                   ))}
@@ -312,7 +313,7 @@ export default function FluxoDeCaixaPage() {
                           </div>
                           <div className="text-right">
                             <p className={cn('text-sm font-bold tabular-nums', balanceColor(d.balance))}>{formatCurrency(d.balance)}</p>
-                            {d.movements.length > 0 && (
+                            {d.movements.some((m) => m.direction !== 'internal') && (
                               <p className={cn('text-xs tabular-nums', d.net < 0 ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400')}>
                                 {d.net < 0 ? '−' : '+'} {formatCurrency(Math.abs(d.net))} no dia
                               </p>
@@ -326,6 +327,7 @@ export default function FluxoDeCaixaPage() {
                                 key={m.id}
                                 movement={m}
                                 accountName={m.bankAccountId ? accountNames.get(m.bankAccountId) : undefined}
+                                accountNames={accountNames}
                                 showScope={scopeVisible}
                               />
                             ))}

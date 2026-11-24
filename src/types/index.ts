@@ -226,7 +226,35 @@ export interface ScopeTotals {
   totalExpenses: number;
   totalDonations: number;
   totalInvested: number;
+  /** Transferências PF ↔ PJ recebidas/enviadas pelo lado (não são receita nem despesa). */
+  transfersIn?: number;
+  transfersOut?: number;
+  /** Já considera as transferências do lado. */
   balance: number;
+}
+
+/** Totais de transferências do resumo; `in`/`out`/`net` valem 0 no consolidado. */
+export interface TransferTotals {
+  count: number;
+  total: number;
+  in: number;
+  out: number;
+  net: number;
+}
+
+export interface TransferEntry {
+  id: string;
+  financialMonthId: string;
+  name: string;
+  amount: string | number;
+  day: number | null;
+  fromScope: FinanceScope;
+  toScope: FinanceScope;
+  fromBankAccountId: string | null;
+  toBankAccountId: string | null;
+  carryForward: boolean;
+  notes?: string | null;
+  sortOrder: number;
 }
 
 export interface ScopeBreakdown {
@@ -242,7 +270,9 @@ export interface MonthSummary {
   totalIncome: number;
   totalExpenses: number;
   totalDonations: number;
+  /** No PF/PJ, já inclui `transfers.net`. */
   balance: number;
+  transfers?: TransferTotals;
   creditCardBill: {
     total: number;
     breakdown: { expenses: number; installments: number; subscriptions: number; financings: number; donations: number };
@@ -255,6 +285,7 @@ export interface MonthSummary {
     expenses: SummaryItem[];
     donations: SummaryItem[];
     investments: SummaryItem[];
+    transfers?: (SummaryItem & { fromScope: FinanceScope; toScope: FinanceScope })[];
   };
 }
 
@@ -262,6 +293,7 @@ export interface MonthReport {
   month: FinancialMonth;
   scope?: ScopeFilter;
   scopeBreakdown?: ScopeBreakdown | null;
+  transfers?: TransferTotals;
   overview: {
     totalIncome: number;
     totalExpenses: number;
@@ -514,20 +546,32 @@ export type CashFlowSource =
   | 'financing'
   | 'donation'
   | 'investment'
-  | 'credit_card_bill';
+  | 'credit_card_bill'
+  | 'transfer';
+
+/** `internal`: transferência com origem e destino dentro do filtro — não muda o saldo. */
+export type CashFlowDirection = 'in' | 'out' | 'internal';
+
+export interface TransferInfo {
+  fromScope: FinanceScope;
+  toScope: FinanceScope;
+  fromBankAccountId: string | null;
+  toBankAccountId: string | null;
+}
 
 export interface CashFlowMovement {
   id: string;
   source: CashFlowSource;
   name: string;
   amount: number;
-  direction: 'in' | 'out';
+  direction: CashFlowDirection;
   day: number | null;
   scope: FinanceScope | 'mixed';
   bankAccountId: string | null;
   paid?: boolean;
   creditCardId?: string;
   items?: CashFlowMovement[];
+  transfer?: TransferInfo;
 }
 
 export interface CashFlowDay {
