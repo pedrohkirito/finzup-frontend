@@ -19,6 +19,7 @@ import {
   Footprints,
   Crown,
   Tags,
+  Building2,
   Gauge,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
@@ -42,6 +43,7 @@ const links = [
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
   { href: '/dashboard/categorias', label: 'Categorias', icon: Tags },
+  { href: '/dashboard/empresas', label: 'Empresas', icon: Building2 },
   { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange },
   { href: '/dashboard/investimentos', label: 'Investimentos', icon: PiggyBank },
   { href: '/dashboard/doacoes', label: 'Doações', icon: Heart },

@@ -68,6 +68,7 @@ function DonationForm({
         <CategorySelect
           kind="expense"
           scope={form.watch('scope') ?? 'personal'}
+                  spaceId={form.watch('spaceId')}
           value={form.watch('budgetTemplateId')}
           onChange={(v) => form.setValue('budgetTemplateId', v)}
         />

@@ -24,6 +24,7 @@ import {
   Loader2,
   Crown,
   Tags,
+  Building2,
   Gauge,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -49,6 +50,7 @@ const moreLinks = [
     : []),
   { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
   { href: '/dashboard/categorias', icon: Tags, label: 'Categorias' },
+  { href: '/dashboard/empresas', icon: Building2, label: 'Empresas' },
   { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento' },
   { href: '/dashboard/assistente', icon: Sparkles, label: 'Assistente IA (tela cheia)' },
   { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },

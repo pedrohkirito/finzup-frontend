@@ -1,3 +1,5 @@
+import { spaceHeader } from './space-store';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 const SUBSCRIPTION_REDIRECT_KEY = 'finzup:subscription-redirect-at';
 const REDIRECT_COOLDOWN_MS = 8_000;
@@ -86,6 +88,7 @@ async function request<T>(path: string, options: InternalRequestInit = {}): Prom
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...spaceHeader(),
       ...fetchOptions.headers,
     },
   });

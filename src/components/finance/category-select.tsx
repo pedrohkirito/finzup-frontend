@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { filterCategories, useCategories, useCreateCategory } from '@/hooks/use-categories';
+import { useEffectiveSpace } from '@/hooks/use-spaces';
 import type { CategoryKind, FinanceScope } from '@/types';
 
 const NONE = 'none';
@@ -21,6 +22,7 @@ const NEW = '__new__';
 export function CategorySelect({
   kind,
   scope = 'personal',
+  spaceId,
   value,
   onChange,
   label = 'Categoria',
@@ -28,18 +30,21 @@ export function CategorySelect({
 }: {
   kind: CategoryKind;
   scope?: FinanceScope;
+  /** Espaço do lançamento (sem isso: o escolhido no topo ou o pessoal). */
+  spaceId?: string;
   value?: string | null;
   onChange: (value: string | null) => void;
   label?: string;
   showLabel?: boolean;
 }) {
-  const { data } = useCategories();
+  const space = useEffectiveSpace(spaceId);
+  const { data } = useCategories({ spaceId: space?.id, scope: space ? undefined : scope });
   const createCategory = useCreateCategory();
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const options = filterCategories(data, kind, scope);
+  const options = filterCategories(data, kind, space ? undefined : scope);
   // Lançamento antigo ligado a categoria de outro PF/PJ ou arquivada: mantém visível para não perder o vínculo.
   const current = value ? data?.find((c) => c.id === value) : undefined;
   const showCurrent = current && !options.some((o) => o.id === current.id);
@@ -49,7 +54,7 @@ export function CategorySelect({
     if (!name) return;
     setError(null);
     try {
-      const created = await createCategory.mutateAsync({ name, kind, scope });
+      const created = await createCategory.mutateAsync(space ? { name, kind, spaceId: space.id } : { name, kind, scope });
       onChange(created.id);
       setCreating(false);
       setNewName('');

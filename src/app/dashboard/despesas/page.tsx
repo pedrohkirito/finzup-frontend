@@ -348,6 +348,7 @@ export default function DespesasPage() {
                 <CategorySelect
                   kind="expense"
                   scope={expenseForm.watch('scope') ?? 'personal'}
+                  spaceId={expenseForm.watch('spaceId')}
                   value={expenseForm.watch('budgetTemplateId')}
                   onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
                 />
@@ -460,6 +461,7 @@ export default function DespesasPage() {
                   <CategorySelect
                   kind="expense"
                   scope={fixedTemplateForm.watch('scope') ?? 'personal'}
+                  spaceId={fixedTemplateForm.watch('spaceId')}
                   value={fixedTemplateForm.watch('budgetTemplateId')}
                   onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
                 />
@@ -581,6 +583,7 @@ export default function DespesasPage() {
                 <CategorySelect
                   kind="expense"
                   scope={installmentForm.watch('scope') ?? 'personal'}
+                  spaceId={installmentForm.watch('spaceId')}
                   value={installmentForm.watch('budgetTemplateId')}
                   onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
                 />
@@ -704,6 +707,7 @@ export default function DespesasPage() {
                 <CategorySelect
                   kind="expense"
                   scope={subscriptionForm.watch('scope') ?? 'personal'}
+                  spaceId={subscriptionForm.watch('spaceId')}
                   value={subscriptionForm.watch('budgetTemplateId')}
                   onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
                 />
@@ -954,6 +958,7 @@ export default function DespesasPage() {
               <CategorySelect
                   kind="expense"
                   scope={expenseForm.watch('scope') ?? 'personal'}
+                  spaceId={expenseForm.watch('spaceId')}
                   value={expenseForm.watch('budgetTemplateId')}
                   onChange={(v) => expenseForm.setValue('budgetTemplateId', v)}
                 />
@@ -985,6 +990,7 @@ export default function DespesasPage() {
               <CategorySelect
                   kind="expense"
                   scope={fixedTemplateForm.watch('scope') ?? 'personal'}
+                  spaceId={fixedTemplateForm.watch('spaceId')}
                   value={fixedTemplateForm.watch('budgetTemplateId')}
                   onChange={(v) => fixedTemplateForm.setValue('budgetTemplateId', v)}
                 />
@@ -1020,6 +1026,7 @@ export default function DespesasPage() {
               <CategorySelect
                   kind="expense"
                   scope={installmentForm.watch('scope') ?? 'personal'}
+                  spaceId={installmentForm.watch('spaceId')}
                   value={installmentForm.watch('budgetTemplateId')}
                   onChange={(v) => installmentForm.setValue('budgetTemplateId', v)}
                 />
@@ -1050,6 +1057,7 @@ export default function DespesasPage() {
               <CategorySelect
                   kind="expense"
                   scope={subscriptionForm.watch('scope') ?? 'personal'}
+                  spaceId={subscriptionForm.watch('spaceId')}
                   value={subscriptionForm.watch('budgetTemplateId')}
                   onChange={(v) => subscriptionForm.setValue('budgetTemplateId', v)}
                 />

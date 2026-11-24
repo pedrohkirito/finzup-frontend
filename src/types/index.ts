@@ -61,7 +61,47 @@ export type ScopeFilter = 'all' | FinanceScope;
 export interface EntryExtras {
   day?: number | null;
   scope?: FinanceScope;
+  /** Espaço (pessoal ou empresa). Manda no lugar do PF/PJ. */
+  spaceId?: string;
   bankAccountId?: string | null;
+}
+
+/** Espaço financeiro: o pessoal (PF) ou uma empresa (PJ). */
+export interface Space {
+  id: string;
+  kind: FinanceScope;
+  name: string;
+  cnpj: string | null;
+  sortOrder: number;
+  /** Empresa vinda do PJ antigo: continua liberada em qualquer plano. */
+  grandfathered: boolean;
+  archived: boolean;
+  /** Acima do limite do plano: só leitura. */
+  locked: boolean;
+  createdAt: string;
+}
+
+export interface SpacesResponse {
+  spaces: Space[];
+  canCreateBusiness: boolean;
+  maxBusinessSpaces: number;
+  tier: string;
+}
+
+/** Espaço escolhido no topo: "all" (consolidado) ou o id de um espaço. */
+export type SpaceSelection = 'all' | string;
+
+export interface SpaceRef {
+  id: string;
+  name: string;
+  kind: FinanceScope;
+}
+
+export interface SpaceTotals extends ScopeTotals {
+  spaceId: string;
+  name: string;
+  kind: FinanceScope;
+  archived?: boolean;
 }
 
 export interface BankAccount {
@@ -115,6 +155,7 @@ export interface Category {
   name: string;
   kind: CategoryKind;
   scope: FinanceScope;
+  spaceId?: string;
   defaultLimit: number;
   sortOrder: number;
   isDefault: boolean;
@@ -125,6 +166,7 @@ export interface MonthBudget {
   templateId: string;
   name: string;
   scope?: FinanceScope;
+  spaceId?: string;
   isDefault?: boolean;
   archived?: boolean;
   /** Tem limite definido (> 0). Sem limite a categoria só acompanha o gasto. */
@@ -281,6 +323,8 @@ export interface TransferEntry {
   day: number | null;
   fromScope: FinanceScope;
   toScope: FinanceScope;
+  fromSpaceId?: string;
+  toSpaceId?: string;
   fromBankAccountId: string | null;
   toBankAccountId: string | null;
   carryForward: boolean;
@@ -296,8 +340,12 @@ export interface ScopeBreakdown {
 export interface MonthSummary {
   month: FinancialMonth;
   scope?: ScopeFilter;
+  /** Espaço filtrado (null = consolidado). */
+  space?: SpaceRef | null;
   /** Só no consolidado: totais de PF e PJ separados. */
   scopeBreakdown?: ScopeBreakdown | null;
+  /** Só no consolidado: totais por espaço (pessoal + cada empresa). */
+  spaceBreakdown?: SpaceTotals[] | null;
   totalIncome: number;
   totalExpenses: number;
   totalDonations: number;
@@ -323,7 +371,9 @@ export interface MonthSummary {
 export interface MonthReport {
   month: FinancialMonth;
   scope?: ScopeFilter;
+  space?: SpaceRef | null;
   scopeBreakdown?: ScopeBreakdown | null;
+  spaceBreakdown?: SpaceTotals[] | null;
   transfers?: TransferTotals;
   overview: {
     totalIncome: number;
@@ -622,7 +672,8 @@ export interface CashFlow {
   month: number;
   daysInMonth: number;
   undatedRule: 'start_of_month';
-  filter: { scope: ScopeFilter; bankAccountId: string | null };
+  filter: { scope: ScopeFilter; spaceId?: string | null; bankAccountId: string | null };
+  space?: SpaceRef | null;
   openingBalance: number;
   undated: { inflow: number; outflow: number; net: number; movements: CashFlowMovement[] };
   days: CashFlowDay[];
@@ -639,6 +690,7 @@ export interface CashFlow {
   };
   byAccount: { bankAccountId: string | null; name: string; inflow: number; outflow: number; net: number }[];
   byScope: { scope: FinanceScope; inflow: number; outflow: number; net: number }[];
+  bySpace?: { spaceId: string; name: string; kind: FinanceScope; inflow: number; outflow: number; net: number }[];
 }
 
 // ---------- Planos (catálogo, recursos e upgrade) ----------

@@ -543,6 +543,7 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   update_category: [['categories'], ['budgets'], ['budget-templates'], ['expenses'], ['incomes'], ['donations'], ['months']],
   create_investment_simulation: [['investment-simulations']],
   update_investment_simulation: [['investment-simulations']],
+  create_company: [['spaces'], ['auth']],
 };
 
 function dedupeQueryKeys(keys: string[][]): string[][] {

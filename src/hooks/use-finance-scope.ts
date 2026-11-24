@@ -1,57 +1,32 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { ScopeFilter } from '@/types';
+import { useActiveSpaces, useSelectedSpace, useSpaceSelection } from '@/hooks/use-spaces';
+import type { ScopeFilter, SpaceSelection } from '@/types';
 
-const STORAGE_KEY = 'finzup:scope-filter';
-const CHANGE_EVENT = 'finzup:scope-filter-change';
-
-function isScopeFilter(value: unknown): value is ScopeFilter {
-  return value === 'all' || value === 'personal' || value === 'business';
-}
-
-function readScope(): ScopeFilter {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return isScopeFilter(stored) ? stored : 'all';
-  } catch {
-    return 'all';
-  }
-}
-
-function subscribe(onChange: () => void) {
-  window.addEventListener(CHANGE_EVENT, onChange);
-  window.addEventListener('storage', onChange);
-  return () => {
-    window.removeEventListener(CHANGE_EVENT, onChange);
-    window.removeEventListener('storage', onChange);
-  };
-}
-
-/** O fluxo PJ está ligado no perfil do usuário? */
+/** O usuário separa empresa e vida pessoal? (fluxo PJ ligado ou alguma empresa cadastrada) */
 export function useBusinessEnabled() {
   const { data: user } = useAuth({ refetchOnWindowFocus: false });
-  return !!user?.businessEnabled;
+  const { businesses } = useActiveSpaces();
+  return !!user?.businessEnabled || businesses.length > 0;
 }
 
 /**
- * Visão escolhida (Consolidado, PF ou PJ), compartilhada entre Visão geral,
- * Relatórios e Fluxo de caixa e lembrada no navegador.
- * Com o PJ desligado, a visão é sempre o consolidado.
+ * Visão atual derivada do espaço escolhido no topo: consolidado ("all"), pessoal ("personal")
+ * ou empresa ("business"). A troca é feita pelo seletor de espaço do topo.
  */
-export function useScopeFilter(): [ScopeFilter, (scope: ScopeFilter) => void] {
+export function useScopeFilter(): [ScopeFilter, (selection: SpaceSelection) => void] {
+  const [, setSelection] = useSpaceSelection();
+  const selected = useSelectedSpace();
+  return [selected ? selected.kind : 'all', setSelection];
+}
+
+/** Nome da visão atual para subtítulos: o espaço escolhido ou "Tudo (pessoal + empresas)". */
+export function useScopeLabel(): string | null {
   const businessEnabled = useBusinessEnabled();
-  const stored = useSyncExternalStore(subscribe, readScope, () => 'all' as ScopeFilter);
-  const setScope = useCallback((scope: ScopeFilter) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, scope);
-    } catch {
-      // sem localStorage: a escolha vale só até recarregar
-    }
-    window.dispatchEvent(new Event(CHANGE_EVENT));
-  }, []);
-  return [businessEnabled ? stored : 'all', setScope];
+  const selected = useSelectedSpace();
+  if (!businessEnabled) return null;
+  return selected ? selected.name : 'Tudo (pessoal + empresas)';
 }
 
 export const SCOPE_LABELS: Record<ScopeFilter, string> = {

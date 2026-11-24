@@ -6,12 +6,11 @@ import { AlertTriangle, ArrowDownRight, ArrowUpRight, CalendarClock, Info, Trend
 import { useMonthStore } from '@/hooks/use-month';
 import { useBankAccounts } from '@/hooks/use-bank-accounts';
 import { useCashFlow } from '@/hooks/use-cash-flow';
-import { useBusinessEnabled, useScopeFilter, SCOPE_LONG_LABELS } from '@/hooks/use-finance-scope';
+import { useBusinessEnabled, useScopeFilter, useScopeLabel, SCOPE_LONG_LABELS } from '@/hooks/use-finance-scope';
 import { cn, formatCurrency, formatMonth } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScopeSwitch } from '@/components/finance/scope-switch';
 import { CashFlowChart } from '@/components/fluxo/cash-flow-chart';
 import { CashFlowMovementRow } from '@/components/fluxo/cash-flow-movement';
 import { TransfersCard } from '@/components/transfers/transfers-card';
@@ -92,13 +91,16 @@ function Breakdown({ flow, showScope }: { flow: CashFlow; showScope: boolean }) 
       {showScope && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">PF × PJ</CardTitle>
+            <CardTitle className="text-base">Por espaço</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
-              {flow.byScope.map((s) => (
-                <li key={s.scope} className="flex items-center justify-between gap-3 py-2 text-sm">
-                  <span className="text-slate-700 dark:text-slate-200">{SCOPE_LONG_LABELS[s.scope]}</span>
+              {(flow.bySpace?.length
+                ? flow.bySpace.map((s) => ({ key: s.spaceId, label: s.name, ...s }))
+                : flow.byScope.map((s) => ({ key: s.scope, label: SCOPE_LONG_LABELS[s.scope], ...s }))
+              ).map((s) => (
+                <li key={s.key} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <span className="min-w-0 truncate text-slate-700 dark:text-slate-200">{s.label}</span>
                   <span className="shrink-0 text-right tabular-nums">
                     <span className={cn('font-semibold', balanceColor(s.net))}>{formatCurrency(s.net)}</span>
                     <span className="block text-xs text-slate-400">
@@ -118,6 +120,7 @@ function Breakdown({ flow, showScope }: { flow: CashFlow; showScope: boolean }) 
 export default function FluxoDeCaixaPage() {
   const { selectedMonthId } = useMonthStore();
   const [scope] = useScopeFilter();
+  const scopeLabel = useScopeLabel();
   const businessEnabled = useBusinessEnabled();
   const [account, setAccount] = useState('all');
   const [showAllDays, setShowAllDays] = useState(false);
@@ -153,7 +156,7 @@ export default function FluxoDeCaixaPage() {
   const startBalance = flow.openingBalance + flow.undated.net;
   const scopeVisible = businessEnabled && scope === 'all';
   const filterLabel = [
-    businessEnabled ? SCOPE_LONG_LABELS[scope] : null,
+    scopeLabel,
     account === 'all' ? null : account === 'none' ? 'Sem conta' : accountNames.get(account),
   ]
     .filter(Boolean)
@@ -170,7 +173,6 @@ export default function FluxoDeCaixaPage() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <ScopeSwitch className="w-full sm:w-auto" />
           {accounts && accounts.length > 0 && (
             <Select value={account} onValueChange={setAccount}>
               <SelectTrigger className="w-full sm:w-52" aria-label="Filtrar por conta">

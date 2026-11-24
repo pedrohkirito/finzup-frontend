@@ -10,6 +10,7 @@ import { api, ApiError } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import { useBankAccounts } from '@/hooks/use-bank-accounts';
 import { useTransfers } from '@/hooks/use-transfers';
+import { useSelectedSpace, useSpaces } from '@/hooks/use-spaces';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,21 +19,13 @@ import { FormCurrencyInput } from '@/components/ui/currency-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SegmentedControl } from '@/components/finance/segmented-control';
 import { ItemActions } from '@/components/despesas/item-actions';
 import type { FinanceScope, TransferEntry, TransferKind } from '@/types';
 
 /**
- * Transferências do mês (pró-labore, lucros, aporte, entre contas).
- * Mínimo de propósito: os lados ainda são PF/PJ + conta e vão virar "espaços" na próxima etapa.
+ * Transferências do mês (pró-labore, lucros, aporte, entre contas e entre empresas).
+ * Origem e destino são espaços (pessoal ou uma empresa) e, opcionalmente, contas.
  */
-
-type Direction = 'business_to_personal' | 'personal_to_business' | 'same';
-
-const DIRECTION_SCOPES: Record<Exclude<Direction, 'same'>, { from: FinanceScope; to: FinanceScope }> = {
-  business_to_personal: { from: 'business', to: 'personal' },
-  personal_to_business: { from: 'personal', to: 'business' },
-};
 
 const KIND_OPTIONS: { value: TransferKind; label: string }[] = [
   { value: 'pro_labore', label: 'Pró-labore' },
@@ -43,6 +36,7 @@ const KIND_OPTIONS: { value: TransferKind; label: string }[] = [
 ];
 const KIND_LABEL = Object.fromEntries(KIND_OPTIONS.map((o) => [o.value, o.label])) as Record<TransferKind, string>;
 const SCOPE_SHORT: Record<FinanceScope, string> = { personal: 'PF', business: 'PJ' };
+const SAME_ACCOUNTS_MESSAGE = 'No mesmo espaço, escolha duas contas diferentes.';
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 const schema = z
@@ -50,40 +44,53 @@ const schema = z
     kind: z.enum(['pro_labore', 'profit_distribution', 'capital_contribution', 'between_accounts', 'other']),
     name: z.string().max(200),
     amount: z.number().positive('Valor deve ser positivo'),
-    direction: z.enum(['business_to_personal', 'personal_to_business', 'same']),
-    sameScope: z.enum(['personal', 'business']),
+    fromSpaceId: z.string().min(1, 'Escolha a origem.'),
+    toSpaceId: z.string().min(1, 'Escolha o destino.'),
     fromBankAccountId: z.string().nullable(),
     toBankAccountId: z.string().nullable(),
     day: z.number().int().min(1).max(31).nullable(),
     carryForward: z.boolean(),
   })
-  .refine((v) => v.direction !== 'same' || (v.fromBankAccountId && v.toBankAccountId && v.fromBankAccountId !== v.toBankAccountId), {
-    message: 'Entre contas: escolha duas contas diferentes.',
+  .refine((v) => v.fromSpaceId !== v.toSpaceId || (v.fromBankAccountId && v.toBankAccountId && v.fromBankAccountId !== v.toBankAccountId), {
+    message: SAME_ACCOUNTS_MESSAGE,
     path: ['toBankAccountId'],
   });
 
 type FormValues = z.infer<typeof schema>;
 
+type SpaceOption = { id: string; name: string; kind: FinanceScope; locked: boolean };
+
+/** Origem/destino padrão de cada tipo: pró-labore e lucros saem da empresa para o pessoal; aporte, o contrário. */
+function defaultEnds(kind: TransferKind, spaces: SpaceOption[], preferredBusinessId?: string) {
+  const personal = spaces.find((s) => s.kind === 'personal');
+  const business = spaces.find((s) => s.id === preferredBusinessId && s.kind === 'business') ?? spaces.find((s) => s.kind === 'business');
+  const p = personal?.id ?? '';
+  const b = business?.id ?? p;
+  if (kind === 'capital_contribution') return { fromSpaceId: p, toSpaceId: b };
+  if (kind === 'between_accounts') return { fromSpaceId: preferredBusinessId ?? p, toSpaceId: preferredBusinessId ?? p };
+  return { fromSpaceId: b, toSpaceId: p };
+}
+
 const EMPTY: FormValues = {
   kind: 'pro_labore',
   name: '',
   amount: 0,
-  direction: 'business_to_personal',
-  sameScope: 'personal',
+  fromSpaceId: '',
+  toSpaceId: '',
   fromBankAccountId: null,
   toBankAccountId: null,
   day: null,
   carryForward: false,
 };
 
-function toForm(t: TransferEntry): FormValues {
-  const same = t.fromScope === t.toScope;
+function toForm(t: TransferEntry, spaces: SpaceOption[]): FormValues {
+  const fallback = (scope: FinanceScope) => spaces.find((s) => s.kind === scope)?.id ?? '';
   return {
     kind: t.kind,
     name: t.name,
     amount: Number(t.amount),
-    direction: same ? 'same' : t.fromScope === 'business' ? 'business_to_personal' : 'personal_to_business',
-    sameScope: t.fromScope,
+    fromSpaceId: t.fromSpaceId ?? fallback(t.fromScope),
+    toSpaceId: t.toSpaceId ?? fallback(t.toScope),
     fromBankAccountId: t.fromBankAccountId,
     toBankAccountId: t.toBankAccountId,
     day: t.day,
@@ -92,13 +99,12 @@ function toForm(t: TransferEntry): FormValues {
 }
 
 function toPayload(v: FormValues) {
-  const scopes = v.direction === 'same' ? { from: v.sameScope, to: v.sameScope } : DIRECTION_SCOPES[v.direction];
   return {
     kind: v.kind,
     name: v.name.trim() || KIND_LABEL[v.kind],
     amount: v.amount,
-    fromScope: scopes.from,
-    toScope: scopes.to,
+    fromSpaceId: v.fromSpaceId,
+    toSpaceId: v.toSpaceId,
     fromBankAccountId: v.fromBankAccountId,
     toBankAccountId: v.toBankAccountId,
     day: v.day,
@@ -128,15 +134,58 @@ function AccountSelect({ label, value, onChange }: { label: string; value: strin
   );
 }
 
-function TransferForm({ form, onSubmit }: { form: UseFormReturn<FormValues>; onSubmit: (v: FormValues) => Promise<void> }) {
-  const [direction, carryForward, day, fromAcc, toAcc, sameScope, kind] = useWatch({
+function SpaceSelect({
+  label,
+  value,
+  spaces,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  spaces: SpaceOption[];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <Select value={value || undefined} onValueChange={onChange}>
+        <SelectTrigger aria-label={label}>
+          <SelectValue placeholder="Escolha" />
+        </SelectTrigger>
+        <SelectContent>
+          {spaces.map((s) => (
+            <SelectItem key={s.id} value={s.id} disabled={s.locked && s.id !== value}>
+              {s.kind === 'personal' ? `${s.name} (PF)` : s.name}
+              {s.locked ? ' · só leitura' : ''}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function TransferForm({
+  form,
+  spaces,
+  onSubmit,
+}: {
+  form: UseFormReturn<FormValues>;
+  spaces: SpaceOption[];
+  onSubmit: (v: FormValues) => Promise<void>;
+}) {
+  const [carryForward, day, fromAcc, toAcc, fromSpaceId, toSpaceId, kind] = useWatch({
     control: form.control,
-    name: ['direction', 'carryForward', 'day', 'fromBankAccountId', 'toBankAccountId', 'sameScope', 'kind'],
+    name: ['carryForward', 'day', 'fromBankAccountId', 'toBankAccountId', 'fromSpaceId', 'toSpaceId', 'kind'],
   });
   const [error, setError] = useState<string | null>(null);
   const set = <K extends keyof FormValues>(key: K, value: FormValues[K]) =>
     form.setValue(key, value as never, { shouldDirty: true, shouldValidate: form.formState.isSubmitted });
-  const fieldError = form.formState.errors.amount?.message ?? form.formState.errors.toBankAccountId?.message;
+  const fieldError =
+    form.formState.errors.amount?.message ??
+    form.formState.errors.fromSpaceId?.message ??
+    form.formState.errors.toSpaceId?.message ??
+    form.formState.errors.toBankAccountId?.message;
 
   return (
     <form
@@ -155,10 +204,15 @@ function TransferForm({ form, onSubmit }: { form: UseFormReturn<FormValues>; onS
         <Select
           value={kind}
           onValueChange={(v) => {
-            set('kind', v as TransferKind);
-            if (v === 'between_accounts') set('direction', 'same');
-            if (v === 'capital_contribution') set('direction', 'personal_to_business');
-            if (v === 'pro_labore' || v === 'profit_distribution') set('direction', 'business_to_personal');
+            const next = v as TransferKind;
+            set('kind', next);
+            if (next === 'other') return;
+            const fromSpace = spaces.find((s) => s.id === fromSpaceId);
+            const toSpace = spaces.find((s) => s.id === toSpaceId);
+            const preferred = [fromSpace, toSpace].find((s) => s?.kind === 'business')?.id;
+            const ends = defaultEnds(next, spaces, next === 'between_accounts' ? fromSpaceId : preferred);
+            set('fromSpaceId', ends.fromSpaceId);
+            set('toSpaceId', ends.toSpaceId);
           }}
         >
           <SelectTrigger aria-label="Tipo">
@@ -177,34 +231,13 @@ function TransferForm({ form, onSubmit }: { form: UseFormReturn<FormValues>; onS
         <Label>Valor</Label>
         <FormCurrencyInput control={form.control} name="amount" placeholder="0,00" />
       </div>
-      <div className="space-y-2">
-        <Label>De → para</Label>
-        <SegmentedControl
-          ariaLabel="Direção da transferência"
-          className="w-full"
-          size="sm"
-          options={[
-            { value: 'business_to_personal', label: 'PJ → PF' },
-            { value: 'personal_to_business', label: 'PF → PJ' },
-            { value: 'same', label: 'Entre contas' },
-          ]}
-          value={direction}
-          onChange={(v) => set('direction', v)}
-        />
-        {direction === 'same' && (
-          <SegmentedControl
-            ariaLabel="Lado das contas"
-            className="w-full"
-            size="sm"
-            options={[
-              { value: 'personal', label: 'Contas PF' },
-              { value: 'business', label: 'Contas PJ' },
-            ]}
-            value={sameScope}
-            onChange={(v) => set('sameScope', v)}
-          />
-        )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <SpaceSelect label="De (origem)" value={fromSpaceId} spaces={spaces} onChange={(v) => set('fromSpaceId', v)} />
+        <SpaceSelect label="Para (destino)" value={toSpaceId} spaces={spaces} onChange={(v) => set('toSpaceId', v)} />
       </div>
+      {fromSpaceId && fromSpaceId === toSpaceId && (
+        <p className="-mt-2 text-xs text-slate-400">Mesmo espaço: é uma transferência entre contas (escolha as duas abaixo).</p>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <AccountSelect label="Conta de origem" value={fromAcc} onChange={(v) => set('fromBankAccountId', v)} />
         <AccountSelect label="Conta de destino" value={toAcc} onChange={(v) => set('toBankAccountId', v)} />
@@ -251,12 +284,21 @@ export function TransfersCard({ monthId, isMonthOpen }: { monthId: string; isMon
   const { data: transfers } = useTransfers(monthId);
   const { data: accounts } = useBankAccounts();
   const accountName = (id: string | null) => (id ? accounts?.find((a) => a.id === id)?.name : undefined);
+  const { data: spacesData } = useSpaces();
+  const spaces: SpaceOption[] = (spacesData?.spaces ?? []).filter((s) => !s.archived);
+  const selected = useSelectedSpace();
+  const spaceName = (id: string | undefined, scope: FinanceScope) =>
+    (id && spacesData?.spaces.find((s) => s.id === id)?.name) || SCOPE_SHORT[scope];
   const [editing, setEditing] = useState<TransferEntry | 'new' | null>(null);
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['months'] });
   const openForm = (target: TransferEntry | 'new') => {
-    form.reset(target === 'new' ? EMPTY : toForm(target));
+    form.reset(
+      target === 'new'
+        ? { ...EMPTY, ...defaultEnds('pro_labore', spaces, selected?.kind === 'business' ? selected.id : undefined) }
+        : toForm(target, spaces),
+    );
     setEditing(target);
   };
 
@@ -283,7 +325,9 @@ export function TransfersCard({ monthId, isMonthOpen }: { monthId: string; isMon
               const from = accountName(t.fromBankAccountId);
               const to = accountName(t.toBankAccountId);
               const meta = [
-                t.fromScope !== t.toScope ? `${SCOPE_SHORT[t.fromScope]} → ${SCOPE_SHORT[t.toScope]}` : `Contas ${SCOPE_SHORT[t.fromScope]}`,
+                (t.fromSpaceId ? t.fromSpaceId !== t.toSpaceId : t.fromScope !== t.toScope)
+                  ? `${spaceName(t.fromSpaceId, t.fromScope)} → ${spaceName(t.toSpaceId, t.toScope)}`
+                  : `Contas ${spaceName(t.fromSpaceId, t.fromScope)}`,
                 from || to ? `${from ?? 'sem conta'} → ${to ?? 'sem conta'}` : null,
                 t.day ? (t.carryForward ? `todo dia ${t.day}` : `dia ${t.day}`) : 'sem data',
               ]
@@ -332,6 +376,7 @@ export function TransfersCard({ monthId, isMonthOpen }: { monthId: string; isMon
           </DialogHeader>
           {editing !== null && (
             <TransferForm
+              spaces={spaces}
               form={form}
               onSubmit={async (v) => {
                 const payload = toPayload(v);

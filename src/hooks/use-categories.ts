@@ -18,15 +18,23 @@ export const CATEGORY_RELATED_KEYS = [
   ['reports'],
 ];
 
-export function useCategories(options: { includeArchived?: boolean; scope?: FinanceScope } = {}) {
+export function useCategories(
+  options: { includeArchived?: boolean; scope?: FinanceScope; spaceId?: string; enabled?: boolean } = {},
+) {
   const params = new URLSearchParams();
   if (options.includeArchived) params.set('includeArchived', 'true');
-  if (options.scope) params.set('scope', options.scope);
+  if (options.spaceId) params.set('spaceId', options.spaceId);
+  else if (options.scope) params.set('scope', options.scope);
   const qs = params.toString();
   return useQuery({
-    queryKey: [...CATEGORIES_QUERY_KEY, options.scope ?? 'all', options.includeArchived ? 'archived' : 'active'],
+    queryKey: [
+      ...CATEGORIES_QUERY_KEY,
+      options.spaceId ?? options.scope ?? 'all',
+      options.includeArchived ? 'archived' : 'active',
+    ],
     queryFn: () => api.get<Category[]>(`/categories${qs ? `?${qs}` : ''}`),
     staleTime: 60_000,
+    enabled: options.enabled ?? true,
   });
 }
 
@@ -42,7 +50,7 @@ export function useInvalidateCategories() {
 export function useCreateCategory() {
   const invalidate = useInvalidateCategories();
   return useMutation({
-    mutationFn: (data: { name: string; kind: CategoryKind; scope: FinanceScope; defaultLimit?: number }) =>
+    mutationFn: (data: { name: string; kind: CategoryKind; scope?: FinanceScope; spaceId?: string; defaultLimit?: number }) =>
       api.post<Category>('/categories', data),
     onSuccess: () => invalidate(),
   });
@@ -69,7 +77,8 @@ export function useDeleteCategory() {
 export function useAddDefaultCategories() {
   const invalidate = useInvalidateCategories();
   return useMutation({
-    mutationFn: (scope: FinanceScope) => api.post<{ created: number }>('/categories/defaults', { scope }),
+    mutationFn: (target: { scope?: FinanceScope; spaceId?: string }) =>
+      api.post<{ created: number }>('/categories/defaults', target),
     onSuccess: () => invalidate(),
   });
 }

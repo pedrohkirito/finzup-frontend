@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { Input } from '@/components/ui/input';
-import { SegmentedControl } from '@/components/finance/segmented-control';
-import { useBusinessEnabled } from '@/hooks/use-finance-scope';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useActiveSpaces, useEffectiveSpace } from '@/hooks/use-spaces';
 import {
   useAddDefaultCategories,
   useCategories,
@@ -142,7 +142,7 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
   );
 }
 
-function AddCategory({ kind, scope }: { kind: CategoryKind; scope: FinanceScope }) {
+function AddCategory({ kind, scope, spaceId }: { kind: CategoryKind; scope: FinanceScope; spaceId?: string }) {
   const create = useCreateCategory();
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -151,7 +151,7 @@ function AddCategory({ kind, scope }: { kind: CategoryKind; scope: FinanceScope 
     if (!name.trim()) return;
     setError(null);
     try {
-      await create.mutateAsync({ name: name.trim(), kind, scope });
+      await create.mutateAsync(spaceId ? { name: name.trim(), kind, spaceId } : { name: name.trim(), kind, scope });
       setName('');
     } catch (err) {
       setError(errorMessage(err));
@@ -182,12 +182,14 @@ function CategoryGroup({
   title,
   kind,
   scope,
+  spaceId,
   items,
   limitLabel,
 }: {
   title: string;
   kind: CategoryKind;
   scope: FinanceScope;
+  spaceId?: string;
   items: Category[];
   limitLabel: string;
 }) {
@@ -206,17 +208,18 @@ function CategoryGroup({
             ))}
           </ul>
         )}
-        <AddCategory kind={kind} scope={scope} />
+        <AddCategory kind={kind} scope={scope} spaceId={spaceId} />
       </CardContent>
     </Card>
   );
 }
 
 export default function CategoriasPage() {
-  const businessEnabled = useBusinessEnabled();
-  const [scope, setScope] = useState<FinanceScope>('personal');
-  const activeScope: FinanceScope = businessEnabled ? scope : 'personal';
-  const { data, isPending } = useCategories({ scope: activeScope, includeArchived: true });
+  const { spaces, businesses } = useActiveSpaces();
+  const [pickedSpaceId, setPickedSpaceId] = useState<string | undefined>(undefined);
+  const space = useEffectiveSpace(pickedSpaceId);
+  const activeScope: FinanceScope = space?.kind ?? 'personal';
+  const { data, isPending } = useCategories({ spaceId: space?.id, includeArchived: true, enabled: !!space });
   const addDefaults = useAddDefaultCategories();
   const update = useUpdateCategory();
   const [showArchived, setShowArchived] = useState(false);
@@ -229,7 +232,7 @@ export default function CategoriasPage() {
   const handleDefaults = async () => {
     setDefaultsMessage(null);
     try {
-      const result = await addDefaults.mutateAsync(activeScope);
+      const result = await addDefaults.mutateAsync(space ? { spaceId: space.id } : { scope: activeScope });
       setDefaultsMessage(
         result.created > 0
           ? `${result.created} categoria${result.created === 1 ? '' : 's'} padrão adicionada${result.created === 1 ? '' : 's'}.`
@@ -254,16 +257,19 @@ export default function CategoriasPage() {
             </Link>
           </p>
         </div>
-        {businessEnabled && (
-          <SegmentedControl
-            ariaLabel="PF ou PJ"
-            value={scope}
-            onChange={setScope}
-            options={[
-              { value: 'personal', label: 'Pessoal (PF)' },
-              { value: 'business', label: 'Empresa (PJ)' },
-            ]}
-          />
+        {businesses.length > 0 && space && (
+          <Select value={space.id} onValueChange={setPickedSpaceId}>
+            <SelectTrigger aria-label="Espaço" className="w-full sm:w-56">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {spaces.map((sp) => (
+                <SelectItem key={sp.id} value={sp.id}>
+                  {sp.kind === 'personal' ? `${sp.name} (PF)` : sp.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
       </div>
 
@@ -278,6 +284,7 @@ export default function CategoriasPage() {
               title="Despesas"
               kind="expense"
               scope={activeScope}
+              spaceId={space?.id}
               items={active.filter((c) => c.kind === 'expense')}
               limitLabel={limitLabel}
             />
@@ -285,6 +292,7 @@ export default function CategoriasPage() {
               title="Receitas"
               kind="income"
               scope={activeScope}
+              spaceId={space?.id}
               items={active.filter((c) => c.kind === 'income')}
               limitLabel={limitLabel}
             />
@@ -292,7 +300,7 @@ export default function CategoriasPage() {
 
           <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.1]">
             <div>
-              <p className="text-sm font-medium text-slate-900 dark:text-white">Categorias padrão {activeScope === 'business' ? 'da empresa' : 'pessoais'}</p>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">Categorias padrão {activeScope === 'business' ? `da empresa${space ? ` ${space.name}` : ''}` : 'pessoais'}</p>
               <p className="text-xs text-slate-500">
                 Adiciona só as que faltam. {defaultsMessage && <span className="text-brand-600 dark:text-brand-300">{defaultsMessage}</span>}
               </p>

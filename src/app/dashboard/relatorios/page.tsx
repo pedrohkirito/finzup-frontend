@@ -9,13 +9,12 @@ import { ReportIncomeExpenseChart } from '@/components/reports/report-income-exp
 import { ReportIncomeByItemChart } from '@/components/reports/report-income-by-item-chart';
 import { ReportInvestment } from '@/components/reports/report-investment';
 import { ReportMonthlyTrendChart } from '@/components/reports/report-monthly-trend-chart';
-import { ScopeSwitch } from '@/components/finance/scope-switch';
-import { useBusinessEnabled, useScopeFilter, SCOPE_LONG_LABELS } from '@/hooks/use-finance-scope';
+import { useScopeFilter, useScopeLabel } from '@/hooks/use-finance-scope';
 
 export default function RelatoriosPage() {
   const { selectedMonthId } = useMonthStore();
   const [scope] = useScopeFilter();
-  const businessEnabled = useBusinessEnabled();
+  const scopeLabel = useScopeLabel();
   const { data: report, isLoading } = useMonthReport(selectedMonthId, scope);
 
   if (!selectedMonthId || isLoading) {
@@ -41,10 +40,9 @@ export default function RelatoriosPage() {
           <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Relatórios</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Análise detalhada de {formatMonth(report.month.year, report.month.month)}
-            {businessEnabled ? ` · ${SCOPE_LONG_LABELS[scope]}` : ''}
+            {scopeLabel ? ` · ${scopeLabel}` : ''}
           </p>
         </div>
-        <ScopeSwitch className="w-full sm:w-auto" />
       </div>
 
       {!hasData && (

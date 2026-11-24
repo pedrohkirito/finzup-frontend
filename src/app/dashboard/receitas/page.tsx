@@ -57,6 +57,7 @@ function IncomeForm({
       <CategorySelect
         kind="income"
         scope={form.watch('scope') ?? 'personal'}
+                  spaceId={form.watch('spaceId')}
         value={form.watch('categoryId')}
         onChange={(v) => form.setValue('categoryId', v)}
       />
