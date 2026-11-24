@@ -86,7 +86,7 @@ function InvestmentAportesTab() {
     <>
       <div className="space-y-2">
         <Label>Nome</Label>
-        <Input placeholder="Ex: Tesouro Direto" {...form.register('name')} />
+        <Input placeholder="Ex: Reserva de emergência, Aposentadoria" {...form.register('name')} />
       </div>
       <div className="space-y-2">
         <Label>Valor</Label>

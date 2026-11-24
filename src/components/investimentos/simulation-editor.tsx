@@ -15,6 +15,7 @@ import { Sparkles } from 'lucide-react';
 import { SimulationProjectionChart } from './simulation-projection-chart';
 import { SimulationGoalCard } from './simulation-goal-card';
 import { SimulationSummaryTable } from './simulation-summary-table';
+import { CvmNotice } from '@/components/legal/regulatory-notice';
 
 type FormState = {
   purpose: string;
@@ -153,7 +154,7 @@ export function SimulationEditor({ simulation, suggestions }: SimulationEditorPr
             />
           </div>
           <div className="space-y-2">
-            <Label>Rentabilidade anual (%)</Label>
+            <Label>Rentabilidade anual hipotética (%)</Label>
             <Input
               type="number"
               min={0}
@@ -162,6 +163,7 @@ export function SimulationEditor({ simulation, suggestions }: SimulationEditorPr
               value={form.annualYieldPercent}
               onChange={(e) => updateField('annualYieldPercent', Number(e.target.value))}
             />
+            <p className="text-xs text-slate-500">Use a taxa que quiser testar. Não é indicação nem promessa de rendimento.</p>
           </div>
           <div className="space-y-2">
             <Label>Aumento anual dos aportes (%)</Label>
@@ -194,6 +196,8 @@ export function SimulationEditor({ simulation, suggestions }: SimulationEditorPr
           </div>
         </CardContent>
       </Card>
+
+      <CvmNotice />
 
       <SimulationGoalCard projection={projection} goalAmount={form.goalAmount} />
       <SimulationProjectionChart

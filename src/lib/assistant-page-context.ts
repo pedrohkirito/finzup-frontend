@@ -63,14 +63,14 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Investimentos',
     description: 'Página de meta mensal e aportes de investimento.',
     guidance:
-      'Priorize meta mensal e registro de aportes. Não recomende ativos específicos. Se o usuário ainda está nos Passos 1–2, avise que investir 15% ainda não é o foco.',
+      'Priorize meta mensal e registro de aportes. Não indique produtos, instituições nem taxas (Resolução CVM 19); pedidos de onde investir vão para um consultor CVM. Se o usuário ainda está nos Passos 1–2, avise que investir 15% ainda não é o foco.',
   },
   '/dashboard/investimentos/simulador': {
     key: 'simulador_investimentos',
     label: 'Simulador de investimentos',
     description: 'Simulação de patrimônio com juros compostos, metas e projeção em 30 anos.',
     guidance:
-      'Intake primeiro: uma pergunta por vez (finalidade, meta/prazo, patrimônio, aportes). Plano com números só após intake completo. Salvar simulação após confirmação. Sem aportes do mês.',
+      'Intake primeiro: uma pergunta por vez (finalidade, meta/prazo, patrimônio, aportes). Plano com números só após intake completo. Rentabilidade é hipótese do usuário; não sugira taxa nem produto (CVM 19). Salvar simulação após confirmação. Sem aportes do mês.',
   },
   '/dashboard/doacoes': {
     key: 'doacoes',
