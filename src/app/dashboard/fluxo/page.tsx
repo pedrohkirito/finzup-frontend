@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScopeSwitch } from '@/components/finance/scope-switch';
 import { CashFlowChart } from '@/components/fluxo/cash-flow-chart';
 import { CashFlowMovementRow } from '@/components/fluxo/cash-flow-movement';
+import { TransfersCard } from '@/components/transfers/transfers-card';
 import { formatFlowDate, todayInMonth } from '@/components/fluxo/cash-flow-labels';
 import type { CashFlow } from '@/types';
 
@@ -344,6 +345,8 @@ export default function FluxoDeCaixaPage() {
           <Breakdown flow={flow} showScope={scopeVisible} />
         </>
       )}
+
+      {businessEnabled && <TransfersCard monthId={flow.monthId} isMonthOpen={flow.status === 'open'} />}
 
       <p className="text-xs text-slate-400">
         Compras no cartão de crédito entram como uma única saída no dia de vencimento da fatura (cadastre o vencimento em{' '}

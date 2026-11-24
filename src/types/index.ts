@@ -242,10 +242,13 @@ export interface TransferTotals {
   net: number;
 }
 
+export type TransferKind = 'pro_labore' | 'profit_distribution' | 'capital_contribution' | 'between_accounts' | 'other';
+
 export interface TransferEntry {
   id: string;
   financialMonthId: string;
   name: string;
+  kind: TransferKind;
   amount: string | number;
   day: number | null;
   fromScope: FinanceScope;
