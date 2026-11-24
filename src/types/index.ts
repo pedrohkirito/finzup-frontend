@@ -1048,3 +1048,30 @@ export interface OwnerDashboard {
   alerts: OwnerDashboardAlert[];
   generatedInMs: number;
 }
+
+// ── WhatsApp (item 8) ──
+export interface WhatsAppLinkView {
+  phoneMasked: string;
+  status: 'pending' | 'verified';
+  verifiedAt: string | null;
+  codeExpiresAt: string | null;
+  alertsEnabled: boolean;
+  weeklyCheckinEnabled: boolean;
+  checkinWeekday: number;
+  checkinHour: number;
+}
+
+export interface WhatsAppStatus {
+  configured: boolean;
+  businessNumber: string | null;
+  featureEnabled: boolean;
+  link: WhatsAppLinkView | null;
+}
+
+export interface WhatsAppLinkStart {
+  code: string;
+  expiresAt: string;
+  messageText: string;
+  waLink: string | null;
+  link: WhatsAppLinkView | null;
+}

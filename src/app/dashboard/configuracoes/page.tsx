@@ -28,6 +28,7 @@ import { SupportChannels } from '@/components/layout/support-channels';
 import { DueDaySelect } from '@/components/payment-methods/due-day-select';
 import { BankAccountsCard } from '@/components/settings/bank-accounts-card';
 import { BusinessScopeCard } from '@/components/settings/business-scope-card';
+import { WhatsAppCard } from '@/components/settings/whatsapp-card';
 import type { PaymentMethod, User as UserProfile } from '@/types';
 import {
   ArrowLeftRight,
@@ -480,6 +481,7 @@ export default function ConfiguracoesPage() {
       {/* ── Contas bancárias e PF/PJ ── */}
       <BankAccountsCard />
       <BusinessScopeCard />
+      <WhatsAppCard />
 
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-sm">
