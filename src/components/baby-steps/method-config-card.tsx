@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Check, Loader2, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { useUpdateMethodConfig } from '@/hooks/use-baby-steps';
 import { ApiError } from '@/lib/api';
@@ -17,8 +17,8 @@ const SUFFIX: Record<string, string> = { percent: '%', months: 'meses', int: '' 
 
 function NumberParam({ param, onCommit, disabled }: { param: MethodParamView; onCommit: (v: number) => void; disabled?: boolean }) {
   const value = Number(param.value);
+  // O valor salvo entra pela key do componente (remonta quando muda), sem efeito para sincronizar.
   const [draft, setDraft] = useState(String(value));
-  useEffect(() => setDraft(String(value)), [value]);
   const commit = () => {
     const n = Number(draft.replace(',', '.'));
     if (!Number.isFinite(n)) return setDraft(String(value));
@@ -46,7 +46,6 @@ function NumberParam({ param, onCommit, disabled }: { param: MethodParamView; on
 function MoneyParam({ param, onCommit, disabled }: { param: MethodParamView; onCommit: (v: number) => void; disabled?: boolean }) {
   const value = Number(param.value);
   const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
   return (
     <div className="min-w-0" onBlur={() => draft !== value && onCommit(Math.min(param.max ?? Infinity, Math.max(param.min ?? 0, draft)))}>
       <CurrencyInput value={draft} onChange={setDraft} aria-label={param.label} disabled={disabled} />
@@ -79,9 +78,9 @@ function ItemRow({ item, bucket, save, busy }: { item: MethodItemView; bucket: B
                 <label key={p.key} className="block min-w-0 space-y-1">
                   <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{p.label}</span>
                   {p.type === 'money' ? (
-                    <MoneyParam param={p} disabled={busy} onCommit={(v) => change({ params: { [p.key]: v } })} />
+                    <MoneyParam key={`${p.key}:${String(p.value)}`} param={p} disabled={busy} onCommit={(v) => change({ params: { [p.key]: v } })} />
                   ) : (
-                    <NumberParam param={p} disabled={busy} onCommit={(v) => change({ params: { [p.key]: v } })} />
+                    <NumberParam key={`${p.key}:${String(p.value)}`} param={p} disabled={busy} onCommit={(v) => change({ params: { [p.key]: v } })} />
                   )}
                   {p.help && <span className="block text-[11px] text-slate-500 dark:text-slate-400">{p.help}</span>}
                 </label>
