@@ -19,6 +19,8 @@ interface ClosePreview {
   investmentGoalToCarry: { targetAmount: string | number } | null;
   /** Aportes recorrentes (opcional para compatibilidade com APIs antigas). */
   investmentsToCarry?: { id: string; name: string; amount: string | number; day?: number | null }[];
+  /** Transferências recorrentes (pró-labore etc.). */
+  transfersToCarry?: { id: string; name: string; amount: string | number; day?: number | null }[];
 }
 
 export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
@@ -132,6 +134,14 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
                   <p className="font-medium">Aportes recorrentes:</p>
                   {preview.investmentsToCarry.map((i) => (
                     <p key={i.id} className="text-slate-500">{i.name} — {formatCurrency(Number(i.amount))}</p>
+                  ))}
+                </div>
+              )}
+              {preview.transfersToCarry && preview.transfersToCarry.length > 0 && (
+                <div>
+                  <p className="font-medium">Transferências recorrentes:</p>
+                  {preview.transfersToCarry.map((t) => (
+                    <p key={t.id} className="text-slate-500">{t.name} — {formatCurrency(Number(t.amount))}</p>
                   ))}
                 </div>
               )}

@@ -33,6 +33,13 @@ export function ScopeBreakdownCard({ breakdown }: { breakdown: ScopeBreakdown })
               <p className="truncate text-xs text-slate-400">
                 Entradas {formatCurrency(totals.totalIncome)} · Saídas {formatCurrency(totals.totalExpenses + totals.totalDonations + totals.totalInvested)}
               </p>
+              {(totals.transfersIn || totals.transfersOut) ? (
+                <p className="truncate text-xs text-slate-400">
+                  Transferências {totals.transfersIn ? `+${formatCurrency(totals.transfersIn)}` : ''}
+                  {totals.transfersIn && totals.transfersOut ? ' / ' : ''}
+                  {totals.transfersOut ? `−${formatCurrency(totals.transfersOut)}` : ''}
+                </p>
+              ) : null}
             </div>
           </div>
         ))}

@@ -495,6 +495,10 @@ export type AiExecutedAction = {
 };
 
 const ACTION_QUERY_KEYS: Record<string, string[][]> = {
+  // Transferências ficam em ['months', id, 'transfers'] e mudam resumo e fluxo do mês.
+  create_transfer: [['months'], ['bank-accounts'], ['auth', 'me'], ['baby-steps']],
+  update_transfer: [['months'], ['bank-accounts'], ['baby-steps']],
+  delete_transfer: [['months'], ['bank-accounts'], ['baby-steps']],
   create_bank_account: [['bank-accounts']],
   update_bank_account: [['bank-accounts'], ['months']],
   delete_bank_account: [
