@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { BudgetSummary, MonthSummary } from '@/types';
+import { budgetTerms, useBusinessView } from '@/hooks/use-finance-scope';
 import { TrendingUp, TrendingDown, Wallet, CreditCard, PiggyBank, Heart, Target, ChevronRight } from 'lucide-react';
 import {
   BalanceDetailDialog,
@@ -49,10 +50,12 @@ function BudgetSection({
     if (a.overBudget !== b.overBudget) return a.overBudget ? -1 : 1;
     return b.progress - a.progress;
   });
+  const business = useBusinessView();
   const totalLimit = sorted.reduce((sum, budget) => sum + budget.limit, 0);
   const totalSpent = sorted.reduce((sum, budget) => sum + budget.spent, 0);
   const totalRemaining = totalLimit - totalSpent;
   const overCount = sorted.filter((budget) => budget.overBudget).length;
+  const budgetsTitle = budgetTerms(business).title;
 
   return (
     <section className="space-y-3">
@@ -60,7 +63,7 @@ function BudgetSection({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orçamentos</h2>
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{budgetsTitle}</h2>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(totalSpent)}</span>

@@ -1,5 +1,6 @@
 'use client';
 
+import { budgetTerms, useBusinessView } from '@/hooks/use-finance-scope';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -325,7 +326,7 @@ function BudgetCard({
   );
 }
 
-function HowBudgetsWork({ onCreate }: { onCreate: () => void }) {
+function HowBudgetsWork({ onCreate, firstLabel }: { onCreate: () => void; firstLabel: string }) {
   return (
     <Card>
       <CardContent className="p-5 sm:p-6">
@@ -343,7 +344,7 @@ function HowBudgetsWork({ onCreate }: { onCreate: () => void }) {
         </ol>
         <Button onClick={onCreate} className="mt-5 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
-          Criar primeiro orçamento
+          {firstLabel}
         </Button>
       </CardContent>
     </Card>
@@ -352,6 +353,7 @@ function HowBudgetsWork({ onCreate }: { onCreate: () => void }) {
 
 export default function OrcamentosPage() {
   const { selectedMonthId } = useMonthStore();
+  const terms = budgetTerms(useBusinessView());
   const { data: months } = useMonths();
   const selectedMonth = months?.find((m) => m.id === selectedMonthId);
   const isMonthOpen = selectedMonth?.status === 'open';
@@ -435,10 +437,10 @@ export default function OrcamentosPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-2xl">
           <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">
-            Orçamentos
+            {terms.title}
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Um teto de gasto por categoria. As despesas lançadas na categoria somam aqui e mostram o que ainda cabe no mês.{' '}
+            {terms.description}{' '}
             <Link href="/dashboard/categorias" className="font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400">
               Gerenciar categorias
             </Link>
@@ -446,7 +448,7 @@ export default function OrcamentosPage() {
         </div>
         <Button onClick={openCreateTemplate} size="sm" className="h-11 w-full sm:h-9 sm:w-auto">
           <Plus className="h-4 w-4" />
-          Novo orçamento
+          {terms.newLabel}
         </Button>
       </div>
 
@@ -483,7 +485,7 @@ export default function OrcamentosPage() {
           <Card className="p-4">
             <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
               <Target className="h-3.5 w-3.5" />
-              Orçamentos planejados
+              {terms.planned}
             </div>
             <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white">
               {formatCurrency(totalLimit)}
@@ -507,7 +509,7 @@ export default function OrcamentosPage() {
       )}
 
       {!pageLoading && sortedBudgets.length === 0 && (
-        <HowBudgetsWork onCreate={openCreateTemplate} />
+        <HowBudgetsWork firstLabel={terms.firstLabel} onCreate={openCreateTemplate} />
       )}
 
       {!pageLoading && sortedBudgets.length > 0 && (
@@ -570,7 +572,7 @@ export default function OrcamentosPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editTemplateId ? 'Editar orçamento' : 'Novo orçamento'}
+              {editTemplateId ? `Editar ${terms.singular}` : terms.newLabel}
             </DialogTitle>
             <DialogDescription>
               {editTemplateId
@@ -644,7 +646,7 @@ export default function OrcamentosPage() {
                 Cancelar
               </Button>
               <Button type="submit">
-                {editTemplateId ? 'Salvar' : 'Criar orçamento'}
+                {editTemplateId ? 'Salvar' : `Criar ${terms.singular}`}
               </Button>
             </DialogFooter>
           </form>
@@ -654,7 +656,7 @@ export default function OrcamentosPage() {
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Tirar o orçamento</DialogTitle>
+            <DialogTitle>Tirar o {terms.singular}</DialogTitle>
             <DialogDescription>
               Tirar o limite de{' '}
               <span className="font-semibold text-slate-800 dark:text-slate-200">

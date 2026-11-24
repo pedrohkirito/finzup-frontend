@@ -33,6 +33,7 @@ import { SupportDialog } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth, useLogout } from '@/hooks/use-auth';
+import { useNavLabel } from '@/hooks/use-finance-scope';
 import { useTheme } from '@/providers/theme-provider';
 import { useAssistant } from '@/providers/assistant-provider';
 import { AssistantActivityMark } from '@/components/assistant/assistant-trigger';
@@ -69,9 +70,10 @@ export function MobileNav() {
   const assistantHasReply = assistantUnread && !assistantLoading;
   const [moreOpen, setMoreOpen] = useState(false);
   const { data: user } = useAuth({ refetchOnWindowFocus: false });
-  const visibleMoreLinks = user?.isAdmin
-    ? [...moreLinks, { href: '/dashboard/interno', icon: Gauge, label: 'Painel interno', isNew: false }]
-    : moreLinks;
+  const navLabel = useNavLabel();
+  const visibleMoreLinks = (
+    user?.isAdmin ? [...moreLinks, { href: '/dashboard/interno', icon: Gauge, label: 'Painel interno', isNew: false }] : moreLinks
+  ).map((link) => ({ ...link, label: navLabel(link.href, link.label) }));
   const [supportOpen, setSupportOpen] = useState(false);
 
   const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));

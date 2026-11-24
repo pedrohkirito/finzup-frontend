@@ -9,12 +9,15 @@ import { ReportIncomeExpenseChart } from '@/components/reports/report-income-exp
 import { ReportIncomeByItemChart } from '@/components/reports/report-income-by-item-chart';
 import { ReportInvestment } from '@/components/reports/report-investment';
 import { ReportMonthlyTrendChart } from '@/components/reports/report-monthly-trend-chart';
-import { useScopeFilter, useScopeLabel } from '@/hooks/use-finance-scope';
+import { useBusinessEnabled, useBusinessView, useScopeFilter, useScopeLabel } from '@/hooks/use-finance-scope';
+import { AccountantNotice } from '@/components/legal/regulatory-notice';
 
 export default function RelatoriosPage() {
   const { selectedMonthId } = useMonthStore();
   const [scope] = useScopeFilter();
   const scopeLabel = useScopeLabel();
+  const business = useBusinessView();
+  const businessEnabled = useBusinessEnabled();
   const { data: report, isLoading } = useMonthReport(selectedMonthId, scope);
 
   if (!selectedMonthId || isLoading) {
@@ -37,13 +40,18 @@ export default function RelatoriosPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">Relatórios</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">
+            {business ? 'Painel gerencial do dono' : 'Relatórios'}
+          </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Análise detalhada de {formatMonth(report.month.year, report.month.month)}
+            {business ? 'Visão gerencial de ' : 'Análise detalhada de '}
+            {formatMonth(report.month.year, report.month.month)}
             {scopeLabel ? ` · ${scopeLabel}` : ''}
           </p>
         </div>
       </div>
+
+      {(business || (businessEnabled && scope === 'all')) && <AccountantNotice />}
 
       {!hasData && (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center dark:border-white/[0.08] dark:bg-white/[0.03]">

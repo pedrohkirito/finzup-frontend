@@ -269,7 +269,8 @@ function TransferForm({
         <Label htmlFor="transferCarryForward">Repetir todo mês</Label>
       </div>
       <p className="text-xs text-slate-400">
-        Não conta como receita nem despesa: sai da origem e entra no destino no mesmo dia do fluxo de caixa.
+        Não conta como receita nem despesa: sai da origem e entra no destino no mesmo dia do fluxo de caixa. Aqui é o
+        controle gerencial; a formalização do pró-labore e das retiradas é com o seu contador.
       </p>
       {(fieldError || error) && <p className="text-sm text-red-500">{fieldError ?? error}</p>}
       <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>

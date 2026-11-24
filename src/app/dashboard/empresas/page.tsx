@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UpgradePrompt } from '@/components/billing/upgrade-prompt';
+import { AccountantNotice } from '@/components/legal/regulatory-notice';
 import type { Space } from '@/types';
 
 function errorMessage(err: unknown) {
@@ -233,6 +234,7 @@ export default function EmpresasPage() {
               }
             />
           )}
+          <AccountantNotice />
         </>
       )}
     </div>

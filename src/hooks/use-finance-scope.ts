@@ -29,6 +29,44 @@ export function useScopeLabel(): string | null {
   return selected ? selected.name : 'Tudo (pessoal + empresas)';
 }
 
+/** Está vendo uma empresa? No lado do dono usamos linguagem gerencial (sem termos contábeis do CRC). */
+export function useBusinessView(): boolean {
+  return useSelectedSpace()?.kind === 'business';
+}
+
+/** Nomes do lado do dono: "orçamento" vira "limite de gasto" e "relatórios" vira "painel gerencial do dono". */
+export const BUSINESS_NAV_LABELS: Record<string, string> = {
+  '/dashboard/orcamentos': 'Limites de gasto',
+  '/dashboard/relatorios': 'Painel do dono',
+};
+
+export function useNavLabel() {
+  const business = useBusinessView();
+  return (href: string, label: string) => (business ? (BUSINESS_NAV_LABELS[href] ?? label) : label);
+}
+
+export function budgetTerms(business: boolean) {
+  return business
+    ? {
+        title: 'Limites de gasto',
+        singular: 'limite de gasto',
+        newLabel: 'Novo limite de gasto',
+        planned: 'Limites planejados',
+        firstLabel: 'Criar primeiro limite de gasto',
+        description:
+          'Um teto de gasto por categoria da empresa. As despesas lançadas na categoria somam aqui e mostram o que ainda cabe no mês.',
+      }
+    : {
+        title: 'Orçamentos',
+        singular: 'orçamento',
+        newLabel: 'Novo orçamento',
+        planned: 'Orçamentos planejados',
+        firstLabel: 'Criar primeiro orçamento',
+        description:
+          'Um teto de gasto por categoria. As despesas lançadas na categoria somam aqui e mostram o que ainda cabe no mês.',
+      };
+}
+
 export const SCOPE_LABELS: Record<ScopeFilter, string> = {
   all: 'Consolidado',
   personal: 'PF',

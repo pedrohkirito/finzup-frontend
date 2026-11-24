@@ -29,6 +29,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { SupportLink } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { useAuth, useLogout } from '@/hooks/use-auth';
+import { useNavLabel } from '@/hooks/use-finance-scope';
 import { useTheme } from '@/providers/theme-provider';
 import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
@@ -57,6 +58,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: user } = useAuth({ refetchOnWindowFocus: false });
   const visibleLinks = user?.isAdmin ? [...links, ADMIN_LINK] : links;
+  const navLabel = useNavLabel();
   const logout = useLogout();
   const { theme, toggle } = useTheme();
 
@@ -84,7 +86,7 @@ export function Sidebar() {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span className="flex min-w-0 flex-1 items-center gap-2">
-                  <span className="truncate">{label}</span>
+                  <span className="truncate">{navLabel(href, label)}</span>
                   {isNew && <NewFeatureBadge />}
                 </span>
               </Link>
