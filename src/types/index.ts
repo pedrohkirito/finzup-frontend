@@ -1002,3 +1002,49 @@ export interface WithdrawalCheck {
   exceedBy: number;
   message: string;
 }
+
+// ── Painel do dono (item 7) ──
+export interface OwnerDashboardAlert {
+  level: 'danger' | 'warning' | 'info';
+  area: 'company' | 'personal';
+  message: string;
+  href?: string;
+  spaceName?: string;
+}
+
+export interface OwnerDashboardCompany {
+  spaceId: string;
+  name: string;
+  cashCurrent: number | null;
+  cashProjectedEnd: number | null;
+  daysOfCash: number | null;
+  avgCosts: number;
+  monthRevenue: number;
+  monthCosts: number;
+  monthProfit: number;
+  sustainable: number;
+  definedAmount: number | null;
+  monthLimit: number;
+  remaining: number;
+  withdrawnTotal: number;
+  withdrawnProLabore: number;
+  withdrawnExtra: number;
+  exceededBy: number;
+}
+
+export interface OwnerDashboard {
+  month: { id: string; year: number; month: number; status: 'open' | 'closed' } | null;
+  companies: OwnerDashboardCompany[];
+  totals: { cashCurrent: number | null; cashKnownFor: number; daysOfCash: number | null; remaining: number; withdrawnTotal: number; monthProfit: number };
+  personal: {
+    cashCurrent: number | null;
+    emergencyFund: { balance: number; target: number; months: number; targetMonths: number };
+    consumerDebt: { total: number; count: number; next: { name: string; remainingBalance: number } | null };
+    homeFinancing: number;
+    monthIncome: number;
+    monthCostOfLiving: number;
+    firstNegativeDay: number | null;
+  };
+  alerts: OwnerDashboardAlert[];
+  generatedInMs: number;
+}

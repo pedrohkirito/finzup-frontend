@@ -20,12 +20,13 @@ const PAGES_WITH_OPENING_FLOW: PageKey[] = [
   'fluxo',
   'importar',
   'pro_labore',
+  'painel_dono',
   'resumo',
   'assistente',
   'metodo',
 ];
 
-const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'importar', 'pro_labore', 'resumo', 'metodo'];
+const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'importar', 'pro_labore', 'painel_dono', 'resumo', 'metodo'];
 
 export type PageSnapshot = {
   incomeCount: number;
@@ -266,6 +267,19 @@ export function getPageFlow(
             'Analise meu fluxo de caixa do mês e diga os dias de aperto e o que mudar de data.',
         },
       };
+    case 'painel_dono':
+      return {
+        ...base,
+        openingMessage: 'Quer que eu leia o painel e diga o que merece atenção primeiro?',
+        openingActions: [
+          yesSuggest('Sim, o que fazer primeiro?', 'Leia meu painel do dono e diga o que merece atenção primeiro e a próxima ação.'),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Ler meu painel',
+          message: 'Leia meu painel do dono: alertas, caixa da empresa, retiradas e lado pessoal.',
+        },
+      };
     case 'pro_labore':
       return {
         ...base,
@@ -390,6 +404,8 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Traga novos insights sobre saldo, cadastros pendentes, orçamentos estourados, economia ou metas do mês.`;
     case 'relatorios':
       return `${avoidRepeat} Traga novos insights sobre gastos, categorias, tendências ou oportunidades de melhoria.`;
+    case 'painel_dono':
+      return `${avoidRepeat} Use o painel do dono: alertas, dias de caixa, retiradas x limite, dívidas e reserva pessoais.`;
     case 'pro_labore':
       return `${avoidRepeat} Olhe o pró-labore: limite do mês, sustentável x definido, retiradas extras e dias de caixa da empresa.`;
     case 'importar':

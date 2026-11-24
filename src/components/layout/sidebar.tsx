@@ -22,6 +22,7 @@ import {
   Building2,
   FileUp,
   HandCoins,
+  Briefcase,
   Gauge,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
@@ -43,6 +44,7 @@ const links = [
   { href: '/dashboard/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/dashboard/fluxo', label: 'Fluxo de caixa', icon: CalendarDays, isNew: true },
   { href: '/dashboard/importar', label: 'Extratos', icon: FileUp, isNew: true },
+  { href: '/dashboard/painel', label: 'Painel do dono', icon: Briefcase, isNew: true },
   { href: '/dashboard/pro-labore', label: 'Pró-labore', icon: HandCoins, isNew: true },
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },

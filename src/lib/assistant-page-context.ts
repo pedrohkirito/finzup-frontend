@@ -11,6 +11,7 @@ export type PageKey =
   | 'fluxo'
   | 'importar'
   | 'pro_labore'
+  | 'painel_dono'
   | 'configuracoes'
   | 'assistente'
   | 'metodo'
@@ -108,6 +109,12 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     description: 'Importação de extrato OFX/CSV: o usuário envia o arquivo, revisa as categorias sugeridas e confirma.',
     guidance:
       'Ajude a revisar a importação em andamento (get_statement_import) e a ajustar linhas ou criar regras (categorize_statement_lines). Só confirme a importação depois do "Confirmo".',
+  },
+  '/dashboard/painel': {
+    key: 'painel_dono',
+    label: 'Painel do dono',
+    description: 'Painel do dono: caixa e dias de caixa das empresas, pró-labore x retiradas, dívidas e reserva pessoais e alertas.',
+    guidance: 'Use get_owner_dashboard. Comece pelo alerta mais grave e diga a próxima ação. Para "posso retirar R$ X?", use get_pro_labore.',
   },
   '/dashboard/pro-labore': {
     key: 'pro_labore',

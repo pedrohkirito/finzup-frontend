@@ -27,6 +27,7 @@ import {
   Building2,
   FileUp,
   HandCoins,
+  Briefcase,
   Gauge,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -59,6 +60,7 @@ const moreLinks = [
   { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },
   { href: '/dashboard/fluxo', icon: CalendarDays, label: 'Fluxo de caixa', isNew: true },
   { href: '/dashboard/importar', icon: FileUp, label: 'Importar extrato', isNew: true },
+  { href: '/dashboard/painel', icon: Briefcase, label: 'Painel do dono', isNew: true },
   { href: '/dashboard/pro-labore', icon: HandCoins, label: 'Pró-labore', isNew: true },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },
   { href: '/dashboard/doacoes', icon: Heart, label: 'Doações' },
