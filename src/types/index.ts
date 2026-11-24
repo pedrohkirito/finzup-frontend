@@ -104,9 +104,23 @@ export interface SpaceTotals extends ScopeTotals {
   archived?: boolean;
 }
 
+export type AccountKind = 'bank' | 'cash' | 'card' | 'other';
+
 export interface BankAccount {
   id: string;
   name: string;
+  /** Banco, dinheiro, cartão pré-pago/benefício ou outra carteira. */
+  kind: AccountKind;
+  /** Espaço dono da conta (pessoal ou empresa); null = sem espaço. */
+  spaceId: string | null;
+  initialBalance: number;
+  /** AAAA-MM-DD; o saldo inicial vale do começo desse mês. */
+  initialBalanceDate: string;
+  /** Inicial + entradas − saídas na conta até hoje. */
+  currentBalance: number;
+  /** Inclui o resto do mês corrente e os meses futuros já criados. */
+  projectedBalance: number;
+  projectedUntil: { year: number; month: number };
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -312,7 +326,7 @@ export interface TransferTotals {
   net: number;
 }
 
-export type TransferKind = 'pro_labore' | 'profit_distribution' | 'capital_contribution' | 'between_accounts' | 'other';
+export type TransferKind = 'pro_labore' | 'profit_distribution' | 'capital_contribution' | 'between_accounts' | 'withdrawal' | 'other';
 
 export interface TransferEntry {
   id: string;

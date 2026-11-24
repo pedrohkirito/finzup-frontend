@@ -30,6 +30,7 @@ import type { FinanceScope, TransferEntry, TransferKind } from '@/types';
 const KIND_OPTIONS: { value: TransferKind; label: string }[] = [
   { value: 'pro_labore', label: 'Pró-labore' },
   { value: 'profit_distribution', label: 'Distribuição de lucros' },
+  { value: 'withdrawal', label: 'Retirada' },
   { value: 'capital_contribution', label: 'Aporte na empresa' },
   { value: 'between_accounts', label: 'Entre contas' },
   { value: 'other', label: 'Outra' },
@@ -41,7 +42,7 @@ const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 const schema = z
   .object({
-    kind: z.enum(['pro_labore', 'profit_distribution', 'capital_contribution', 'between_accounts', 'other']),
+    kind: z.enum(['pro_labore', 'profit_distribution', 'capital_contribution', 'between_accounts', 'withdrawal', 'other']),
     name: z.string().max(200),
     amount: z.number().positive('Valor deve ser positivo'),
     fromSpaceId: z.string().min(1, 'Escolha a origem.'),
