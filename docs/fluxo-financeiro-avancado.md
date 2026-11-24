@@ -32,26 +32,30 @@ Tudo é opcional. Quem não usar nada disso continua vendo e cadastrando exatame
 - **Bloco "Sem data · início do mês":** explica a regra e lista o que entra ali.
 - **Dia a dia:** por padrão mostra só os dias com movimento (há a opção "Mostrar todos os dias"). Hoje fica destacado e os dias passados ficam esmaecidos. A fatura do cartão abre para mostrar as compras que a compõem.
 - **Quebra por conta e PF × PJ:** aparece quando faz sentido.
+- **Transferências** (só com o PJ ligado): cartão no fim da página para cadastrar, editar e remover pró-labore, distribuição de lucros, aporte na empresa e transferências entre contas. Campos: tipo, valor, direção (PJ → PF, PF → PJ ou entre contas do mesmo lado), conta de origem e de destino (opcionais), dia (opcional), nome (opcional, padrão = tipo) e "Repetir todo mês". No dia a dia, a transferência aparece com ponto azul e a rota ("PJ → PF · Inter → Nubank"). Quando os dois lados estão no filtro, aparece com "⇄" em cinza e "não muda o saldo".
+- **De propósito, é mínimo:** a próxima etapa troca PF/PJ por espaços separados, e o cartão vai passar a escolher espaço de origem e de destino em vez da direção.
 
 ## Regras mostradas ao usuário
 
 - **Sem data:** o lançamento conta no **início do mês**.
 - **Cartão de crédito:** as compras entram como uma saída só, **"Fatura <cartão>"**, no dia do vencimento. Por isso o saldo final do fluxo pode ser menor que o do Resumo, que deixa a fatura em aberto para o mês seguinte.
 - **Visão Consolidado/PF/PJ:** a escolha fica guardada no navegador (`localStorage`, chave `finzup:scope-filter`) e vale para Resumo, Relatórios e Fluxo. Com o PJ desligado, a visão é sempre o consolidado.
+- **Transferência não é receita nem despesa:** não entra nos totais de receitas/despesas. No resumo PF × PJ, cada lado mostra "Transferências +X / −Y" e o saldo do lado já as considera. No consolidado, PF ↔ PJ se anula.
 - **Salvar um lançamento PJ** liga o PJ automaticamente (o backend faz isso), e a interface passa a mostrar as opções de PF/PJ.
 
 ## Assistente
 
 - **Página do fluxo:** a página tem `pageKey: 'fluxo'`, com sugestão de abertura "analisar os dias de aperto". Ali a IA responde com o fluxo de caixa e pode ajustar dia, conta ou PF/PJ de lançamentos (com confirmação).
-- **Atualização das telas:** depois de ações da IA com contas bancárias e de `set_entry_details`, as listas, o resumo e o fluxo são recarregados. Depois de qualquer cadastro, contas e perfil também são recarregados, porque a IA pode ter criado uma conta pelo nome ou ligado o PJ.
+- **Atualização das telas:** depois de ações da IA com contas bancárias e de `set_entry_details`, as listas, o resumo e o fluxo são recarregados. Depois de `create/update/delete_transfer`, o mês (resumo, fluxo, transferências), as contas e o Método são recarregados. Depois de qualquer cadastro, contas e perfil também são recarregados, porque a IA pode ter criado uma conta pelo nome ou ligado o PJ.
 
 ## Código
 
-- **Tipos:** `src/types/index.ts` (`BankAccount`, `EntryExtras`, `FinanceScope`, `ScopeFilter`, `CashFlow*`, `ScopeBreakdown`).
-- **Hooks:** `use-bank-accounts.ts`, `use-cash-flow.ts`, `use-finance-scope.ts` (`useScopeFilter`, `useBusinessEnabled`) e `use-month-summary.ts` (que agora aceita o `scope`).
+- **Tipos:** `src/types/index.ts` (`BankAccount`, `EntryExtras`, `FinanceScope`, `ScopeFilter`, `CashFlow*`, `ScopeBreakdown`, `TransferEntry`, `TransferKind`, `TransferTotals`).
+- **Hooks:** `use-bank-accounts.ts`, `use-cash-flow.ts`, `use-transfers.ts`, `use-finance-scope.ts` (`useScopeFilter`, `useBusinessEnabled`) e `use-month-summary.ts` (que agora aceita o `scope`).
 - **Componentes:**
   - `components/finance/`: `entry-extras-fields.tsx` (o bloco "Mais detalhes" e o `entryExtrasFormShape` para os schemas zod), `entry-extras-meta.tsx`, `scope-switch.tsx` e `segmented-control.tsx`;
   - `components/settings/`: `bank-accounts-card.tsx` e `business-scope-card.tsx`;
   - `components/payment-methods/due-day-select.tsx`;
   - `components/fluxo/`: o gráfico, as movimentações e os rótulos;
+  - `components/transfers/transfers-card.tsx`;
   - `components/dashboard/scope-breakdown-card.tsx`.
