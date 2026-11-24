@@ -24,13 +24,14 @@ import {
   Loader2,
   Crown,
   Tags,
+  Gauge,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SupportDialog } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useLogout } from '@/hooks/use-auth';
+import { useAuth, useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 import { useAssistant } from '@/providers/assistant-provider';
 import { AssistantActivityMark } from '@/components/assistant/assistant-trigger';
@@ -65,6 +66,10 @@ export function MobileNav() {
   const { openAssistant, loading: assistantLoading, unread: assistantUnread } = useAssistant();
   const assistantHasReply = assistantUnread && !assistantLoading;
   const [moreOpen, setMoreOpen] = useState(false);
+  const { data: user } = useAuth({ refetchOnWindowFocus: false });
+  const visibleMoreLinks = user?.isAdmin
+    ? [...moreLinks, { href: '/dashboard/interno', icon: Gauge, label: 'Painel interno', isNew: false }]
+    : moreLinks;
   const [supportOpen, setSupportOpen] = useState(false);
 
   const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));
@@ -185,7 +190,7 @@ export function MobileNav() {
             <DialogTitle>Mais opções</DialogTitle>
           </DialogHeader>
           <div className="space-y-1">
-            {moreLinks.map(({ href, icon: Icon, label, isNew }) => {
+            {visibleMoreLinks.map(({ href, icon: Icon, label, isNew }) => {
               const active = isNavLinkActive(pathname, href);
               return (
                 <Link

@@ -19,6 +19,7 @@ import {
   Footprints,
   Crown,
   Tags,
+  Gauge,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -26,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SupportLink } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
-import { useLogout } from '@/hooks/use-auth';
+import { useAuth, useLogout } from '@/hooks/use-auth';
 import { useTheme } from '@/providers/theme-provider';
 import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
@@ -48,8 +49,12 @@ const links = [
   { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
+const ADMIN_LINK = { href: '/dashboard/interno', label: 'Painel interno', icon: Gauge, isNew: false };
+
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: user } = useAuth({ refetchOnWindowFocus: false });
+  const visibleLinks = user?.isAdmin ? [...links, ADMIN_LINK] : links;
   const logout = useLogout();
   const { theme, toggle } = useTheme();
 
@@ -64,7 +69,7 @@ export function Sidebar() {
 
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-1 pr-2">
-            {links.map(({ href, label, icon: Icon, isNew }) => (
+            {visibleLinks.map(({ href, label, icon: Icon, isNew }) => (
               <Link
                 key={href}
                 href={href}

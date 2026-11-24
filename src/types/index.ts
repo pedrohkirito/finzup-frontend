@@ -26,6 +26,8 @@ export interface User {
   billing: UserBilling;
   /** Plano do catálogo e recursos liberados agora. */
   plan?: PlanEntitlements & { name: string };
+  /** Equipe Finzup: vê o painel interno. */
+  isAdmin?: boolean;
   aiCredits?: {
     balance: number;
     included: number;
@@ -728,4 +730,64 @@ export interface BillingHistoryItem {
   paidAt: string | null;
   invoiceUrl: string | null;
   createdAt: string;
+}
+
+// ---------- Painel interno (equipe) ----------
+
+export interface ValidationSignal {
+  key: string;
+  label: string;
+  target: string;
+  value: number | null;
+  unit: 'count' | 'percent';
+  status: 'ok' | 'attention' | 'no_data';
+  detail: string;
+}
+
+export interface AdminMetrics {
+  generatedAt: string;
+  signals: ValidationSignal[];
+  users: {
+    total: number;
+    new7d: number;
+    new30d: number;
+    new90d: number;
+    withBusiness: number;
+    byEffectiveTier: Partial<Record<PlanTier, number>>;
+    payingDono: number;
+  };
+  engagement: {
+    wau: number;
+    mau: number;
+    retentionD7: { eligible: number; retained: number; rate: number | null };
+    retentionD30: { eligible: number; retained: number; rate: number | null };
+    activationRate30d: number | null;
+    activatedTotal: number;
+  };
+  ai: {
+    messages7d: number;
+    messages30d: number;
+    users30d: number;
+    messagesPerUser30d: number | null;
+    entriesByAiShare30d: number | null;
+  };
+  activity: {
+    entries30d: number;
+    imports30d: number;
+    checkinsSent30d: number;
+    checkinsAnswered30d: number;
+    checkinResponseRate30d: number | null;
+    upgrades30d: number;
+  };
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  planTier: PlanTier;
+  effectiveTier: PlanTier;
+  billingStatus: string;
+  currentPeriodEnd: string | null;
 }
