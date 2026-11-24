@@ -33,13 +33,13 @@ Tudo é opcional. Quem não usar nada disso continua vendo e cadastrando exatame
 - **Dia a dia:** por padrão mostra só os dias com movimento (há a opção "Mostrar todos os dias"). Hoje fica destacado e os dias passados ficam esmaecidos. A fatura do cartão abre para mostrar as compras que a compõem.
 - **Quebra por conta e PF × PJ:** aparece quando faz sentido.
 - **Transferências** (só com o PJ ligado): cartão no fim da página para cadastrar, editar e remover pró-labore, distribuição de lucros, aporte na empresa e transferências entre contas. Campos: tipo, valor, direção (PJ → PF, PF → PJ ou entre contas do mesmo lado), conta de origem e de destino (opcionais), dia (opcional), nome (opcional, padrão = tipo) e "Repetir todo mês". No dia a dia, a transferência aparece com ponto azul e a rota ("PJ → PF · Inter → Nubank"). Quando os dois lados estão no filtro, aparece com "⇄" em cinza e "não muda o saldo".
-- **De propósito, é mínimo:** a próxima etapa troca PF/PJ por espaços separados, e o cartão vai passar a escolher espaço de origem e de destino em vez da direção.
+- **Espaços (fase 1):** o cartão escolhe espaço de origem e de destino ("De" / "Para") em vez da direção, e ganhou o tipo **Retirada** (padrão empresa → Pessoal).
 
 ## Regras mostradas ao usuário
 
 - **Sem data:** o lançamento conta no **início do mês**.
 - **Cartão de crédito:** as compras entram como uma saída só, **"Fatura <cartão>"**, no dia do vencimento. Por isso o saldo final do fluxo pode ser menor que o do Resumo, que deixa a fatura em aberto para o mês seguinte.
-- **Visão Consolidado/PF/PJ:** a escolha fica guardada no navegador (`localStorage`, chave `finzup:scope-filter`) e vale para Resumo, Relatórios e Fluxo. Com o PJ desligado, a visão é sempre o consolidado.
+- **Espaço aberto:** desde a fase 1, a troca Consolidado/PF/PJ virou o seletor de espaço no topo (ver abaixo). A escolha fica em `localStorage` (`finzup:space`) e vale para todas as telas.
 - **Transferência não é receita nem despesa:** não entra nos totais de receitas/despesas. No resumo PF × PJ, cada lado mostra "Transferências +X / −Y" e o saldo do lado já as considera. No consolidado, PF ↔ PJ se anula.
 - **Salvar um lançamento PJ** liga o PJ automaticamente (o backend faz isso), e a interface passa a mostrar as opções de PF/PJ.
 
@@ -48,13 +48,28 @@ Tudo é opcional. Quem não usar nada disso continua vendo e cadastrando exatame
 - **Página do fluxo:** a página tem `pageKey: 'fluxo'`, com sugestão de abertura "analisar os dias de aperto". Ali a IA responde com o fluxo de caixa e pode ajustar dia, conta ou PF/PJ de lançamentos (com confirmação).
 - **Atualização das telas:** depois de ações da IA com contas bancárias e de `set_entry_details`, as listas, o resumo e o fluxo são recarregados. Depois de `create/update/delete_transfer`, o mês (resumo, fluxo, transferências), as contas e o Método são recarregados. Depois de qualquer cadastro, contas e perfil também são recarregados, porque a IA pode ter criado uma conta pelo nome ou ligado o PJ.
 
+## Fase 1 do Dono
+
+| Tela | O que mudou |
+|---|---|
+| **Seletor de espaço** (topo do painel, desktop e celular) | "Tudo (consolidado)", "Pessoal", cada empresa e "Gerenciar empresas". Só aparece para quem tem empresa. Trocar recarrega os dados da tela; o `api.ts` manda o header `X-Finzup-Space`. |
+| **Empresas** (`/dashboard/empresas`, novo no menu) | Criar (nome + CNPJ opcional), renomear, arquivar e excluir (só vazia). Sem o recurso no plano, mostra o convite de upgrade. Empresas acima do limite do plano aparecem bloqueadas. Aviso do contador (CRC). |
+| **Formulários de lançamento** | O bloco "Mais detalhes" troca PF/PJ por **Espaço**; as categorias oferecidas são as do espaço escolhido. A etiqueta do card mostra o nome da empresa quando há mais de uma. |
+| **Categorias** (`/dashboard/categorias`) | Criar, renomear, arquivar e restaurar categorias de despesa e receita, por espaço; botão para adicionar o conjunto padrão PF ou PJ. Os formulários criam categoria na hora ("+ Nova categoria"). |
+| **Linguagem na empresa** (CRC) | Com uma empresa aberta: "Orçamentos" vira **"Limites de gasto"** e "Relatórios" vira **"Painel do dono"** / "Painel gerencial do dono", com o aviso de que formalização é com o contador. |
+| **Planos** (`/dashboard/planos`) | Catálogo vindo do backend, assinatura e upgrade via Asaas (PIX com QR code ou cartão), histórico de cobranças. CFO de bolso e Conselho por contato. |
+| **Painel interno** (`/dashboard/interno`) | Só para a equipe (`ADMIN_EMAILS` no backend): sinais de validação, métricas de uso e retenção e troca manual de plano. |
+| **Contas e carteiras** (Configurações, `#contas`) | Tipo (banco, dinheiro, cartão pré-pago/benefício, outra), espaço, saldo inicial com o mês, **saldo atual** e "previsto R$ X em dez/26", e o saldo somado. Adicionar abre a edição para informar o saldo inicial. |
+| **Simulador de investimentos** (CVM) | Aviso de rentabilidade hipotética e de que o Finzup não indica investimentos, com encaminhamento a um consultor CVM. |
+
 ## Código
 
 - **Tipos:** `src/types/index.ts` (`BankAccount`, `EntryExtras`, `FinanceScope`, `ScopeFilter`, `CashFlow*`, `ScopeBreakdown`, `TransferEntry`, `TransferKind`, `TransferTotals`).
 - **Hooks:** `use-bank-accounts.ts`, `use-cash-flow.ts`, `use-transfers.ts`, `use-finance-scope.ts` (`useScopeFilter`, `useBusinessEnabled`) e `use-month-summary.ts` (que agora aceita o `scope`).
 - **Componentes:**
-  - `components/finance/`: `entry-extras-fields.tsx` (o bloco "Mais detalhes" e o `entryExtrasFormShape` para os schemas zod), `entry-extras-meta.tsx`, `scope-switch.tsx` e `segmented-control.tsx`;
-  - `components/settings/`: `bank-accounts-card.tsx` e `business-scope-card.tsx`;
+  - `components/finance/`: `entry-extras-fields.tsx` (o bloco "Mais detalhes" e o `entryExtrasFormShape` para os schemas zod), `entry-extras-meta.tsx`, e `segmented-control.tsx` (o `scope-switch.tsx` saiu na fase 1);
+  - `components/settings/`: `bank-accounts-card.tsx` (contas com saldo) e o cartão Empresas;
+  - `components/spaces/space-switcher.tsx`, `hooks/use-spaces.ts` e `lib/space-store.ts` (espaços);
   - `components/payment-methods/due-day-select.tsx`;
   - `components/fluxo/`: o gráfico, as movimentações e os rótulos;
   - `components/transfers/transfers-card.tsx`;
