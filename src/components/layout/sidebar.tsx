@@ -17,6 +17,7 @@ import {
   CalendarDays,
   CalendarRange,
   Footprints,
+  Crown,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -41,6 +42,7 @@ const links = [
   { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange },
   { href: '/dashboard/investimentos', label: 'Investimentos', icon: PiggyBank },
   { href: '/dashboard/doacoes', label: 'Doações', icon: Heart },
+  { href: '/dashboard/planos', label: 'Planos', icon: Crown },
   { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },
 ];
 

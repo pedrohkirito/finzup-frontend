@@ -24,6 +24,8 @@ export interface User {
   /** Liga o fluxo PJ (separação PF/PJ) na interface. */
   businessEnabled?: boolean;
   billing: UserBilling;
+  /** Plano do catálogo e recursos liberados agora. */
+  plan?: PlanEntitlements & { name: string };
   aiCredits?: {
     balance: number;
     included: number;
@@ -611,4 +613,95 @@ export interface CashFlow {
   };
   byAccount: { bankAccountId: string | null; name: string; inflow: number; outflow: number; net: number }[];
   byScope: { scope: FinanceScope; inflow: number; outflow: number; net: number }[];
+}
+
+// ---------- Planos (catálogo, recursos e upgrade) ----------
+
+export type PlanTier = 'free' | 'essencial' | 'dono' | 'cfo' | 'conselho';
+export type PlanCycle = 'monthly' | 'annual';
+export type PlanFeature =
+  | 'core_finance'
+  | 'ai_assistant'
+  | 'business_spaces'
+  | 'multiple_companies'
+  | 'statement_import'
+  | 'owner_dashboard'
+  | 'whatsapp_ai'
+  | 'export'
+  | 'human_review'
+  | 'council';
+
+export interface PlanPrice {
+  value: number;
+  monthlyEquivalent: number;
+  intervalMonths: number;
+  aiCreditsIncluded: number;
+  compareAt?: number;
+}
+
+export interface PlanCatalogEntry {
+  tier: PlanTier;
+  name: string;
+  audience: 'pf' | 'dono';
+  tagline: string;
+  checkout: 'self_service' | 'contact' | 'none';
+  available: boolean;
+  prices: Partial<Record<PlanCycle, PlanPrice>>;
+  setupFee: number | null;
+  minimumMonths: number | null;
+  features: PlanFeature[];
+  limits: { maxBusinessSpaces: number };
+  highlights: string[];
+}
+
+export interface PlanCatalog {
+  plans: PlanCatalogEntry[];
+  salesContactUrl: string;
+}
+
+export interface PlanEntitlements {
+  tier: PlanTier;
+  effectiveTier: PlanTier;
+  features: PlanFeature[];
+  limits: { maxBusinessSpaces: number };
+}
+
+export interface MyPlan extends PlanEntitlements {
+  planName: string;
+  cycle: PlanCycle | null;
+  hasAccess: boolean;
+  provider: 'asaas' | 'stripe' | null;
+  pendingUpgrade: { id: string; planTier: PlanTier; plan: string; paymentMethod: string; createdAt: string } | null;
+}
+
+export interface UpgradeStartResponse {
+  orderId: string;
+  status: 'paid' | 'awaiting_payment';
+  tier: PlanTier;
+  amount: number;
+  checkoutUrl?: string;
+  pix?: { encodedImage: string; payload: string; expirationDate: string };
+}
+
+export interface UpgradeStatus {
+  orderId: string;
+  status: 'pending' | 'awaiting_payment' | 'paid' | 'expired' | 'canceled';
+  tier: PlanTier;
+  paidAt: string | null;
+}
+
+export interface BillingHistoryItem {
+  id: string;
+  provider: string;
+  planTier: PlanTier | null;
+  planName: string | null;
+  billingPlan: 'monthly' | 'semester' | 'annual' | null;
+  amount: number;
+  status: 'pending' | 'paid' | 'overdue' | 'refunded' | 'canceled';
+  billingType: string | null;
+  description: string | null;
+  dueDate: string | null;
+  paidAt: string | null;
+  invoiceUrl: string | null;
+  createdAt: string;
 }

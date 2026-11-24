@@ -582,11 +582,14 @@ export default function ConfiguracoesPage() {
                 )}
               </div>
             </div>
-            {user?.billing?.plan && (
+            {(user?.plan || user?.billing?.plan) && (
               <div className="text-right">
                 <p className="text-xs font-medium text-slate-500">Plano</p>
                 <p className="mt-0.5 font-semibold text-slate-900 dark:text-white">
-                  {planLabels[user.billing.plan] ?? user.billing.plan}
+                  {user?.plan?.name ?? 'Finzup'}
+                  {user?.billing?.plan && (
+                    <span className="font-normal text-slate-500"> · {planLabels[user.billing.plan] ?? user.billing.plan}</span>
+                  )}
                 </p>
               </div>
             )}
@@ -601,11 +604,19 @@ export default function ConfiguracoesPage() {
                 <Sparkles className="h-4 w-4" />
                 Assinar agora
               </Button>
-            ) : canCancelSubscription ? (
-              <Button variant="outline" onClick={() => setCancelDialogOpen(true)}>
-                Cancelar assinatura
-              </Button>
-            ) : null}
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => router.push('/dashboard/planos')}>
+                  <Crown className="h-4 w-4" />
+                  Ver planos e cobranças
+                </Button>
+                {canCancelSubscription && (
+                  <Button variant="ghost" onClick={() => setCancelDialogOpen(true)}>
+                    Cancelar assinatura
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

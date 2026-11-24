@@ -22,6 +22,7 @@ import {
   Footprints,
   Headset,
   Loader2,
+  Crown,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ const moreLinks = [
   { href: '/dashboard/fluxo', icon: CalendarDays, label: 'Fluxo de caixa', isNew: true },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },
   { href: '/dashboard/doacoes', icon: Heart, label: 'Doações' },
+  { href: '/dashboard/planos', icon: Crown, label: 'Planos' },
   { href: '/dashboard/configuracoes', icon: Settings, label: 'Configurações' },
 ];
 
