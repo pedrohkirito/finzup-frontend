@@ -94,7 +94,10 @@ export function AssistantChat({
     babyStep: babySteps?.currentStep,
   });
   if (babySteps?.currentStep) {
-    const stepGuidance = getBabyStepPageGuidance(screen.pageKey, babySteps.currentStep);
+    const stepGuidance = getBabyStepPageGuidance(screen.pageKey, babySteps.currentStep, {
+      investPercent: babySteps.metrics.investTargetPercent,
+      tithePercent: babySteps.metrics.titheTargetPercent,
+    });
     if (stepGuidance) {
       screen.pageContext += `\n\nFoco do Baby Step ${babySteps.currentStep} nesta tela: ${stepGuidance}`;
       screen.pageContext += `\nPróxima ação do método: ${babySteps.nextAction.label}`;

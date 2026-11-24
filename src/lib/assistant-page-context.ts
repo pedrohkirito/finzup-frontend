@@ -52,7 +52,7 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Orçamentos',
     description: 'Página de orçamentos por categoria com limites mensais.',
     guidance:
-      'Priorize definir limites por categoria e identificar estouros. Alinhe ao Baby Step e aos princípios (10% lazer, 10% dízimo, 15% investir).',
+      'Priorize definir limites por categoria e identificar estouros. Alinhe ao Baby Step e aos princípios que o usuário mantém ligados no Método (padrão: 10% lazer, 10% dízimo, 15% investir).',
   },
   '/dashboard/planejamento': {
     key: 'planejamento',
@@ -80,7 +80,7 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Doações',
     description: 'Página de doações do mês selecionado.',
     guidance:
-      'Priorize cadastro de doações com nome e valor. Proteja o dízimo de 10% em qualquer Baby Step.',
+      'Priorize cadastro de doações com nome e valor. Se o dízimo estiver ligado no Método, proteja o % definido pelo usuário (padrão 10%) em qualquer Baby Step; se estiver desligado, doações são escolha livre.',
   },
   '/dashboard/metodo': {
     key: 'metodo',
@@ -159,7 +159,7 @@ export function getAssistantPageContext(pathname: string): AssistantPageContext 
 
 export function buildPageContextPayload(
   pathname: string,
-  overrides?: { pageKey?: PageKey; babyStep?: 1 | 2 | 3 | 4 | 5 | 6 },
+  overrides?: { pageKey?: PageKey; babyStep?: number },
 ): {
   pageKey: PageKey;
   pageLabel: string;

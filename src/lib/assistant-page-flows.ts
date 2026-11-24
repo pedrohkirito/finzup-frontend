@@ -596,6 +596,7 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   create_categorization_rule: [['categorization-rules'], ['categories']],
   delete_categorization_rule: [['categorization-rules']],
   set_pro_labore: [['pro-labore'], ['owner-dashboard']],
+  update_method_settings: [['baby-steps'], ['ai', 'suggestions'], ['owner-dashboard']],
   start_whatsapp_link: [['whatsapp']],
   update_whatsapp_preferences: [['whatsapp']],
   record_owner_withdrawal: [['pro-labore'], ['owner-dashboard'], ['months'], ['bank-accounts'], ['baby-steps']],

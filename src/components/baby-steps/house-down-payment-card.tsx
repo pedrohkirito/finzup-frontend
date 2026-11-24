@@ -68,7 +68,7 @@ export function HouseDownPaymentCard({ state }: HouseDownPaymentCardProps) {
       <CardContent className="space-y-4">
         {state.metrics.hasHomeFinancing && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-500/20 dark:bg-amber-500/[0.08]">
-            Financiamento ativo detectado. Foque em 15% investidos + amortizar com a sobra.
+            Financiamento ativo detectado. Foque nos investimentos do mês + amortizar com a sobra.
             <ul className="mt-2 space-y-1">
               {state.metrics.homeFinancings.map((f) => (
                 <li key={f.id} className="flex justify-between gap-2">

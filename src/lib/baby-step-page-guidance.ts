@@ -70,9 +70,34 @@ const STEP_PAGE_GUIDANCE: Partial<
   },
 };
 
-export function getBabyStepPageGuidance(
-  pageKey: PageKey,
-  step: 1 | 2 | 3 | 4 | 5 | 6,
-): string | null {
-  return STEP_PAGE_GUIDANCE[pageKey]?.[step] ?? null;
+export type MethodGuidanceOptions = {
+  investPercent?: number | null;
+  tithePercent?: number | null;
+  /** Texto para a tela (sem as instruções à IA): com o dízimo desligado, tira as menções ou esconde a dica. */
+  forUser?: boolean;
+};
+
+/**
+ * Texto da etapa nesta tela, com os números do Método do usuário (investir X%, dízimo Y%).
+ * Se o dízimo estiver desligado, avisa para ignorar as menções (a configuração vem completa no contexto do servidor).
+ */
+export function getBabyStepPageGuidance(pageKey: PageKey, step: number, opts: MethodGuidanceOptions = {}): string | null {
+  let text = STEP_PAGE_GUIDANCE[pageKey]?.[step as 1 | 2 | 3 | 4 | 5 | 6] ?? null;
+  if (!text) return null;
+  if (opts.investPercent != null) text = text.replace(/15%/g, `${opts.investPercent}%`);
+  if (opts.tithePercent != null) {
+    text = text.replace(/10% (de )?dízimo/gi, `${opts.tithePercent}% $1dízimo`).replace(/dízimo (de )?10%/gi, `dízimo $1${opts.tithePercent}%`);
+  } else if (opts.tithePercent === null && /dízimo/i.test(text)) {
+    if (opts.forUser) {
+      text = text
+        .replace(/ \+ 10% dízimo/g, '')
+        .replace(/\/dízimo/g, '')
+        .replace(/ e dízimo/g, '')
+        .replace(/ \(após dízimo\)/g, '');
+      if (/dízimo/i.test(text)) return null;
+    } else {
+      text += ' (O usuário desligou o dízimo no Método: ignore as menções a dízimo.)';
+    }
+  }
+  return text;
 }

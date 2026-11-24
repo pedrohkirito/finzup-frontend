@@ -561,7 +561,8 @@ export interface SimulationSuggestions {
   suggestedMonthlyContribution: number;
 }
 
-export type BabyStepNumber = 1 | 2 | 3 | 4 | 5 | 6;
+/** Número da etapa do Método (1–6 hoje; 0 = todas desligadas). */
+export type BabyStepNumber = number;
 
 export interface BabyStepDebtItem {
   id: string;
@@ -579,16 +580,63 @@ export interface BabyStepNextAction {
 }
 
 export interface BabyStepDefinition {
+  key: string;
   step: BabyStepNumber;
   title: string;
   shortTitle: string;
   description: string;
-  status: 'completed' | 'current' | 'locked';
+  enabled: boolean;
+  status: 'completed' | 'current' | 'locked' | 'disabled';
   progressPercent: number;
+}
+
+export interface MethodParamView {
+  key: string;
+  label: string;
+  type: 'money' | 'percent' | 'months' | 'int' | 'boolean';
+  default: number | boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  help?: string;
+  value: number | boolean;
+}
+
+export interface MethodItemView {
+  key: string;
+  step?: number;
+  title: string;
+  shortTitle?: string;
+  description: string;
+  enabled: boolean;
+  params: MethodParamView[];
+}
+
+export interface MethodGoals {
+  income: number;
+  items: Array<{ key: string; label: string; percent: number; amount: number; source: 'principle' | 'step' }>;
+  committedPercent: number;
+  freePercent: number;
+  freeAmount: number;
+}
+
+export interface MethodConfigItemInput {
+  key: string;
+  enabled?: boolean;
+  params?: Record<string, number | boolean>;
+}
+
+export interface MethodConfigInput {
+  steps?: MethodConfigItemInput[];
+  principles?: MethodConfigItemInput[];
+  reset?: boolean;
 }
 
 export interface BabyStepState {
   currentStep: BabyStepNumber;
+  currentKey: string | null;
+  goals: MethodGoals;
+  config: { steps: MethodItemView[]; principles: MethodItemView[] };
   progressPercent: number;
   nextAction: BabyStepNextAction;
   steps: BabyStepDefinition[];
@@ -607,9 +655,11 @@ export interface BabyStepState {
     totalIncome: number;
     totalInvested: number;
     investmentPercentOfIncome: number;
+    investTargetPercent: number | null;
     investmentTarget15: number;
     donationsTotal: number;
     tithePercentOfIncome: number;
+    titheTargetPercent: number | null;
     houseDownPaymentTarget: number | null;
     houseDownPaymentSaved: number;
     houseDownPaymentProgress: number;
