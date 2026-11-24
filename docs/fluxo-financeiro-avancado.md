@@ -62,6 +62,23 @@ Tudo é opcional. Quem não usar nada disso continua vendo e cadastrando exatame
 | **Contas e carteiras** (Configurações, `#contas`) | Tipo (banco, dinheiro, cartão pré-pago/benefício, outra), espaço, saldo inicial com o mês, **saldo atual** e "previsto R$ X em dez/26", e o saldo somado. Adicionar abre a edição para informar o saldo inicial. |
 | **Simulador de investimentos** (CVM) | Aviso de rentabilidade hipotética e de que o Finzup não indica investimentos, com encaminhamento a um consultor CVM. |
 
+## Fase 2 do Dono
+
+| Tela | O que faz |
+|---|---|
+| **Extratos** (`/dashboard/importar`) | Envio de OFX ou CSV. Na revisão, cada linha tem categoria sugerida (por regra, histórico ou IA), duplicadas marcadas, ignorar e criar regra. Depois vêm a confirmação, o histórico e o desfazer. |
+| **Pró-labore** (`/dashboard/pro-labore`) | Limite sustentável do mês por empresa (reserva mínima), "Posso retirar R$ X?", registro de retirada com alerta de retirada extra e histórico de definido × retirado. |
+| **Painel do dono** (`/dashboard/painel`) | Caixa e dias de caixa por empresa, retiradas × limite, dívidas e reserva pessoais e alertas. Tem botão de exportação. |
+| **WhatsApp** (Configurações, `#whatsapp`) | Vincula o número com um código enviado como "FINZUP <código>": copiar, abrir o WhatsApp, contagem regressiva, gerar novo código e trocar número. Vinculado, mostra o número mascarado e permite ligar alertas e o check-in semanal (dia e hora), com exemplos do que mandar. Sem o servidor configurado, explica por que não dá para vincular. |
+| **Exportação** (Resumo, Relatórios e Painel) | "Exportar mês" baixa o PDF do fechamento em 1 clique. A seta abre a escolha entre Fechamento, Lançamentos, Relatório e Painel do dono, cada um em PDF ou CSV. Sem o recurso no plano, aparece um link para os planos. |
+| **Configurar o Método** (`/dashboard/metodo#configurar`) | Princípios (dízimo, lazer, não usar cartão) e etapas com interruptor e parâmetros: valores em R$, % e meses, salvos ao sair do campo. Mostra "Salvo · metas recalculadas" e tem "Voltar ao padrão". A página mostra "Metas do mês" (dízimo e investimento com o % do usuário e quanto fica livre), as etapas desligadas com "Religar" e um estado para quando nenhuma etapa está ligada. |
+
+O assistente:
+
+- mostra botões de download quando a IA usa `export_data`;
+- abre o cartão do WhatsApp ou a configuração do Método quando a IA os altera;
+- nas dicas de página, usa o % do usuário e omite o dízimo se ele estiver desligado.
+
 ## Código
 
 - **Tipos:** `src/types/index.ts` (`BankAccount`, `EntryExtras`, `FinanceScope`, `ScopeFilter`, `CashFlow*`, `ScopeBreakdown`, `TransferEntry`, `TransferKind`, `TransferTotals`).
@@ -74,3 +91,9 @@ Tudo é opcional. Quem não usar nada disso continua vendo e cadastrando exatame
   - `components/fluxo/`: o gráfico, as movimentações e os rótulos;
   - `components/transfers/transfers-card.tsx`;
   - `components/dashboard/scope-breakdown-card.tsx`.
+- **Fase 2:**
+  - `lib/api.ts` (`api.download`);
+  - `components/export/export-button.tsx`;
+  - `components/settings/whatsapp-card.tsx`;
+  - `components/baby-steps/method-config-card.tsx` e `components/ui/switch.tsx`;
+  - hook `useUpdateMethodConfig` e `getBabyStepPageGuidance(pageKey, step, {investPercent, tithePercent, forUser})`.
