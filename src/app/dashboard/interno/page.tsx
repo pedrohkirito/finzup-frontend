@@ -19,6 +19,12 @@ function fmt(value: number | null, unit: 'count' | 'percent' = 'count') {
   return unit === 'percent' ? `${value.toLocaleString('pt-BR')}%` : value.toLocaleString('pt-BR');
 }
 
+const OFFERED_TIERS: PlanTier[] = ['free', 'essencial', 'dono'];
+
+function tierChoices(current: PlanTier): PlanTier[] {
+  return OFFERED_TIERS.includes(current) ? OFFERED_TIERS : [...OFFERED_TIERS, current];
+}
+
 const STATUS = {
   ok: { icon: CheckCircle2, className: 'text-emerald-500', label: 'Na meta' },
   attention: { icon: CircleAlert, className: 'text-amber-500', label: 'Abaixo da meta' },
@@ -220,7 +226,7 @@ function PlanChanger() {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Trocar plano de um usuário</CardTitle>
-        <p className="text-sm text-slate-500">Para CFO de bolso e Conselho (vendidos por contato) ou ajustes do suporte.</p>
+        <p className="text-sm text-slate-500">Ajusta o plano de um usuário. À venda: PF Essencial e Dono App.</p>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2">
@@ -247,7 +253,7 @@ function PlanChanger() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.keys(PLAN_TIER_LABELS) as PlanTier[]).map((t) => (
+                    {tierChoices(tiers[u.id] ?? u.planTier).map((t) => (
                       <SelectItem key={t} value={t}>{PLAN_TIER_LABELS[t]}</SelectItem>
                     ))}
                   </SelectContent>

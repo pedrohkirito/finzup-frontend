@@ -48,7 +48,7 @@ export function PlanCatalogGrid({
         <p className="text-xs text-slate-500">Pagamento pelo Asaas, com PIX ou cartão. O plano libera na confirmação.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {plans.map((plan) => {
           const price = plan.prices[cycle] ?? plan.prices.monthly;
           const priceCycle: PlanCycle = plan.prices[cycle] ? cycle : 'monthly';
