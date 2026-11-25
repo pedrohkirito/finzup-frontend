@@ -8,6 +8,10 @@ export type PageKey =
   | 'orcamentos'
   | 'planejamento'
   | 'relatorios'
+  | 'fluxo'
+  | 'importar'
+  | 'pro_labore'
+  | 'painel_dono'
   | 'configuracoes'
   | 'assistente'
   | 'metodo'
@@ -48,7 +52,7 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Orçamentos',
     description: 'Página de orçamentos por categoria com limites mensais.',
     guidance:
-      'Priorize definir limites por categoria e identificar estouros. Alinhe ao Baby Step e aos princípios (10% lazer, 10% dízimo, 15% investir).',
+      'Priorize definir limites por categoria e identificar estouros. Alinhe ao Baby Step e aos princípios que o usuário mantém ligados no Método (padrão: 10% lazer, 10% dízimo, 15% investir).',
   },
   '/dashboard/planejamento': {
     key: 'planejamento',
@@ -62,21 +66,21 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Investimentos',
     description: 'Página de meta mensal e aportes de investimento.',
     guidance:
-      'Priorize meta mensal e registro de aportes. Não recomende ativos específicos. Se o usuário ainda está nos Passos 1–2, avise que investir 15% ainda não é o foco.',
+      'Priorize meta mensal e registro de aportes. Não indique produtos, instituições nem taxas (Resolução CVM 19); pedidos de onde investir vão para um consultor CVM. Se o usuário ainda está nos Passos 1–2, avise que investir 15% ainda não é o foco.',
   },
   '/dashboard/investimentos/simulador': {
     key: 'simulador_investimentos',
     label: 'Simulador de investimentos',
     description: 'Simulação de patrimônio com juros compostos, metas e projeção em 30 anos.',
     guidance:
-      'Intake primeiro: uma pergunta por vez (finalidade, meta/prazo, patrimônio, aportes). Plano com números só após intake completo. Salvar simulação após confirmação. Sem aportes do mês.',
+      'Intake primeiro: uma pergunta por vez (finalidade, meta/prazo, patrimônio, aportes). Plano com números só após intake completo. Rentabilidade é hipótese do usuário; não sugira taxa nem produto (CVM 19). Salvar simulação após confirmação. Sem aportes do mês.',
   },
   '/dashboard/doacoes': {
     key: 'doacoes',
     label: 'Doações',
     description: 'Página de doações do mês selecionado.',
     guidance:
-      'Priorize cadastro de doações com nome e valor. Proteja o dízimo de 10% em qualquer Baby Step.',
+      'Priorize cadastro de doações com nome e valor. Se o dízimo estiver ligado no Método, proteja o % definido pelo usuário (padrão 10%) em qualquer Baby Step; se estiver desligado, doações são escolha livre.',
   },
   '/dashboard/metodo': {
     key: 'metodo',
@@ -92,12 +96,39 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     guidance:
       'Priorize explicar gráficos, categorias, tendências e comparativos com base nos dados. Relacione insights ao Baby Step atual. Não cadastre itens aqui.',
   },
+  '/dashboard/fluxo': {
+    key: 'fluxo',
+    label: 'Fluxo de caixa',
+    description: 'Fluxo de caixa diário do mês: saldo previsto dia a dia, com filtros de conta bancária e PF/PJ.',
+    guidance:
+      'Use o fluxo de caixa (get_cash_flow) para dizer o saldo em um dia, o menor saldo e quando fica negativo. Sugira mudar datas de entradas/saídas para evitar aperto. Lançamentos sem data contam no início do mês.',
+  },
+  '/dashboard/importar': {
+    key: 'importar',
+    label: 'Importar extrato',
+    description: 'Importação de extrato OFX/CSV: o usuário envia o arquivo, revisa as categorias sugeridas e confirma.',
+    guidance:
+      'Ajude a revisar a importação em andamento (get_statement_import) e a ajustar linhas ou criar regras (categorize_statement_lines). Só confirme a importação depois do "Confirmo".',
+  },
+  '/dashboard/painel': {
+    key: 'painel_dono',
+    label: 'Painel do dono',
+    description: 'Painel do dono: caixa e dias de caixa das empresas, pró-labore x retiradas, dívidas e reserva pessoais e alertas.',
+    guidance: 'Use get_owner_dashboard. Comece pelo alerta mais grave e diga a próxima ação. Para "posso retirar R$ X?", use get_pro_labore.',
+  },
+  '/dashboard/pro-labore': {
+    key: 'pro_labore',
+    label: 'Pró-labore',
+    description: 'Pró-labore sustentável da empresa, quanto ainda dá para retirar no mês, definido x retiradas e alertas.',
+    guidance:
+      'Use get_pro_labore (com amount para "posso retirar R$ X?") e responda com o número devolvido. Definir pró-labore/reserva: set_pro_labore. Registrar retirada: record_owner_withdrawal. Sempre com confirmação.',
+  },
   '/dashboard/configuracoes': {
     key: 'configuracoes',
     label: 'Configurações',
-    description: 'Página de configurações da conta, métodos de pagamento e assinatura.',
+    description: 'Página de configurações da conta, métodos de pagamento (com vencimento da fatura), contas bancárias, fluxo PJ e assinatura.',
     guidance:
-      'Priorize orientar sobre conta, métodos de pagamento, assinatura e créditos de IA. Encaminhe suporte para cobrança.',
+      'Priorize orientar sobre conta, métodos de pagamento, contas bancárias, fluxo PJ, assinatura e créditos de IA. Encaminhe suporte para cobrança.',
   },
   '/dashboard/assistente': {
     key: 'assistente',
@@ -128,7 +159,7 @@ export function getAssistantPageContext(pathname: string): AssistantPageContext 
 
 export function buildPageContextPayload(
   pathname: string,
-  overrides?: { pageKey?: PageKey; babyStep?: 1 | 2 | 3 | 4 | 5 | 6 },
+  overrides?: { pageKey?: PageKey; babyStep?: number },
 ): {
   pageKey: PageKey;
   pageLabel: string;

@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { DueDaySelect } from '@/components/payment-methods/due-day-select';
 
 type AddPaymentMethodDialogProps = {
   open: boolean;
@@ -54,7 +55,11 @@ export function AddPaymentMethodDialog({
         </DialogHeader>
         <form
           onSubmit={form.handleSubmit(async (data) => {
-            const method = await api.post<PaymentMethod>('/payment-methods', data);
+            const method = await api.post<PaymentMethod>('/payment-methods', {
+              ...data,
+              dueDay: data.type === 'credit' ? (data.dueDay ?? null) : null,
+              closingDay: data.type === 'credit' ? (data.closingDay ?? null) : null,
+            });
             await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
             onCreated?.(method);
             form.reset();
@@ -90,6 +95,20 @@ export function AddPaymentMethodDialog({
               <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>
             )}
           </div>
+          {currentType === 'credit' && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Fechamento da fatura (opcional)</Label>
+                <DueDaySelect kind="closing" value={form.watch('closingDay')} onChange={(v) => form.setValue('closingDay', v)} />
+                <p className="text-xs text-slate-400">Compras depois desse dia entram na fatura do mês seguinte.</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Vencimento da fatura (opcional)</Label>
+                <DueDaySelect value={form.watch('dueDay')} onChange={(v) => form.setValue('dueDay', v)} />
+                <p className="text-xs text-slate-400">Dia em que a fatura sai do caixa no fluxo.</p>
+              </div>
+            </div>
+          )}
           <Button type="submit" className="w-full">
             Salvar
           </Button>

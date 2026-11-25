@@ -2,6 +2,7 @@
 
 import { formatCurrency, cn } from '@/lib/utils';
 import type { MonthReport } from '@/types';
+import { useBusinessView } from '@/hooks/use-finance-scope';
 import { ReportSection } from './report-section';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -14,15 +15,16 @@ export function ReportBudgetChart({
   className?: string;
 }) {
   const withData = budgetByCategory.filter((b) => b.spent > 0 || b.limit > 0);
+  const business = useBusinessView();
 
   return (
     <ReportSection
       className={className}
-      title="Despesas por orçamento"
+      title={business ? 'Despesas por limite de gasto' : 'Despesas por orçamento'}
       description="Gasto realizado vs limite por categoria"
     >
       {withData.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-500">Nenhum orçamento com movimentação neste mês.</p>
+        <p className="py-8 text-center text-sm text-slate-500">{business ? 'Nenhum limite de gasto' : 'Nenhum orçamento'} com movimentação neste mês.</p>
       ) : (
         <div className="space-y-4">
           {withData.map((budget) => {

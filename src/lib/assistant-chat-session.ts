@@ -5,6 +5,8 @@ export type ChatMessage = {
   content: string;
   /** Pedido completo enviado ao modelo quando a bolha mostra um rótulo curto. */
   prompt?: string;
+  /** Arquivos que a IA preparou (exportação): viram botões de download abaixo da resposta. */
+  downloads?: { path: string; label: string; format: 'pdf' | 'csv' }[];
 };
 
 export type AssistantChatSession = {

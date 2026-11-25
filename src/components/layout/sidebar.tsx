@@ -14,8 +14,16 @@ import {
   Sun,
   Target,
   BarChart3,
+  CalendarDays,
   CalendarRange,
   Footprints,
+  Crown,
+  Tags,
+  Building2,
+  FileUp,
+  HandCoins,
+  Briefcase,
+  Gauge,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { cn, isNavLinkActive } from '@/lib/utils';
@@ -23,7 +31,8 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SupportLink } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
-import { useLogout } from '@/hooks/use-auth';
+import { useAuth, useLogout } from '@/hooks/use-auth';
+import { useNavLabel } from '@/hooks/use-finance-scope';
 import { useTheme } from '@/providers/theme-provider';
 import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
 
@@ -33,17 +42,29 @@ const links = [
     ? [{ href: '/dashboard/metodo', label: 'Método', icon: Footprints, isNew: true }]
     : []),
   { href: '/dashboard/relatorios', label: 'Relatórios', icon: BarChart3 },
+  { href: '/dashboard/fluxo', label: 'Fluxo de caixa', icon: CalendarDays, isNew: true },
+  { href: '/dashboard/importar', label: 'Extratos', icon: FileUp, isNew: true },
+  { href: '/dashboard/painel', label: 'Painel do dono', icon: Briefcase, isNew: true },
+  { href: '/dashboard/pro-labore', label: 'Pró-labore', icon: HandCoins, isNew: true },
   { href: '/dashboard/receitas', label: 'Receitas', icon: TrendingUp },
   { href: '/dashboard/despesas', label: 'Despesas', icon: Receipt },
   { href: '/dashboard/orcamentos', label: 'Orçamentos', icon: Target },
+  { href: '/dashboard/categorias', label: 'Categorias', icon: Tags },
+  { href: '/dashboard/empresas', label: 'Empresas', icon: Building2 },
   { href: '/dashboard/planejamento', label: 'Planejamento', icon: CalendarRange },
   { href: '/dashboard/investimentos', label: 'Investimentos', icon: PiggyBank },
   { href: '/dashboard/doacoes', label: 'Doações', icon: Heart },
+  { href: '/dashboard/planos', label: 'Planos', icon: Crown },
   { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
+const ADMIN_LINK = { href: '/dashboard/interno', label: 'Painel interno', icon: Gauge, isNew: false };
+
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: user } = useAuth({ refetchOnWindowFocus: false });
+  const visibleLinks = user?.isAdmin ? [...links, ADMIN_LINK] : links;
+  const navLabel = useNavLabel();
   const logout = useLogout();
   const { theme, toggle } = useTheme();
 
@@ -58,7 +79,7 @@ export function Sidebar() {
 
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-1 pr-2">
-            {links.map(({ href, label, icon: Icon, isNew }) => (
+            {visibleLinks.map(({ href, label, icon: Icon, isNew }) => (
               <Link
                 key={href}
                 href={href}
@@ -71,7 +92,7 @@ export function Sidebar() {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span className="flex min-w-0 flex-1 items-center gap-2">
-                  <span className="truncate">{label}</span>
+                  <span className="truncate">{navLabel(href, label)}</span>
                   {isNew && <NewFeatureBadge />}
                 </span>
               </Link>

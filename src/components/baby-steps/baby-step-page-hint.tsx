@@ -16,7 +16,11 @@ export function BabyStepPageHint({ pageKey }: BabyStepPageHintProps) {
   const { data } = useBabySteps();
   if (!BABY_STEPS_ENABLED || !data) return null;
 
-  const guidance = getBabyStepPageGuidance(pageKey, data.currentStep);
+  const guidance = getBabyStepPageGuidance(pageKey, data.currentStep, {
+    investPercent: data.metrics.investTargetPercent,
+    tithePercent: data.metrics.titheTargetPercent,
+    forUser: true,
+  });
   if (!guidance) return null;
 
   return (

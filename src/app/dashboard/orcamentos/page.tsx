@@ -1,9 +1,10 @@
 'use client';
 
+import { budgetTerms, useBusinessView } from '@/hooks/use-finance-scope';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/api';
@@ -20,27 +21,37 @@ import {
 } from '@/components/ui/dialog';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { IncomeEntry, MonthBudget } from '@/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { filterCategories, useCategories } from '@/hooks/use-categories';
 import {
   Plus, Pencil, Trash2, Target, ChevronDown, ChevronUp,
   RotateCcw, Save, TrendingUp,
 } from 'lucide-react';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
 
-const templateSchema = z.object({
-  name: z.string().min(1, 'Informe um nome'),
-  defaultLimit: z.coerce.number().nonnegative('Informe um valor válido'),
-});
+const NEW_CATEGORY = '__new__';
+
+const templateSchema = z
+  .object({
+    categoryId: z.string().optional(),
+    name: z.string().optional(),
+    defaultLimit: z.coerce.number().nonnegative('Informe um valor válido'),
+  })
+  .refine((v) => (v.categoryId && v.categoryId !== NEW_CATEGORY) || (v.name ?? '').trim().length > 0, {
+    message: 'Escolha a categoria ou informe um nome',
+    path: ['name'],
+  });
 
 const steps = [
   {
     n: '1',
-    title: 'Crie a categoria',
-    body: 'Dê um nome e o máximo que quer gastar por mês. Ex.: Alimentação, R$ 1.200.',
+    title: 'Escolha a categoria',
+    body: 'Defina o máximo que quer gastar por mês numa categoria. Ex.: Alimentação, R$ 1.200.',
   },
   {
     n: '2',
     title: 'Vincule a despesa',
-    body: 'Em Despesas, escolha esse orçamento no lançamento. Sem isso, o valor não entra aqui.',
+    body: 'Em Despesas, escolha a categoria no lançamento. Sem isso, o valor não entra aqui.',
   },
   {
     n: '3',
@@ -282,7 +293,7 @@ function BudgetCard({
             </p>
             {expenseCount === 0 ? (
               <p className="text-sm leading-relaxed text-slate-500">
-                Nenhuma despesa deste mês está ligada a {budget.name}. Ao lançar uma despesa, escolha este orçamento no campo Orçamento.{' '}
+                Nenhuma despesa deste mês está ligada a {budget.name}. Ao lançar uma despesa, escolha esta categoria no campo Categoria.{' '}
                 <Link href="/dashboard/despesas" className="font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400">
                   Ir para despesas
                 </Link>
@@ -315,7 +326,7 @@ function BudgetCard({
   );
 }
 
-function HowBudgetsWork({ onCreate }: { onCreate: () => void }) {
+function HowBudgetsWork({ onCreate, firstLabel }: { onCreate: () => void; firstLabel: string }) {
   return (
     <Card>
       <CardContent className="p-5 sm:p-6">
@@ -333,7 +344,7 @@ function HowBudgetsWork({ onCreate }: { onCreate: () => void }) {
         </ol>
         <Button onClick={onCreate} className="mt-5 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
-          Criar primeiro orçamento
+          {firstLabel}
         </Button>
       </CardContent>
     </Card>
@@ -342,6 +353,7 @@ function HowBudgetsWork({ onCreate }: { onCreate: () => void }) {
 
 export default function OrcamentosPage() {
   const { selectedMonthId } = useMonthStore();
+  const terms = budgetTerms(useBusinessView());
   const { data: months } = useMonths();
   const selectedMonth = months?.find((m) => m.id === selectedMonthId);
   const isMonthOpen = selectedMonth?.status === 'open';
@@ -364,38 +376,56 @@ export default function OrcamentosPage() {
     enabled: !!selectedMonthId,
   });
 
+  const { data: categories } = useCategories();
   const templateForm = useForm({ resolver: zodResolver(templateSchema) });
+  // Categorias de despesa PF ainda sem limite: candidatas a virar orçamento.
+  const budgetIds = new Set((budgets ?? []).filter((b) => b.hasLimit !== false).map((b) => b.templateId));
+  const categoriesWithoutLimit = filterCategories(categories, 'expense', 'personal').filter((c) => !budgetIds.has(c.id));
+  const selectedCategoryId = useWatch({ control: templateForm.control, name: 'categoryId' }) as string | undefined;
   const invalidate = () => queryClient.invalidateQueries();
 
   const openCreateTemplate = () => {
     setEditTemplateId(null);
-    templateForm.reset({ name: '', defaultLimit: 0 });
+    templateForm.reset({ categoryId: categoriesWithoutLimit[0]?.id ?? NEW_CATEGORY, name: '', defaultLimit: 0 });
+    setTemplateDialog(true);
+  };
+
+  const openSetLimit = (budget: MonthBudget) => {
+    setEditTemplateId(null);
+    templateForm.reset({ categoryId: budget.templateId, name: '', defaultLimit: 0 });
     setTemplateDialog(true);
   };
 
   const openEditTemplate = (budget: MonthBudget) => {
     setEditTemplateId(budget.templateId);
-    templateForm.reset({ name: budget.name, defaultLimit: budget.defaultLimit });
+    templateForm.reset({ categoryId: budget.templateId, name: budget.name, defaultLimit: budget.defaultLimit });
     setTemplateDialog(true);
   };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    await api.delete(`/budget-templates/${deleteTarget.templateId}`);
+    // Tirar o orçamento = zerar o limite. A categoria continua (e as despesas ligadas a ela).
+    await api.patch(`/categories/${deleteTarget.templateId}`, { defaultLimit: 0 });
+    if (isMonthOpen && selectedMonthId) {
+      await api.put(`/months/${selectedMonthId}/budgets/${deleteTarget.templateId}/limit`, { limitAmount: 0 });
+    }
     setDeleting(false);
     setDeleteTarget(null);
     invalidate();
   };
 
+  // Orçamento = categoria com limite. Sem limite e com gasto aparece à parte, para o usuário definir um teto.
+  const limitedBudgets = (budgets ?? []).filter((b) => b.hasLimit !== false);
+  const unlimitedWithSpending = (budgets ?? []).filter((b) => b.hasLimit === false && b.spent > 0);
   const sortedBudgets = budgets
-    ? [...budgets].sort((a, b) => {
+    ? [...limitedBudgets].sort((a, b) => {
         if (a.overBudget !== b.overBudget) return a.overBudget ? -1 : 1;
         return b.progress - a.progress;
       })
     : [];
 
-  const totalLimit = budgets?.reduce((s, b) => s + b.limit, 0) ?? 0;
+  const totalLimit = limitedBudgets.reduce((s, b) => s + b.limit, 0);
   const totalIncome = incomes?.reduce((sum, income) => sum + Number(income.amount), 0) ?? 0;
   const incomeLeft = totalIncome - totalLimit;
   const overCount = sortedBudgets.filter((budget) => budget.overBudget).length;
@@ -407,15 +437,18 @@ export default function OrcamentosPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-2xl">
           <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">
-            Orçamentos
+            {terms.title}
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Um teto de gasto por categoria. As despesas em que você escolhe o orçamento somam aqui e mostram o que ainda cabe no mês.
+            {terms.description}{' '}
+            <Link href="/dashboard/categorias" className="font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400">
+              Gerenciar categorias
+            </Link>
           </p>
         </div>
         <Button onClick={openCreateTemplate} size="sm" className="h-11 w-full sm:h-9 sm:w-auto">
           <Plus className="h-4 w-4" />
-          Novo orçamento
+          {terms.newLabel}
         </Button>
       </div>
 
@@ -452,7 +485,7 @@ export default function OrcamentosPage() {
           <Card className="p-4">
             <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
               <Target className="h-3.5 w-3.5" />
-              Orçamentos planejados
+              {terms.planned}
             </div>
             <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white">
               {formatCurrency(totalLimit)}
@@ -476,7 +509,7 @@ export default function OrcamentosPage() {
       )}
 
       {!pageLoading && sortedBudgets.length === 0 && (
-        <HowBudgetsWork onCreate={openCreateTemplate} />
+        <HowBudgetsWork firstLabel={terms.firstLabel} onCreate={openCreateTemplate} />
       )}
 
       {!pageLoading && sortedBudgets.length > 0 && (
@@ -489,7 +522,7 @@ export default function OrcamentosPage() {
 
           {nothingCounted && (
             <div className="rounded-2xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-100">
-              Os tetos já existem, mas nenhuma despesa entrou na conta. Ao lançar uma despesa, selecione o orçamento no campo Orçamento.{' '}
+              Os tetos já existem, mas nenhuma despesa entrou na conta. Ao lançar uma despesa, selecione a categoria no campo Categoria.{' '}
               <Link href="/dashboard/despesas" className="font-semibold underline underline-offset-2">
                 Abrir despesas
               </Link>
@@ -512,24 +545,52 @@ export default function OrcamentosPage() {
         </>
       )}
 
+      {!pageLoading && unlimitedWithSpending.length > 0 && (
+        <Card>
+          <CardContent className="p-4 sm:p-5">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Gastos em categorias sem limite</p>
+            <ul className="mt-2 divide-y divide-slate-100 dark:divide-white/[0.06]">
+              {unlimitedWithSpending.map((b) => (
+                <li key={b.templateId} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <span className="truncate text-slate-700 dark:text-slate-300">{b.name}</span>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <span className="font-medium tabular-nums text-slate-900 dark:text-white">{formatCurrency(b.spent)}</span>
+                    {!b.archived && (
+                      <Button size="sm" variant="ghost" onClick={() => openSetLimit(b)}>
+                        Definir limite
+                      </Button>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       <Dialog open={templateDialog} onOpenChange={setTemplateDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editTemplateId ? 'Editar orçamento' : 'Novo orçamento'}
+              {editTemplateId ? `Editar ${terms.singular}` : terms.newLabel}
             </DialogTitle>
             <DialogDescription>
               {editTemplateId
                 ? 'O nome e o limite padrão valem para os meses seguintes. O mês atual pode ter um limite diferente.'
-                : 'Escolha a categoria e quanto pode gastar por mês. Depois, vincule as despesas a este orçamento.'}
+                : 'Escolha a categoria e quanto pode gastar por mês. As despesas lançadas nela passam a contar aqui.'}
             </DialogDescription>
           </DialogHeader>
           <form
             onSubmit={templateForm.handleSubmit(async (data) => {
               if (editTemplateId) {
-                await api.patch(`/budget-templates/${editTemplateId}`, data);
+                await api.patch(`/categories/${editTemplateId}`, { name: data.name, defaultLimit: data.defaultLimit });
+              } else if (data.categoryId && data.categoryId !== NEW_CATEGORY) {
+                await api.patch(`/categories/${data.categoryId}`, { defaultLimit: data.defaultLimit });
+                if (isMonthOpen && selectedMonthId) {
+                  await api.put(`/months/${selectedMonthId}/budgets/${data.categoryId}/limit`, { limitAmount: data.defaultLimit });
+                }
               } else {
-                await api.post('/budget-templates', data);
+                await api.post('/budget-templates', { name: (data.name ?? '').trim(), defaultLimit: data.defaultLimit });
               }
               invalidate();
               setTemplateDialog(false);
@@ -537,11 +598,30 @@ export default function OrcamentosPage() {
             })}
             className="space-y-4"
           >
-            <div className="space-y-2">
-              <Label htmlFor="budget-name">Categoria</Label>
+            {!editTemplateId && (
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Select
+                  value={selectedCategoryId ?? NEW_CATEGORY}
+                  onValueChange={(v) => templateForm.setValue('categoryId', v)}
+                >
+                  <SelectTrigger aria-label="Categoria">
+                    <SelectValue placeholder="Escolha a categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoriesWithoutLimit.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                    <SelectItem value={NEW_CATEGORY}>+ Nova categoria</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className={cn('space-y-2', !editTemplateId && selectedCategoryId !== NEW_CATEGORY && 'hidden')}>
+              <Label htmlFor="budget-name">{editTemplateId ? 'Nome da categoria' : 'Nome da nova categoria'}</Label>
               <Input
                 id="budget-name"
-                placeholder="Ex.: Alimentação, Transporte, Lazer"
+                placeholder="Ex.: Pets, Viagens"
                 {...templateForm.register('name')}
               />
               {templateForm.formState.errors.name && (
@@ -566,7 +646,7 @@ export default function OrcamentosPage() {
                 Cancelar
               </Button>
               <Button type="submit">
-                {editTemplateId ? 'Salvar' : 'Criar orçamento'}
+                {editTemplateId ? 'Salvar' : `Criar ${terms.singular}`}
               </Button>
             </DialogFooter>
           </form>
@@ -576,13 +656,13 @@ export default function OrcamentosPage() {
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Remover orçamento</DialogTitle>
+            <DialogTitle>Tirar o {terms.singular}</DialogTitle>
             <DialogDescription>
-              Remover{' '}
+              Tirar o limite de{' '}
               <span className="font-semibold text-slate-800 dark:text-slate-200">
                 {deleteTarget?.name}
               </span>
-              ? A categoria sai de todos os meses. As despesas continuam lançadas, só deixam de contar aqui.
+              ? A categoria continua existindo com as despesas ligadas a ela; só deixa de ter teto de gasto.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -590,7 +670,7 @@ export default function OrcamentosPage() {
               Cancelar
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-              {deleting ? 'Removendo…' : 'Remover'}
+              {deleting ? 'Tirando…' : 'Tirar limite'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2, Send, Sparkles, Check, ChevronDown } from 'lucide-react';
+import { Loader2, Send, Sparkles, Check, ChevronDown, FileDown, FileSpreadsheet } from 'lucide-react';
 import { AssistantMessage } from '@/components/assistant/assistant-message';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -94,7 +94,10 @@ export function AssistantChat({
     babyStep: babySteps?.currentStep,
   });
   if (babySteps?.currentStep) {
-    const stepGuidance = getBabyStepPageGuidance(screen.pageKey, babySteps.currentStep);
+    const stepGuidance = getBabyStepPageGuidance(screen.pageKey, babySteps.currentStep, {
+      investPercent: babySteps.metrics.investTargetPercent,
+      tithePercent: babySteps.metrics.titheTargetPercent,
+    });
     if (stepGuidance) {
       screen.pageContext += `\n\nFoco do Baby Step ${babySteps.currentStep} nesta tela: ${stepGuidance}`;
       screen.pageContext += `\nPróxima ação do método: ${babySteps.nextAction.label}`;
@@ -220,7 +223,13 @@ export function AssistantChat({
         creditsRemaining: number;
         creditsDebited: number;
         awaitingConfirmation?: boolean;
-        actionsExecuted?: { type: string; name: string; amount?: number; simulationId?: string }[];
+        actionsExecuted?: {
+          type: string;
+          name: string;
+          amount?: number;
+          simulationId?: string;
+          details?: { download?: { path: string; label: string; format: 'pdf' | 'csv' } };
+        }[];
       }>('/ai/chat', {
         message: text,
         history: currentMessages.map((item) => ({
@@ -238,8 +247,20 @@ export function AssistantChat({
 
       if (!isAssistantRequestCurrent(requestId)) return;
 
+      const downloads = (result.actionsExecuted ?? []).flatMap((a) =>
+        a.details?.download?.path?.startsWith('/exports/')
+          ? [{ path: a.details.download.path, label: a.details.download.label, format: a.details.download.format }]
+          : [],
+      );
       updateAssistantChatSession({
-        messages: [...nextMessages, { role: 'assistant', content: result.reply }],
+        messages: [
+          ...nextMessages,
+          {
+            role: 'assistant',
+            content: result.reply,
+            ...(downloads.length ? { downloads } : {}),
+          },
+        ],
         lastAwaitingConfirmation: result.awaitingConfirmation ?? false,
         loading: false,
         unread: assistantReplyShouldNotify(),
@@ -423,6 +444,13 @@ export function AssistantChat({
                   ) : (
                     msg.content
                   )}
+                  {msg.role === 'assistant' && msg.downloads?.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {msg.downloads.map((d) => (
+                        <DownloadChip key={d.path} {...d} />
+                      ))}
+                    </div>
+                  ) : null}
                   {showConfirmButton && i === messages.length - 1 && (
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -568,5 +596,28 @@ export function AssistantChat({
         </div>
       </div>
     </div>
+  );
+}
+
+function DownloadChip({ path, label, format }: { path: string; label: string; format: 'pdf' | 'csv' }) {
+  const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle');
+  return (
+    <button
+      type="button"
+      disabled={state === 'busy'}
+      onClick={async () => {
+        setState('busy');
+        try {
+          await api.download(path);
+          setState('done');
+        } catch {
+          setState('error');
+        }
+      }}
+      className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-60"
+    >
+      {state === 'busy' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : format === 'csv' ? <FileSpreadsheet className="h-3.5 w-3.5" /> : <FileDown className="h-3.5 w-3.5" />}
+      {state === 'error' ? 'Não deu para baixar · tentar de novo' : state === 'done' ? `Baixado · ${label}` : `Baixar ${label}`}
+    </button>
   );
 }

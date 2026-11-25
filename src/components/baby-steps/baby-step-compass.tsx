@@ -37,8 +37,7 @@ export function BabyStepCompass({ compact = false, className }: BabyStepCompassP
               </span>
             </div>
             <p className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
-              Baby Step {data.currentStep}
-              {current ? ` — ${current.shortTitle}` : ''}
+              {current ? `Baby Step ${current.step} — ${current.shortTitle}` : 'Nenhuma etapa ligada'}
             </p>
             {!compact && current && (
               <p className="text-sm text-slate-600 dark:text-slate-400">{current.description}</p>
@@ -71,7 +70,7 @@ export function BabyStepCompass({ compact = false, className }: BabyStepCompassP
             {data.steps.map((step) => (
               <span
                 key={step.step}
-                title={step.title}
+                title={step.status === 'disabled' ? `${step.shortTitle} (desligada)` : step.title}
                 className={cn(
                   'inline-flex h-7 min-w-7 items-center justify-center rounded-lg px-1.5 text-xs font-semibold',
                   step.status === 'completed' &&
@@ -80,6 +79,8 @@ export function BabyStepCompass({ compact = false, className }: BabyStepCompassP
                     'brand-gradient-bg text-white shadow-sm',
                   step.status === 'locked' &&
                     'bg-slate-100 text-slate-400 dark:bg-white/[0.05] dark:text-slate-500',
+                  step.status === 'disabled' &&
+                    'border border-dashed border-slate-200 text-slate-300 line-through dark:border-white/[0.08] dark:text-slate-600',
                 )}
               >
                 {step.status === 'completed' ? (

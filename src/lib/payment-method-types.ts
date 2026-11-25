@@ -4,6 +4,10 @@ import type { PaymentMethod } from '@/types';
 export const paymentMethodSchema = z.object({
   name: z.string().min(1, 'Informe um nome'),
   type: z.enum(['cash', 'debit', 'credit', 'pix', 'transfer', 'other']),
+  /** Vencimento da fatura (só cartão de crédito). Opcional. */
+  dueDay: z.number().int().min(1).max(31).nullable().optional(),
+  /** Fechamento da fatura (só cartão de crédito). Opcional. */
+  closingDay: z.number().int().min(1).max(31).nullable().optional(),
 });
 
 export type PaymentMethodFormValues = z.infer<typeof paymentMethodSchema>;

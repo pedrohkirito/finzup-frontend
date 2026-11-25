@@ -16,18 +16,27 @@ import {
   Moon,
   Sun,
   BarChart3,
+  CalendarDays,
   Sparkles,
   CalendarRange,
   Footprints,
   Headset,
   Loader2,
+  Crown,
+  Tags,
+  Building2,
+  FileUp,
+  HandCoins,
+  Briefcase,
+  Gauge,
 } from 'lucide-react';
 import { cn, isNavLinkActive } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SupportDialog } from '@/components/layout/support-link';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useLogout } from '@/hooks/use-auth';
+import { useAuth, useLogout } from '@/hooks/use-auth';
+import { useNavLabel } from '@/hooks/use-finance-scope';
 import { useTheme } from '@/providers/theme-provider';
 import { useAssistant } from '@/providers/assistant-provider';
 import { AssistantActivityMark } from '@/components/assistant/assistant-trigger';
@@ -44,11 +53,18 @@ const moreLinks = [
     ? [{ href: '/dashboard/metodo', icon: Footprints, label: 'Método', isNew: true }]
     : []),
   { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
+  { href: '/dashboard/categorias', icon: Tags, label: 'Categorias' },
+  { href: '/dashboard/empresas', icon: Building2, label: 'Empresas' },
   { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento' },
   { href: '/dashboard/assistente', icon: Sparkles, label: 'Assistente IA (tela cheia)' },
   { href: '/dashboard/relatorios', icon: BarChart3, label: 'Relatórios' },
+  { href: '/dashboard/fluxo', icon: CalendarDays, label: 'Fluxo de caixa', isNew: true },
+  { href: '/dashboard/importar', icon: FileUp, label: 'Importar extrato', isNew: true },
+  { href: '/dashboard/painel', icon: Briefcase, label: 'Painel do dono', isNew: true },
+  { href: '/dashboard/pro-labore', icon: HandCoins, label: 'Pró-labore', isNew: true },
   { href: '/dashboard/investimentos', icon: PiggyBank, label: 'Investimentos' },
   { href: '/dashboard/doacoes', icon: Heart, label: 'Doações' },
+  { href: '/dashboard/planos', icon: Crown, label: 'Planos' },
   { href: '/dashboard/configuracoes', icon: Settings, label: 'Configurações' },
 ];
 
@@ -59,6 +75,11 @@ export function MobileNav() {
   const { openAssistant, loading: assistantLoading, unread: assistantUnread } = useAssistant();
   const assistantHasReply = assistantUnread && !assistantLoading;
   const [moreOpen, setMoreOpen] = useState(false);
+  const { data: user } = useAuth({ refetchOnWindowFocus: false });
+  const navLabel = useNavLabel();
+  const visibleMoreLinks = (
+    user?.isAdmin ? [...moreLinks, { href: '/dashboard/interno', icon: Gauge, label: 'Painel interno', isNew: false }] : moreLinks
+  ).map((link) => ({ ...link, label: navLabel(link.href, link.label) }));
   const [supportOpen, setSupportOpen] = useState(false);
 
   const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));
@@ -179,7 +200,7 @@ export function MobileNav() {
             <DialogTitle>Mais opções</DialogTitle>
           </DialogHeader>
           <div className="space-y-1">
-            {moreLinks.map(({ href, icon: Icon, label, isNew }) => {
+            {visibleMoreLinks.map(({ href, icon: Icon, label, isNew }) => {
               const active = isNavLinkActive(pathname, href);
               return (
                 <Link

@@ -17,6 +17,10 @@ interface ClosePreview {
   subscriptionsToCarry: { id: string; name: string; amount: string | number }[];
   financingsToAdvance: { id: string; name: string; installmentAmount: string | number }[];
   investmentGoalToCarry: { targetAmount: string | number } | null;
+  /** Aportes recorrentes (opcional para compatibilidade com APIs antigas). */
+  investmentsToCarry?: { id: string; name: string; amount: string | number; day?: number | null }[];
+  /** Transferências recorrentes (pró-labore etc.). */
+  transfersToCarry?: { id: string; name: string; amount: string | number; day?: number | null }[];
 }
 
 export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
@@ -87,7 +91,7 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
       <div>
         <p className="font-medium text-amber-900 dark:text-amber-200">Pronto para fechar o mês?</p>
         <p className="text-sm text-amber-700 dark:text-amber-400">
-          Receitas, doações, despesas recorrentes e meta de investimentos serão copiadas para o próximo mês.
+          Receitas, doações, despesas recorrentes, aportes recorrentes e meta de investimentos serão copiados para o próximo mês.
         </p>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -122,6 +126,22 @@ export function CloseMonthBanner({ month }: { month: FinancialMonth }) {
                   <p className="font-medium">Despesas fixas:</p>
                   {preview.fixedExpensesToCreate.map((e) => (
                     <p key={e.id} className="text-slate-500">{e.name} — {formatCurrency(Number(e.defaultAmount))}</p>
+                  ))}
+                </div>
+              )}
+              {preview.investmentsToCarry && preview.investmentsToCarry.length > 0 && (
+                <div>
+                  <p className="font-medium">Aportes recorrentes:</p>
+                  {preview.investmentsToCarry.map((i) => (
+                    <p key={i.id} className="text-slate-500">{i.name} — {formatCurrency(Number(i.amount))}</p>
+                  ))}
+                </div>
+              )}
+              {preview.transfersToCarry && preview.transfersToCarry.length > 0 && (
+                <div>
+                  <p className="font-medium">Transferências recorrentes:</p>
+                  {preview.transfersToCarry.map((t) => (
+                    <p key={t.id} className="text-slate-500">{t.name} — {formatCurrency(Number(t.amount))}</p>
                   ))}
                 </div>
               )}

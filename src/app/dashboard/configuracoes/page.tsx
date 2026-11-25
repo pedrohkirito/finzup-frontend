@@ -25,6 +25,10 @@ import {
 } from '@/components/ui/dialog';
 import { AddPaymentMethodDialog } from '@/components/payment-methods/add-payment-method-dialog';
 import { SupportChannels } from '@/components/layout/support-channels';
+import { DueDaySelect } from '@/components/payment-methods/due-day-select';
+import { BankAccountsCard } from '@/components/settings/bank-accounts-card';
+import { BusinessScopeCard } from '@/components/settings/business-scope-card';
+import { WhatsAppCard } from '@/components/settings/whatsapp-card';
 import type { PaymentMethod, User as UserProfile } from '@/types';
 import {
   ArrowLeftRight,
@@ -426,6 +430,31 @@ export default function ConfiguracoesPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-slate-900 dark:text-white">{m.name}</p>
                     <p className={cn('text-xs font-medium', style.iconText)}>{paymentMethodTypeLabels[m.type]}</p>
+                    {m.type === 'credit' && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        <DueDaySelect
+                          compact
+                          kind="closing"
+                          value={m.closingDay}
+                          onChange={async (closingDay) => {
+                            await api.patch(`/payment-methods/${m.id}`, { closingDay });
+                            await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+                            await queryClient.invalidateQueries({ queryKey: ['months'] });
+                            await queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+                          }}
+                        />
+                        <DueDaySelect
+                          compact
+                          value={m.dueDay}
+                          onChange={async (dueDay) => {
+                            await api.patch(`/payment-methods/${m.id}`, { dueDay });
+                            await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+                            await queryClient.invalidateQueries({ queryKey: ['months'] });
+                            await queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* ações */}
@@ -460,6 +489,11 @@ export default function ConfiguracoesPage() {
       </Card>
 
       <AddPaymentMethodDialog open={addMethodOpen} onOpenChange={setAddMethodOpen} />
+
+      {/* ── Contas bancárias e PF/PJ ── */}
+      <BankAccountsCard />
+      <BusinessScopeCard />
+      <WhatsAppCard />
 
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-sm">
@@ -562,11 +596,14 @@ export default function ConfiguracoesPage() {
                 )}
               </div>
             </div>
-            {user?.billing?.plan && (
+            {(user?.plan || user?.billing?.plan) && (
               <div className="text-right">
                 <p className="text-xs font-medium text-slate-500">Plano</p>
                 <p className="mt-0.5 font-semibold text-slate-900 dark:text-white">
-                  {planLabels[user.billing.plan] ?? user.billing.plan}
+                  {user?.plan?.name ?? 'Finzup'}
+                  {user?.billing?.plan && (
+                    <span className="font-normal text-slate-500"> · {planLabels[user.billing.plan] ?? user.billing.plan}</span>
+                  )}
                 </p>
               </div>
             )}
@@ -581,11 +618,19 @@ export default function ConfiguracoesPage() {
                 <Sparkles className="h-4 w-4" />
                 Assinar agora
               </Button>
-            ) : canCancelSubscription ? (
-              <Button variant="outline" onClick={() => setCancelDialogOpen(true)}>
-                Cancelar assinatura
-              </Button>
-            ) : null}
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => router.push('/dashboard/planos')}>
+                  <Crown className="h-4 w-4" />
+                  Ver planos e cobranças
+                </Button>
+                {canCancelSubscription && (
+                  <Button variant="ghost" onClick={() => setCancelDialogOpen(true)}>
+                    Cancelar assinatura
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

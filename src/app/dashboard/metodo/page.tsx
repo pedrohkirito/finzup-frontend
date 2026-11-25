@@ -7,7 +7,11 @@ import {
   Lock,
   ArrowRight,
   Sparkles,
+  CircleOff,
+  SlidersHorizontal,
 } from 'lucide-react';
+import { MethodConfigCard } from '@/components/baby-steps/method-config-card';
+import { formatCurrency } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -36,14 +40,20 @@ export default function MetodoPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">
-          Método Finzup
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Os Baby Steps são o caminho oficial — um passo de cada vez. A ação acontece nas telas do
-          app.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">
+            Método Finzup
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Um passo de cada vez, do seu jeito: as etapas e os princípios são opcionais e ajustáveis.
+          </p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <a href="#configurar">
+            <SlidersHorizontal className="h-4 w-4" /> Configurar
+          </a>
+        </Button>
       </div>
 
       <Card className="brand-gradient-border">
@@ -53,8 +63,7 @@ export default function MetodoPage() {
               Você está aqui
             </p>
             <p className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
-              Baby Step {state.currentStep}
-              {current ? ` — ${current.title}` : ''}
+              {current ? `Baby Step ${current.step} — ${current.title}` : 'Nenhuma etapa ligada'}
             </p>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Faça agora: {state.nextAction.label}
@@ -88,7 +97,7 @@ export default function MetodoPage() {
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Jornada dos 6 passos
+          Jornada ({state.steps.filter((s) => s.enabled).length} de {state.steps.length} etapas ligadas)
         </h2>
         {state.steps.map((step) => (
           <div
@@ -101,6 +110,8 @@ export default function MetodoPage() {
                 'border-emerald-200 bg-emerald-50/40 dark:border-emerald-500/20 dark:bg-emerald-500/[0.06]',
               step.status === 'locked' &&
                 'border-slate-200 bg-slate-50/50 opacity-75 dark:border-white/[0.06] dark:bg-white/[0.02] dark:opacity-60',
+              step.status === 'disabled' &&
+                'border-dashed border-slate-200 opacity-60 dark:border-white/[0.08] dark:opacity-50',
             )}
           >
             <div className="shrink-0">
@@ -119,11 +130,16 @@ export default function MetodoPage() {
                   <Lock className="h-4 w-4" />
                 </span>
               )}
+              {step.status === 'disabled' && (
+                <span className="icon-chip bg-slate-100 text-slate-400 dark:bg-white/[0.05] dark:text-slate-500">
+                  <CircleOff className="h-4 w-4" />
+                </span>
+              )}
             </div>
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-baseline gap-2">
                 <p className="font-semibold text-slate-900 dark:text-white">
-                  Passo {step.step}: {step.shortTitle}
+                  Passo {step.step}: {step.status === 'disabled' ? step.shortTitle : step.title}
                 </p>
                 {step.status === 'current' && (
                   <span className="brand-gradient-bg rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
@@ -140,7 +156,15 @@ export default function MetodoPage() {
               )}
               {step.status === 'locked' && (
                 <p className="text-xs text-slate-500">
-                  Desbloqueia após concluir o passo atual — o método não pula etapas.
+                  Desbloqueia após concluir o passo atual — o método não pula etapas ligadas.
+                </p>
+              )}
+              {step.status === 'disabled' && (
+                <p className="text-xs text-slate-500">
+                  Desligada por você — o Método pula esta etapa.{' '}
+                  <a href="#configurar" className="font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400">
+                    Religar
+                  </a>
                 </p>
               )}
             </div>
@@ -193,28 +217,54 @@ export default function MetodoPage() {
             href="/dashboard/investimentos?tab=aportes"
             className="rounded-xl bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
           >
-            <p className="font-medium text-slate-900 dark:text-white">Investir 15%</p>
+            <p className="font-medium text-slate-900 dark:text-white">
+              {state.metrics.investTargetPercent != null ? `Investir ${state.metrics.investTargetPercent}%` : 'Aportes'}
+            </p>
             <p className="text-slate-500 dark:text-slate-400">Investimentos → Aportes</p>
           </Link>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Princípios (valem em todos os passos)</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Metas do mês</CardTitle>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Sobre a renda pessoal de {formatCurrency(state.goals.income)}, com os princípios e etapas que você mantém ligados.
+          </p>
         </CardHeader>
-        <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
-          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
-            Dízimo: {state.metrics.tithePercentOfIncome.toFixed(1)}% da renda (meta 10%)
+        <CardContent className="space-y-3">
+          {state.goals.items.length === 0 && (
+            <p className="text-sm text-slate-500 dark:text-slate-400">Nenhuma fatia fixa ligada: a renda inteira fica livre para o seu plano.</p>
+          )}
+          {state.goals.items.map((g) => {
+            const done = g.key === 'tithe' ? state.metrics.donationsTotal : g.key === 'invest' ? state.metrics.totalInvested : null;
+            const pct = done != null && g.amount > 0 ? Math.min(100, Math.round((done / g.amount) * 100)) : null;
+            return (
+              <div key={g.key} className="space-y-1.5">
+                <div className="flex items-baseline justify-between gap-2 text-sm">
+                  <span className="font-medium text-slate-800 dark:text-slate-100">
+                    {g.label} <span className="font-normal text-slate-500">· {g.percent}%</span>
+                  </span>
+                  <span className="tabular-nums text-slate-700 dark:text-slate-200">
+                    {done != null ? `${formatCurrency(done)} de ` : ''}
+                    {formatCurrency(g.amount)}
+                  </span>
+                </div>
+                {pct != null && <Progress value={pct} className="h-1.5 [&>div]:brand-gradient-bg-r" />}
+              </div>
+            );
+          })}
+          <div className="flex items-baseline justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm dark:bg-white/[0.04]">
+            <span className="text-slate-600 dark:text-slate-300">Livre para custo de vida e o resto do plano ({state.goals.freePercent}%)</span>
+            <span className="font-semibold tabular-nums text-slate-900 dark:text-white">{formatCurrency(state.goals.freeAmount)}</span>
           </div>
-          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
-            Investir: {state.metrics.investmentPercentOfIncome.toFixed(1)}% da renda (meta ≥15%)
-          </div>
-          <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04] sm:col-span-2">
-            Lazer 10% e sem cartão de crédito — pilares do método em qualquer fase.
-          </div>
+          {state.config.principles.some((p) => p.key === 'no_credit_card' && p.enabled) && (
+            <p className="text-xs text-slate-500 dark:text-slate-400">Princípio ligado: não usar cartão de crédito.</p>
+          )}
         </CardContent>
       </Card>
+
+      <MethodConfigCard state={state} />
     </div>
   );
 }

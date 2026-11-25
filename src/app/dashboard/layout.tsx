@@ -6,6 +6,7 @@ import { Logo } from '@/components/brand/logo';
 import { Sidebar } from '@/components/layout/sidebar';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { MonthPicker } from '@/components/layout/month-picker';
+import { SpaceSwitcher } from '@/components/spaces/space-switcher';
 import { MonthProvider } from '@/hooks/use-month';
 import { useAuth } from '@/hooks/use-auth';
 import { ApiError } from '@/lib/api';
@@ -79,7 +80,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <MonthPicker compact />
                 </div>
               </div>
+              <SpaceSwitcher className="sm:hidden" />
               <div className="hidden items-center gap-3 sm:flex">
+                <SpaceSwitcher />
                 <MonthPicker />
               </div>
             </div>

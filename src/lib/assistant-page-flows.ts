@@ -17,12 +17,16 @@ const PAGES_WITH_OPENING_FLOW: PageKey[] = [
   ...REGISTRATION_PAGES,
   'planejamento',
   'relatorios',
+  'fluxo',
+  'importar',
+  'pro_labore',
+  'painel_dono',
   'resumo',
   'assistente',
   'metodo',
 ];
 
-const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'resumo', 'metodo'];
+const SUGGEST_ONLY_PAGES: PageKey[] = ['relatorios', 'fluxo', 'importar', 'pro_labore', 'painel_dono', 'resumo', 'metodo'];
 
 export type PageSnapshot = {
   incomeCount: number;
@@ -246,6 +250,62 @@ export function getPageFlow(
             'Analise meus gastos e indique possíveis pontos de melhoria com base nos relatórios do mês.',
         },
       };
+    case 'fluxo':
+      return {
+        ...base,
+        openingMessage: 'Quer que eu veja os dias de aperto do seu fluxo de caixa?',
+        openingActions: [
+          yesSuggest(
+            'Sim, analisar o fluxo',
+            'Analise meu fluxo de caixa deste mês: em que dia o saldo fica mais baixo, se fica negativo e o que posso mudar de data para evitar aperto.',
+          ),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Analisar meu fluxo',
+          message:
+            'Analise meu fluxo de caixa do mês e diga os dias de aperto e o que mudar de data.',
+        },
+      };
+    case 'painel_dono':
+      return {
+        ...base,
+        openingMessage: 'Quer que eu leia o painel e diga o que merece atenção primeiro?',
+        openingActions: [
+          yesSuggest('Sim, o que fazer primeiro?', 'Leia meu painel do dono e diga o que merece atenção primeiro e a próxima ação.'),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Ler meu painel',
+          message: 'Leia meu painel do dono: alertas, caixa da empresa, retiradas e lado pessoal.',
+        },
+      };
+    case 'pro_labore':
+      return {
+        ...base,
+        openingMessage: 'Quer saber quanto dá para tirar da empresa este mês sem apertar o caixa?',
+        openingActions: [
+          yesSuggest('Sim, quanto posso retirar?', 'Quanto posso retirar da empresa este mês? Explique o limite, o pró-labore sustentável e os alertas.'),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Analisar meu pró-labore',
+          message: 'Analise meu pró-labore: sustentável x definido, retiradas extras e o caixa da empresa.',
+        },
+      };
+    case 'importar':
+      return {
+        ...base,
+        openingMessage: 'Posso revisar o extrato com você: o que ficou sem categoria, o que parece duplicado e o que vale virar regra.',
+        openingActions: [
+          yesSuggest('Sim, revisar comigo', 'Revise a importação de extrato em andamento: o que pede atenção e o que você sugere ajustar ou virar regra?'),
+          noThanks(),
+        ],
+        suggestionAction: {
+          label: 'Revisar o extrato',
+          message: 'Revise a importação de extrato em andamento e diga o que ajustar antes de confirmar.',
+        },
+      };
     case 'resumo':
       return {
         ...base,
@@ -344,6 +404,14 @@ export function buildAnotherSuggestionMessage(pageKey: PageKey): string {
       return `${avoidRepeat} Traga novos insights sobre saldo, cadastros pendentes, orçamentos estourados, economia ou metas do mês.`;
     case 'relatorios':
       return `${avoidRepeat} Traga novos insights sobre gastos, categorias, tendências ou oportunidades de melhoria.`;
+    case 'painel_dono':
+      return `${avoidRepeat} Use o painel do dono: alertas, dias de caixa, retiradas x limite, dívidas e reserva pessoais.`;
+    case 'pro_labore':
+      return `${avoidRepeat} Olhe o pró-labore: limite do mês, sustentável x definido, retiradas extras e dias de caixa da empresa.`;
+    case 'importar':
+      return `${avoidRepeat} Olhe a importação em revisão: linhas sem categoria, duplicadas e regras que valem a pena.`;
+    case 'fluxo':
+      return `${avoidRepeat} Use o fluxo de caixa diário: dias de aperto, saldo por conta ou PF/PJ e datas que valem mudar.`;
     case 'despesas':
       return `${avoidRepeat} Pense em economia, categorias relevantes ou despesas que possam estar faltando.`;
     case 'receitas':
@@ -475,19 +543,64 @@ export type AiExecutedAction = {
 };
 
 const ACTION_QUERY_KEYS: Record<string, string[][]> = {
-  create_expense: [['expenses'], ['fixed-templates'], ['months']],
+  // Transferências ficam em ['months', id, 'transfers'] e mudam resumo e fluxo do mês.
+  create_transfer: [['months'], ['bank-accounts'], ['auth', 'me'], ['baby-steps'], ['pro-labore'], ['owner-dashboard']],
+  update_transfer: [['months'], ['bank-accounts'], ['baby-steps']],
+  delete_transfer: [['months'], ['bank-accounts'], ['baby-steps']],
+  create_bank_account: [['bank-accounts']],
+  update_bank_account: [['bank-accounts'], ['months']],
+  delete_bank_account: [
+    ['bank-accounts'],
+    ['months'],
+    ['incomes'],
+    ['expenses'],
+    ['fixed-templates'],
+    ['installments'],
+    ['subscriptions'],
+    ['financings'],
+    ['investments'],
+    ['donations'],
+  ],
+  set_entry_details: [
+    ['categories'],
+    ['budgets'],
+    ['months'],
+    ['incomes'],
+    ['expenses'],
+    ['fixed-templates'],
+    ['installments'],
+    ['subscriptions'],
+    ['financings'],
+    ['investments'],
+    ['donations'],
+    ['bank-accounts'],
+    ['auth', 'me'],
+  ],
+  create_expense: [['categories'], ['budgets'], ['expenses'], ['fixed-templates'], ['months']],
   update_expense: [['expenses'], ['fixed-templates'], ['months']],
-  create_fixed_expense: [['fixed-templates'], ['expenses'], ['months']],
-  create_installment_plan: [['installments'], ['expenses'], ['months'], ['baby-steps']],
-  create_subscription: [['subscriptions'], ['months']],
+  create_fixed_expense: [['categories'], ['budgets'], ['fixed-templates'], ['expenses'], ['months']],
+  create_installment_plan: [['categories'], ['budgets'], ['installments'], ['expenses'], ['months'], ['baby-steps']],
+  create_subscription: [['categories'], ['budgets'], ['subscriptions'], ['months']],
   create_financing: [['financings'], ['months'], ['baby-steps']],
-  create_income: [['incomes'], ['months'], ['baby-steps']],
-  create_donation: [['donations'], ['months'], ['baby-steps']],
+  create_income: [['categories'], ['budgets'], ['incomes'], ['months'], ['baby-steps']],
+  create_donation: [['categories'], ['budgets'], ['donations'], ['months'], ['baby-steps']],
   create_investment: [['investments'], ['months'], ['baby-steps']],
   set_investment_goal: [['investment-goal'], ['months'], ['baby-steps']],
-  create_budget: [['budgets'], ['budget-templates'], ['months']],
+  create_budget: [['budgets'], ['budget-templates'], ['categories'], ['months']],
+  create_category: [['categories'], ['budgets'], ['budget-templates']],
+  update_category: [['categories'], ['budgets'], ['budget-templates'], ['expenses'], ['incomes'], ['donations'], ['months']],
   create_investment_simulation: [['investment-simulations']],
   update_investment_simulation: [['investment-simulations']],
+  create_company: [['spaces'], ['auth']],
+  categorize_statement_lines: [['statement-imports'], ['categorization-rules'], ['categories']],
+  create_categorization_rule: [['categorization-rules'], ['categories']],
+  delete_categorization_rule: [['categorization-rules']],
+  set_pro_labore: [['pro-labore'], ['owner-dashboard']],
+  update_method_settings: [['baby-steps'], ['ai', 'suggestions'], ['owner-dashboard']],
+  start_whatsapp_link: [['whatsapp']],
+  update_whatsapp_preferences: [['whatsapp']],
+  record_owner_withdrawal: [['pro-labore'], ['owner-dashboard'], ['months'], ['bank-accounts'], ['baby-steps']],
+  commit_statement_import: [['statement-imports'], ['months'], ['bank-accounts'], ['baby-steps'], ['incomes'], ['expenses']],
 };
 
 function dedupeQueryKeys(keys: string[][]): string[][] {
@@ -511,6 +624,10 @@ export function invalidateQueriesAfterAiActions(
   for (const action of actions) {
     const actionKeys = ACTION_QUERY_KEYS[action.type];
     if (actionKeys) keys.push(...actionKeys);
+  }
+  // Cadastros pela IA podem criar uma conta bancária pelo nome ou ligar o fluxo PJ.
+  if (actions.some((action) => action.type.startsWith('create_') && !action.type.includes('simulation'))) {
+    keys.push(['bank-accounts'], ['auth', 'me']);
   }
   if (
     actions.some(
