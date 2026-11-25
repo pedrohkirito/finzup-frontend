@@ -2,16 +2,17 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, CircleAlert, CircleDashed, Gauge, Loader2, Search } from 'lucide-react';
+import { CheckCircle2, CircleAlert, CircleDashed, Gauge, Loader2, Search, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/use-auth';
 import { PLAN_TIER_LABELS } from '@/hooks/use-plan';
 import { api, ApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import type { AdminMetrics, AdminUser, PlanTier, ValidationSignal } from '@/types';
+import type { AdminCreatedUser, AdminMetrics, AdminUser, PlanTier, ValidationSignal } from '@/types';
 
 function fmt(value: number | null, unit: 'count' | 'percent' = 'count') {
   if (value === null || value === undefined) return '—';
@@ -52,6 +53,122 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
   );
 }
 
+function CreateUser() {
+  const queryClient = useQueryClient();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [tier, setTier] = useState<PlanTier>('essencial');
+  const [months, setMonths] = useState('1');
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    setMessage(null);
+    setError(null);
+    if (name.trim().split(/\s+/).filter(Boolean).length < 2) {
+      setError('Informe o nome completo.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('Informe um e-mail válido.');
+      return;
+    }
+    const parsedMonths = Number(months);
+    if (!Number.isInteger(parsedMonths) || parsedMonths < 1 || parsedMonths > 24) {
+      setError('Informe de 1 a 24 meses.');
+      return;
+    }
+    setBusy(true);
+    try {
+      const created = await api.post<AdminCreatedUser>('/admin/users', {
+        name: name.trim(),
+        email: email.trim(),
+        cpf: cpf.trim() || undefined,
+        tier,
+        months: parsedMonths,
+      });
+      setName('');
+      setEmail('');
+      setCpf('');
+      setMonths('1');
+      setMessage(
+        created.emailSent
+          ? `${created.email} criado no ${PLAN_TIER_LABELS[created.planTier]}. O e-mail para definir a senha vale 7 dias.`
+          : `${created.email} foi criado, mas o e-mail não saiu. Busque a pessoa abaixo e use Enviar senha.`,
+      );
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Não foi possível criar o usuário.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <UserPlus className="h-4 w-4 text-brand-500" aria-hidden />
+          Criar usuário
+        </CardTitle>
+        <p className="text-sm text-slate-500">
+          A conta nasce sem senha, com o plano liberado. A pessoa recebe um e-mail para criar a senha e entrar.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="new-user-name">Nome completo</Label>
+            <Input id="new-user-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-user-email">E-mail</Label>
+            <Input id="new-user-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-user-cpf">CPF ou CNPJ</Label>
+            <Input id="new-user-cpf" value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="Opcional" autoComplete="off" />
+          </div>
+          <div className="grid grid-cols-[1fr_5rem] gap-2">
+            <div className="space-y-1.5">
+              <Label>Plano</Label>
+              <Select value={tier} onValueChange={(v) => setTier(v as PlanTier)}>
+                <SelectTrigger aria-label="Plano do novo usuário">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(PLAN_TIER_LABELS) as PlanTier[]).map((t) => (
+                    <SelectItem key={t} value={t}>{PLAN_TIER_LABELS[t]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="new-user-months">Meses</Label>
+              <Input
+                id="new-user-months"
+                type="number"
+                min={1}
+                max={24}
+                value={months}
+                onChange={(e) => setMonths(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+        {message && <p className="text-sm text-brand-600 dark:text-brand-300">{message}</p>}
+        {error && <p className="text-sm text-red-500">{error}</p>}
+        <Button onClick={() => void submit()} disabled={busy || !email.trim()}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+          Criar e enviar e-mail
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 function PlanChanger() {
   const queryClient = useQueryClient();
   const [q, setQ] = useState('');
@@ -81,6 +198,19 @@ function PlanChanger() {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
     } catch (err) {
       setMessage(err instanceof ApiError ? err.message : 'Não foi possível trocar o plano.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const sendAccess = async (user: AdminUser) => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      await api.post(`/admin/users/${user.id}/access-email`);
+      setMessage(`E-mail para definir a senha enviado para ${user.email}. Vale 7 dias.`);
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : 'Não foi possível enviar o e-mail.');
     } finally {
       setBusy(false);
     }
@@ -132,6 +262,7 @@ function PlanChanger() {
                   onChange={(e) => setMonths((m) => ({ ...m, [u.id]: e.target.value }))}
                 />
                 <Button onClick={() => apply(u)} disabled={busy}>Aplicar</Button>
+                <Button variant="outline" onClick={() => sendAccess(u)} disabled={busy}>Enviar senha</Button>
               </div>
             </li>
           ))}
@@ -235,7 +366,12 @@ export default function InternoPage() {
         </>
       )}
 
-      {user?.isAdmin && <PlanChanger />}
+      {user?.isAdmin && (
+        <div className="space-y-4">
+          <CreateUser />
+          <PlanChanger />
+        </div>
+      )}
     </div>
   );
 }

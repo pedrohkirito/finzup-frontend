@@ -910,6 +910,10 @@ export interface AdminUser {
   currentPeriodEnd: string | null;
 }
 
+export interface AdminCreatedUser extends AdminUser {
+  emailSent: boolean;
+}
+
 // ---------------------------------------------------------------- Importação de extrato (fase 2, item 5)
 
 export type StatementLineKind = 'expense' | 'income' | 'transfer' | 'ignore';
