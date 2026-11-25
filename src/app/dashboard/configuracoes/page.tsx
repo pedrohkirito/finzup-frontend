@@ -431,7 +431,18 @@ export default function ConfiguracoesPage() {
                     <p className="font-medium text-slate-900 dark:text-white">{m.name}</p>
                     <p className={cn('text-xs font-medium', style.iconText)}>{paymentMethodTypeLabels[m.type]}</p>
                     {m.type === 'credit' && (
-                      <div className="mt-1.5">
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        <DueDaySelect
+                          compact
+                          kind="closing"
+                          value={m.closingDay}
+                          onChange={async (closingDay) => {
+                            await api.patch(`/payment-methods/${m.id}`, { closingDay });
+                            await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+                            await queryClient.invalidateQueries({ queryKey: ['months'] });
+                            await queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+                          }}
+                        />
                         <DueDaySelect
                           compact
                           value={m.dueDay}
@@ -439,6 +450,7 @@ export default function ConfiguracoesPage() {
                             await api.patch(`/payment-methods/${m.id}`, { dueDay });
                             await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
                             await queryClient.invalidateQueries({ queryKey: ['months'] });
+                            await queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
                           }}
                         />
                       </div>

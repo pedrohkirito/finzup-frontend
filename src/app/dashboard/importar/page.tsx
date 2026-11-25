@@ -248,7 +248,7 @@ export default function ImportarPage() {
           <FileUp className="h-6 w-6 text-brand-500" aria-hidden /> Importar extrato
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Envie o extrato, revise as categorias sugeridas e confirme. Duplicadas ficam de fora; pagamento de fatura e aplicações não contam como gasto.
+          Envie o extrato. A IA sugere a categoria de cada lançamento, sem gastar créditos, e você troca o que não estiver certo. Duplicadas ficam de fora; pagamento de fatura e aplicações não contam como gasto.
         </p>
       </div>
 

@@ -390,6 +390,11 @@ export function ReviewPanel({ data, onClose }: { data: StatementImport; onClose:
               {data.periodStart && data.periodEnd && `${formatShortDate(data.periodStart)} a ${formatShortDate(data.periodEnd)} · `}
               {space ? space.name : ''} · {data.totalLines} linhas
             </p>
+            {reviewing && (
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                A categoria já vem preenchida. Troque no seletor se quiser outra — isso não gasta créditos.
+              </p>
+            )}
           </div>
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-white/[0.07]">Saídas {formatCurrency(data.summary.totalOut)}</span>

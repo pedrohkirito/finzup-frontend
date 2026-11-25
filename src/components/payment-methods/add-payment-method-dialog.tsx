@@ -58,6 +58,7 @@ export function AddPaymentMethodDialog({
             const method = await api.post<PaymentMethod>('/payment-methods', {
               ...data,
               dueDay: data.type === 'credit' ? (data.dueDay ?? null) : null,
+              closingDay: data.type === 'credit' ? (data.closingDay ?? null) : null,
             });
             await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
             onCreated?.(method);
@@ -95,10 +96,17 @@ export function AddPaymentMethodDialog({
             )}
           </div>
           {currentType === 'credit' && (
-            <div className="space-y-2">
-              <Label>Vencimento da fatura (opcional)</Label>
-              <DueDaySelect value={form.watch('dueDay')} onChange={(v) => form.setValue('dueDay', v)} />
-              <p className="text-xs text-slate-400">Usado no fluxo de caixa para mostrar a fatura no dia certo.</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Fechamento da fatura (opcional)</Label>
+                <DueDaySelect kind="closing" value={form.watch('closingDay')} onChange={(v) => form.setValue('closingDay', v)} />
+                <p className="text-xs text-slate-400">Compras depois desse dia entram na fatura do mês seguinte.</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Vencimento da fatura (opcional)</Label>
+                <DueDaySelect value={form.watch('dueDay')} onChange={(v) => form.setValue('dueDay', v)} />
+                <p className="text-xs text-slate-400">Dia em que a fatura sai do caixa no fluxo.</p>
+              </div>
             </div>
           )}
           <Button type="submit" className="w-full">

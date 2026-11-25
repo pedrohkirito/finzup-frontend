@@ -50,6 +50,8 @@ export interface PaymentMethod {
   isDefault: boolean;
   /** Dia de vencimento da fatura (só cartão de crédito). */
   dueDay?: number | null;
+  /** Dia de fechamento da fatura (só cartão de crédito). Compras depois entram no mês seguinte. */
+  closingDay?: number | null;
 }
 
 /** PF (`personal`) ou PJ (`business`). */

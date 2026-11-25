@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { maskPhoneInput, normalizePhoneDigits } from '@/lib/phone';
 import type { WhatsAppLinkStart } from '@/types';
 
 const WEEKDAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -193,8 +194,15 @@ export function WhatsAppCard() {
           >
             <Label htmlFor="wa-phone">Seu número com DDD</Label>
             <div className="flex gap-2">
-              <Input id="wa-phone" inputMode="tel" placeholder="(11) 99999-8888" value={phone} onChange={(e) => setPhone(e.target.value.slice(0, 25))} />
-              <Button type="submit" disabled={phone.replace(/\D/g, '').length < 10 || start.isPending || !data.configured}>
+              <Input
+                id="wa-phone"
+                inputMode="tel"
+                placeholder="(11) 99999-8888"
+                value={phone}
+                onChange={(e) => setPhone(maskPhoneInput(e.target.value))}
+                autoComplete="tel"
+              />
+              <Button type="submit" disabled={normalizePhoneDigits(phone).length < 10 || start.isPending || !data.configured}>
                 {start.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Vincular'}
               </Button>
             </div>

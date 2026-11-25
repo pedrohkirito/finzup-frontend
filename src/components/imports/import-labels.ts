@@ -10,7 +10,7 @@ export const LINE_KIND_LABEL: Record<StatementLineKind, string> = {
 export const SOURCE_LABEL: Record<CategorySuggestionSource, string> = {
   rule: 'Regra',
   history: 'Histórico',
-  ai: 'IA',
+  ai: 'IA sugeriu',
   keyword: 'Sugestão',
   manual: 'Você',
 };
