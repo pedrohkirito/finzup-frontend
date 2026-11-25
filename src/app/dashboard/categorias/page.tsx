@@ -60,7 +60,7 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
   if (editing) {
     return (
       <li className="space-y-2 py-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex flex-wrap items-center gap-2">
           <Input
             autoFocus
             value={name}
@@ -68,7 +68,7 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && void save()}
             aria-label="Nome da categoria"
-            className="sm:flex-1"
+            className="min-w-0 flex-1 basis-full sm:basis-[min(100%,12rem)]"
           />
           {category.kind === 'expense' && (
             <CurrencyInput
@@ -76,10 +76,10 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
               onChange={setLimit}
               aria-label={limitLabel}
               placeholder="Sem limite"
-              className="sm:w-40"
+              className="w-full shrink-0 sm:w-40"
             />
           )}
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <Button size="sm" onClick={save} disabled={update.isPending}>
               {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Salvar
             </Button>
@@ -160,15 +160,16 @@ function AddCategory({ kind, scope, spaceId }: { kind: CategoryKind; scope: Fina
 
   return (
     <div className="pt-3">
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Input
           placeholder={kind === 'income' ? 'Nova categoria de receita' : 'Nova categoria de despesa'}
           value={name}
           maxLength={60}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && void submit()}
+          className="min-w-0 flex-1 basis-full sm:basis-[min(100%,12rem)]"
         />
-        <Button variant="outline" onClick={submit} disabled={create.isPending || !name.trim()}>
+        <Button variant="outline" onClick={submit} disabled={create.isPending || !name.trim()} className="shrink-0">
           {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           <span className="hidden sm:inline">Adicionar</span>
         </Button>
@@ -194,7 +195,7 @@ function CategoryGroup({
   limitLabel: string;
 }) {
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
@@ -244,7 +245,7 @@ export default function CategoriasPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-white">
@@ -279,7 +280,7 @@ export default function CategoriasPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid min-w-0 gap-4 lg:grid-cols-2">
             <CategoryGroup
               title="Despesas"
               kind="expense"
