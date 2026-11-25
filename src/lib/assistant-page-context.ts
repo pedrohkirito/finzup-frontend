@@ -66,7 +66,7 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     label: 'Planejamento',
     description: 'Página de simulação com cenários de receitas, despesas, doações e investimentos.',
     guidance:
-      'Priorize ajudar a montar e comparar cenários. Sugira cenário "completar meu Baby Step atual". Não altera o mês real.',
+      'Monte cenários com os dados que o usuário pedir: mês atual, outro mês, limites das categorias ou outro cenário. Mostre o resumo e salve só depois da confirmação. Não altera o mês real.',
   },
   '/dashboard/investimentos': {
     key: 'investimentos',

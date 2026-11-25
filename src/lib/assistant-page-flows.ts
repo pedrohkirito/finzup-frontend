@@ -144,18 +144,18 @@ export function getPageFlow(
     case 'planejamento':
       return {
         ...base,
-        openingMessage: 'Quer ajuda para montar um cenário de planejamento financeiro?',
+        openingMessage: 'Quer que eu monte um cenário com os seus dados?',
         openingActions: [
           yesSuggest(
-            'Sim, montar cenário',
-            'Me ajude a montar um cenário de planejamento com receitas, despesas por categoria, doações e caixinhas de investimento.',
+            'Sim, usar o mês atual',
+            'Monte um cenário de planejamento com os dados do meu mês atual.',
           ),
           noThanks(),
         ],
         suggestionAction: {
-          label: 'Comparar cenários',
+          label: 'Escolher a origem',
           message:
-            'Sugira dois cenários de planejamento (conservador e ideal) para eu comparar antes de decidir.',
+            'Quero um cenário a partir de outro mês, das minhas categorias ou de um cenário que já existe. Me pergunte qual origem usar.',
         },
       };
     case 'receitas':
@@ -540,6 +540,7 @@ export type AiExecutedAction = {
   name: string;
   amount?: number;
   simulationId?: string;
+  planId?: string;
 };
 
 const ACTION_QUERY_KEYS: Record<string, string[][]> = {
@@ -605,6 +606,7 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   update_category: [['categories'], ['budgets'], ['budget-templates'], ['expenses'], ['incomes'], ['donations'], ['months']],
   create_investment_simulation: [['investment-simulations']],
   update_investment_simulation: [['investment-simulations']],
+  save_planning_scenario: [['plans']],
   create_company: [['spaces'], ['auth']],
   categorize_statement_lines: [['statement-imports'], ['categorization-rules'], ['categories']],
   create_categorization_rule: [['categorization-rules'], ['categories']],

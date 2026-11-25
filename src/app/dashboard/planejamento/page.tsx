@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useMonthStore } from '@/hooks/use-month';
@@ -17,6 +17,11 @@ import {
 import { CalendarRange } from 'lucide-react';
 import { NewFeatureBadge } from '@/components/ui/new-feature-badge';
 import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
+import {
+  clearPendingPlanningPlanId,
+  getPendingPlanningPlanId,
+  subscribePendingPlanningPlan,
+} from '@/lib/planning-page-bridge';
 import type {
   FinancialPlan,
   PlanDonationItem,
@@ -58,6 +63,7 @@ function buildSegments(
 export default function PlanejamentoPage() {
   const { selectedMonthId } = useMonthStore();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const pendingPlanId = useSyncExternalStore(subscribePendingPlanningPlan, getPendingPlanningPlanId, () => null);
 
   const { data: plans, isLoading } = useQuery({
     queryKey: ['plans'],
@@ -65,11 +71,20 @@ export default function PlanejamentoPage() {
   });
 
   useEffect(() => {
-    if (!plans?.length) { setSelectedPlanId(null); return; }
-    if (!selectedPlanId || !plans.some((p) => p.id === selectedPlanId)) {
+    if (!plans?.length) {
+      setSelectedPlanId(null);
+      return;
+    }
+    if (pendingPlanId && plans.some((plan) => plan.id === pendingPlanId)) {
+      setSelectedPlanId(pendingPlanId);
+      clearPendingPlanningPlanId();
+      return;
+    }
+    if (pendingPlanId && selectedPlanId && plans.some((plan) => plan.id === selectedPlanId)) return;
+    if (!selectedPlanId || !plans.some((plan) => plan.id === selectedPlanId)) {
       setSelectedPlanId(plans[0].id);
     }
-  }, [plans, selectedPlanId]);
+  }, [plans, selectedPlanId, pendingPlanId]);
 
   const enabled = !!selectedPlanId;
 

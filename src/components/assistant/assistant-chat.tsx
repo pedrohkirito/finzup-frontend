@@ -32,6 +32,7 @@ import {
   subscribeInvestmentPageBridgeState,
   syncInvestmentPageBridgeState,
 } from '@/lib/investment-page-bridge';
+import { selectPlanningPlanFromAssistant } from '@/lib/planning-page-bridge';
 import {
   assistantReplyShouldNotify,
   beginAssistantRequest,
@@ -228,6 +229,7 @@ export function AssistantChat({
           name: string;
           amount?: number;
           simulationId?: string;
+          planId?: string;
           details?: { download?: { path: string; label: string; format: 'pdf' | 'csv' } };
         }[];
       }>('/ai/chat', {
@@ -284,6 +286,9 @@ export function AssistantChat({
         for (const key of invalidateQueriesAfterAiActions(pageKey, result.actionsExecuted)) {
           await queryClient.invalidateQueries({ queryKey: key, refetchType: 'all' });
         }
+
+        const savedPlan = [...result.actionsExecuted].reverse().find((action) => action.type === 'save_planning_scenario' && action.planId);
+        if (savedPlan?.planId) selectPlanningPlanFromAssistant(savedPlan.planId);
       }
     } catch (err) {
       if (!isAssistantRequestCurrent(requestId)) return;
