@@ -84,7 +84,7 @@ function BudgetSection({
           </p>
         </div>
         <Link
-          href="/dashboard/orcamentos"
+          href="/dashboard/categorias"
           className="mt-0.5 flex shrink-0 items-center gap-0.5 text-xs font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
         >
           Ver todos

@@ -47,12 +47,19 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     guidance:
       'Priorize cadastro de despesas (avulsas, fixas com valor 0, parcelamentos). Aceite listas livres. No Passo 2, destaque dívidas da bola de neve.',
   },
+  '/dashboard/categorias': {
+    key: 'orcamentos',
+    label: 'Categorias',
+    description: 'Página de categorias. O limite de uma categoria de despesa é o teto de gasto do mês.',
+    guidance:
+      'Priorize organizar categorias e definir limites nas de despesa. Identifique estouros. Alinhe ao Baby Step e aos princípios que o usuário mantém ligados no Método (padrão: 10% lazer, 10% dízimo, 15% investir).',
+  },
   '/dashboard/orcamentos': {
     key: 'orcamentos',
-    label: 'Orçamentos',
-    description: 'Página de orçamentos por categoria com limites mensais.',
+    label: 'Categorias',
+    description: 'Página de categorias. O limite de uma categoria de despesa é o teto de gasto do mês.',
     guidance:
-      'Priorize definir limites por categoria e identificar estouros. Alinhe ao Baby Step e aos princípios que o usuário mantém ligados no Método (padrão: 10% lazer, 10% dízimo, 15% investir).',
+      'Priorize organizar categorias e definir limites nas de despesa. Identifique estouros. Alinhe ao Baby Step e aos princípios que o usuário mantém ligados no Método (padrão: 10% lazer, 10% dízimo, 15% investir).',
   },
   '/dashboard/planejamento': {
     key: 'planejamento',

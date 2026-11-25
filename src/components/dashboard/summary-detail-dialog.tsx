@@ -218,7 +218,7 @@ export function BudgetDetailDialog({
         <ScrollArea className={summaryScrollClass}>
           <div className={summaryScrollContentClass}>
             {entries.length === 0 ? (
-              <p className="py-6 text-center text-sm text-slate-500">Nenhum gasto vinculado a este orçamento</p>
+              <p className="py-6 text-center text-sm text-slate-500">Nenhum gasto nesta categoria</p>
             ) : (
               entries.map((item) => (
                 <div key={item.id} className={summaryItemClass}>
@@ -230,7 +230,7 @@ export function BudgetDetailDialog({
           </div>
         </ScrollArea>
         <Button variant="outline" className="w-full" asChild>
-          <Link href="/dashboard/orcamentos">
+          <Link href="/dashboard/categorias">
             Ver página completa
             <ExternalLink className="h-4 w-4" />
           </Link>

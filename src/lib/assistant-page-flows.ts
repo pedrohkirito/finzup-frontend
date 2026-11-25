@@ -130,9 +130,9 @@ export function getPageFlow(
     case 'orcamentos':
       return {
         ...base,
-        openingMessage: 'Quer ajuda para cadastrar seus orçamentos?',
+        openingMessage: 'Quer ajuda para organizar suas categorias e limites?',
         openingActions: [
-          yesRegister('Sim, quero ajuda para cadastrar meus orçamentos.'),
+          yesRegister('Sim, quero ajuda para organizar minhas categorias e limites.'),
           noThanks(),
         ],
         suggestionAction: {
@@ -560,6 +560,20 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
     ['financings'],
     ['investments'],
     ['donations'],
+  ],
+  delete_entry: [
+    ['categories'],
+    ['budgets'],
+    ['months'],
+    ['incomes'],
+    ['expenses'],
+    ['fixed-templates'],
+    ['installments'],
+    ['subscriptions'],
+    ['financings'],
+    ['investments'],
+    ['donations'],
+    ['bank-accounts'],
   ],
   set_entry_details: [
     ['categories'],

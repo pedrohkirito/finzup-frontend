@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   TrendingUp,
   Receipt,
-  Target,
   MoreHorizontal,
   PiggyBank,
   Heart,
@@ -52,7 +51,6 @@ const moreLinks = [
   ...(BABY_STEPS_ENABLED
     ? [{ href: '/dashboard/metodo', icon: Footprints, label: 'Método', isNew: true }]
     : []),
-  { href: '/dashboard/orcamentos', icon: Target, label: 'Orçamentos' },
   { href: '/dashboard/categorias', icon: Tags, label: 'Categorias' },
   { href: '/dashboard/empresas', icon: Building2, label: 'Empresas' },
   { href: '/dashboard/planejamento', icon: CalendarRange, label: 'Planejamento' },

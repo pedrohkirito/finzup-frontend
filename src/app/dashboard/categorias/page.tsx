@@ -1,37 +1,60 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Archive, ArchiveRestore, Check, ChevronDown, Loader2, Pencil, Plus, Sparkles, Tags, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useActiveSpaces, useEffectiveSpace } from '@/hooks/use-spaces';
+import { useMonthStore, useMonths } from '@/hooks/use-month';
+import { useActiveSpaces, useEffectiveSpace, useSelectedSpace } from '@/hooks/use-spaces';
 import {
   useAddDefaultCategories,
   useCategories,
   useCreateCategory,
   useDeleteCategory,
+  useInvalidateCategories,
   useUpdateCategory,
 } from '@/hooks/use-categories';
-import { ApiError } from '@/lib/api';
+import { BabyStepPageHint } from '@/components/baby-steps/baby-step-page-hint';
+import { ApiError, api } from '@/lib/api';
 import { cn, formatCurrency } from '@/lib/utils';
-import type { Category, CategoryKind, FinanceScope } from '@/types';
+import type { Category, CategoryKind, FinanceScope, IncomeEntry, MonthBudget } from '@/types';
 
 function errorMessage(err: unknown) {
   return err instanceof ApiError ? err.message : 'Algo deu errado. Tente de novo.';
 }
 
-function CategoryRow({ category, limitLabel }: { category: Category; limitLabel: string }) {
+function CategoryRow({
+  category,
+  limitLabel,
+  budget,
+  monthId,
+  isMonthOpen,
+}: {
+  category: Category;
+  limitLabel: string;
+  budget?: MonthBudget;
+  monthId?: string;
+  isMonthOpen: boolean;
+}) {
   const update = useUpdateCategory();
   const remove = useDeleteCategory();
+  const invalidate = useInvalidateCategories();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(category.name);
   const [limit, setLimit] = useState(category.defaultLimit);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [showMonth, setShowMonth] = useState(false);
+  const [monthLimit, setMonthLimit] = useState(budget?.limit ?? category.defaultLimit);
+  useEffect(() => {
+    if (!showMonth && budget) setMonthLimit(budget.limit);
+  }, [budget, showMonth]);
+  const [savingMonth, setSavingMonth] = useState(false);
 
   const save = async () => {
     setError(null);
@@ -41,6 +64,17 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
         ...(name.trim() !== category.name && { name: name.trim() }),
         ...(category.kind === 'expense' && limit !== category.defaultLimit && { defaultLimit: limit }),
       });
+      const monthWasCustom = !!budget && budget.limit !== category.defaultLimit;
+      if (
+        category.kind === 'expense' &&
+        monthId &&
+        isMonthOpen &&
+        !monthWasCustom &&
+        limit !== category.defaultLimit
+      ) {
+        await api.put(`/months/${monthId}/budgets/${category.id}/limit`, { limitAmount: limit });
+        await invalidate();
+      }
       setEditing(false);
     } catch (err) {
       setError(errorMessage(err));
@@ -106,13 +140,33 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
 
   return (
     <li className="py-2.5">
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-slate-900 dark:text-white">{category.name}</p>
           {category.kind === 'expense' && category.defaultLimit > 0 && (
             <p className="text-xs text-slate-500">
               {limitLabel}: {formatCurrency(category.defaultLimit)}/mês
+              {budget && budget.limit !== category.defaultLimit ? ` · este mês ${formatCurrency(budget.limit)}` : ''}
             </p>
+          )}
+          {budget && category.kind === 'expense' && (
+            <div className="mt-1.5 space-y-1">
+              <Progress
+                value={budget.limit > 0 ? Math.min(budget.progress, 100) : 0}
+                className={cn(
+                  'h-1.5',
+                  budget.overBudget && '[&>div]:bg-red-500',
+                  !budget.overBudget && budget.progress >= 85 && budget.limit > 0 && '[&>div]:bg-amber-400',
+                )}
+              />
+              <p className="text-xs text-slate-500">
+                {formatCurrency(budget.spent)} neste mês
+                {budget.limit > 0 ? ` de ${formatCurrency(budget.limit)}` : ''}
+                {budget.entries.length > 0
+                  ? ` · ${budget.entries.length} ${budget.entries.length === 1 ? 'lançamento' : 'lançamentos'}`
+                  : ''}
+              </p>
+            </div>
           )}
         </div>
         {category.isDefault && (
@@ -138,6 +192,46 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
       {(notice || error) && (
         <p className={cn('mt-1 text-xs', error ? 'text-red-600 dark:text-red-400' : 'text-slate-500')}>{error ?? notice}</p>
       )}
+      {category.kind === 'expense' && isMonthOpen && monthId && (
+        <div className="mt-1">
+          <button
+            type="button"
+            className="text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+            onClick={() => setShowMonth((open) => !open)}
+          >
+            Limite só deste mês
+          </button>
+          {showMonth && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <CurrencyInput
+                value={monthLimit}
+                onChange={setMonthLimit}
+                aria-label={`Limite de ${category.name} neste mês`}
+                className="w-full sm:w-36"
+              />
+              <Button
+                size="sm"
+                disabled={savingMonth}
+                onClick={async () => {
+                  setSavingMonth(true);
+                  setError(null);
+                  try {
+                    await api.put(`/months/${monthId}/budgets/${category.id}/limit`, { limitAmount: monthLimit });
+                    await invalidate();
+                    setShowMonth(false);
+                  } catch (err) {
+                    setError(errorMessage(err));
+                  } finally {
+                    setSavingMonth(false);
+                  }
+                }}
+              >
+                {savingMonth ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar'}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </li>
   );
 }
@@ -145,14 +239,21 @@ function CategoryRow({ category, limitLabel }: { category: Category; limitLabel:
 function AddCategory({ kind, scope, spaceId }: { kind: CategoryKind; scope: FinanceScope; spaceId?: string }) {
   const create = useCreateCategory();
   const [name, setName] = useState('');
+  const [limit, setLimit] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async () => {
     if (!name.trim()) return;
     setError(null);
     try {
-      await create.mutateAsync(spaceId ? { name: name.trim(), kind, spaceId } : { name: name.trim(), kind, scope });
+      await create.mutateAsync({
+        name: name.trim(),
+        kind,
+        ...(spaceId ? { spaceId } : { scope }),
+        ...(kind === 'expense' && limit > 0 && { defaultLimit: limit }),
+      });
       setName('');
+      setLimit(0);
     } catch (err) {
       setError(errorMessage(err));
     }
@@ -169,6 +270,15 @@ function AddCategory({ kind, scope, spaceId }: { kind: CategoryKind; scope: Fina
           onKeyDown={(e) => e.key === 'Enter' && void submit()}
           className="min-w-0 flex-1 basis-full sm:basis-[min(100%,12rem)]"
         />
+        {kind === 'expense' && (
+          <CurrencyInput
+            value={limit}
+            onChange={setLimit}
+            aria-label="Limite mensal"
+            placeholder="Sem limite"
+            className="w-full shrink-0 sm:w-36"
+          />
+        )}
         <Button variant="outline" onClick={submit} disabled={create.isPending || !name.trim()} className="shrink-0">
           {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           <span className="hidden sm:inline">Adicionar</span>
@@ -186,6 +296,9 @@ function CategoryGroup({
   spaceId,
   items,
   limitLabel,
+  budgets,
+  monthId,
+  isMonthOpen,
 }: {
   title: string;
   kind: CategoryKind;
@@ -193,6 +306,9 @@ function CategoryGroup({
   spaceId?: string;
   items: Category[];
   limitLabel: string;
+  budgets: Map<string, MonthBudget>;
+  monthId?: string;
+  isMonthOpen: boolean;
 }) {
   return (
     <Card className="min-w-0">
@@ -205,7 +321,14 @@ function CategoryGroup({
         ) : (
           <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
             {items.map((c) => (
-              <CategoryRow key={c.id} category={c} limitLabel={limitLabel} />
+              <CategoryRow
+                key={c.id}
+                category={c}
+                limitLabel={limitLabel}
+                budget={budgets.get(c.id)}
+                monthId={monthId}
+                isMonthOpen={isMonthOpen}
+              />
             ))}
           </ul>
         )}
@@ -217,14 +340,36 @@ function CategoryGroup({
 
 export default function CategoriasPage() {
   const { spaces, businesses } = useActiveSpaces();
+  const headerSpace = useSelectedSpace();
   const [pickedSpaceId, setPickedSpaceId] = useState<string | undefined>(undefined);
   const space = useEffectiveSpace(pickedSpaceId);
   const activeScope: FinanceScope = space?.kind ?? 'personal';
+  const { selectedMonthId } = useMonthStore();
+  const { data: months } = useMonths();
+  const isMonthOpen = months?.find((m) => m.id === selectedMonthId)?.status === 'open';
   const { data, isPending } = useCategories({ spaceId: space?.id, includeArchived: true, enabled: !!space });
+  const { data: budgets } = useQuery({
+    queryKey: ['budgets', selectedMonthId, space?.id ?? 'all'],
+    queryFn: () => api.get<MonthBudget[]>(`/months/${selectedMonthId}/budgets?spaceId=${space!.id}`),
+    enabled: !!selectedMonthId && !!space,
+  });
+  const { data: incomes } = useQuery({
+    queryKey: ['incomes', selectedMonthId],
+    queryFn: () => api.get<IncomeEntry[]>(`/months/${selectedMonthId}/incomes`),
+    enabled: !!selectedMonthId,
+  });
   const addDefaults = useAddDefaultCategories();
   const update = useUpdateCategory();
   const [showArchived, setShowArchived] = useState(false);
   const [defaultsMessage, setDefaultsMessage] = useState<string | null>(null);
+  const budgetById = new Map((budgets ?? []).map((b) => [b.templateId, b]));
+  const withLimit = (budgets ?? []).filter((b) => b.hasLimit !== false);
+  const totalLimit = withLimit.reduce((sum, b) => sum + b.limit, 0);
+  const totalSpent = withLimit.reduce((sum, b) => sum + b.spent, 0);
+  const incomesMatchSpace = !headerSpace || headerSpace.id === space?.id;
+  const totalIncome = incomesMatchSpace
+    ? (incomes ?? []).filter((income) => !space || income.spaceId === space.id).reduce((sum, income) => sum + Number(income.amount), 0)
+    : null;
 
   const active = (data ?? []).filter((c) => !c.archived);
   const archived = (data ?? []).filter((c) => c.archived);
@@ -252,11 +397,12 @@ export default function CategoriasPage() {
             <Tags className="h-6 w-6 text-brand-500" aria-hidden /> Categorias
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Organize receitas e despesas. Renomear uma categoria muda todos os lançamentos ligados a ela.{' '}
-            <Link href="/dashboard/orcamentos" className="text-brand-600 hover:underline dark:text-brand-300">
-              Ver {activeScope === 'business' ? 'limites de gasto' : 'orçamentos'}
-            </Link>
+            Organize receitas e despesas. O limite de uma categoria de despesa é o teto do mês — a barra mostra o que já foi usado.
+            Renomear muda todos os lançamentos ligados a ela.
           </p>
+          <div className="mt-3">
+            <BabyStepPageHint pageKey="orcamentos" />
+          </div>
         </div>
         {businesses.length > 0 && space && (
           <Select value={space.id} onValueChange={setPickedSpaceId}>
@@ -274,6 +420,31 @@ export default function CategoriasPage() {
         )}
       </div>
 
+      {!isPending && withLimit.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Card className="p-4">
+            <p className="text-xs font-medium text-slate-500">Gasto nas categorias com limite</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{formatCurrency(totalSpent)}</p>
+            <p className="mt-1 text-xs text-slate-400">de {formatCurrency(totalLimit)} neste mês</p>
+          </Card>
+          <Card className="p-4">
+            <p className="text-xs font-medium text-slate-500">Receitas do mês</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
+              {totalIncome == null ? '—' : formatCurrency(totalIncome)}
+            </p>
+          </Card>
+          <Card className="p-4">
+            <p className="text-xs font-medium text-slate-500">
+              {totalIncome != null && totalIncome - totalLimit < 0 ? 'Acima da receita' : 'Sobra da receita'}
+            </p>
+            <p className={cn('mt-2 text-2xl font-bold tabular-nums', totalIncome != null && totalIncome - totalLimit < 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400')}>
+              {totalIncome == null ? '—' : formatCurrency(Math.abs(totalIncome - totalLimit))}
+            </p>
+            <p className="mt-1 text-xs text-slate-400">Receitas menos os limites</p>
+          </Card>
+        </div>
+      )}
+
       {isPending ? (
         <div className="flex h-40 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
@@ -288,6 +459,9 @@ export default function CategoriasPage() {
               spaceId={space?.id}
               items={active.filter((c) => c.kind === 'expense')}
               limitLabel={limitLabel}
+              budgets={budgetById}
+              monthId={selectedMonthId ?? undefined}
+              isMonthOpen={!!isMonthOpen}
             />
             <CategoryGroup
               title="Receitas"
@@ -296,6 +470,9 @@ export default function CategoriasPage() {
               spaceId={space?.id}
               items={active.filter((c) => c.kind === 'income')}
               limitLabel={limitLabel}
+              budgets={budgetById}
+              monthId={selectedMonthId ?? undefined}
+              isMonthOpen={!!isMonthOpen}
             />
           </div>
 

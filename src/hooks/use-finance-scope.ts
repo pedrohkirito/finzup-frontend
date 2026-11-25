@@ -36,7 +36,6 @@ export function useBusinessView(): boolean {
 
 /** Nomes do lado do dono: "orçamento" vira "limite de gasto" e "relatórios" vira "painel gerencial do dono". */
 export const BUSINESS_NAV_LABELS: Record<string, string> = {
-  '/dashboard/orcamentos': 'Limites de gasto',
   '/dashboard/relatorios': 'Painel do dono',
 };
 
@@ -48,7 +47,7 @@ export function useNavLabel() {
 export function budgetTerms(business: boolean) {
   return business
     ? {
-        title: 'Limites de gasto',
+        title: 'Categorias',
         singular: 'limite de gasto',
         newLabel: 'Novo limite de gasto',
         planned: 'Limites planejados',
@@ -57,7 +56,7 @@ export function budgetTerms(business: boolean) {
           'Um teto de gasto por categoria da empresa. As despesas lançadas na categoria somam aqui e mostram o que ainda cabe no mês.',
       }
     : {
-        title: 'Orçamentos',
+        title: 'Categorias',
         singular: 'orçamento',
         newLabel: 'Novo orçamento',
         planned: 'Orçamentos planejados',

@@ -23,7 +23,7 @@ const nav = [
   { label: 'Relatórios', icon: BarChart3 },
   { label: 'Receitas', icon: TrendingUp },
   { label: 'Despesas', icon: Receipt },
-  { label: 'Orçamentos', icon: Target },
+  { label: 'Categorias', icon: Target },
   { label: 'Planejamento', icon: CalendarRange },
   { label: 'Investimentos', icon: PiggyBank },
   { label: 'Doações', icon: Heart },
