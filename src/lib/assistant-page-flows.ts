@@ -593,6 +593,8 @@ const ACTION_QUERY_KEYS: Record<string, string[][]> = {
   ],
   create_expense: [['categories'], ['budgets'], ['expenses'], ['fixed-templates'], ['months']],
   update_expense: [['expenses'], ['fixed-templates'], ['months']],
+  reorder_expenses: [['expenses'], ['fixed-templates'], ['months']],
+  set_expenses_paid: [['expenses'], ['fixed-templates'], ['installments'], ['subscriptions'], ['months']],
   create_fixed_expense: [['categories'], ['budgets'], ['fixed-templates'], ['expenses'], ['months']],
   create_installment_plan: [['categories'], ['budgets'], ['installments'], ['expenses'], ['months'], ['baby-steps']],
   create_subscription: [['categories'], ['budgets'], ['subscriptions'], ['months']],
