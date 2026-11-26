@@ -985,6 +985,107 @@ export interface StatementCommitResult {
   import: StatementImport;
 }
 
+export type StatementMatchStatus = 'matched' | 'suggested' | 'unmatched';
+export type StatementLineDecision = 'link' | 'create' | 'ignore';
+
+export interface StatementBatchLine {
+  id: string;
+  importId: string;
+  fileName: string;
+  bankAccountId: string | null;
+  bankAccountName: string;
+  spaceId: string;
+  date: string;
+  amount: number;
+  description: string;
+  name: string;
+  kind: StatementLineKind;
+  status: StatementLineStatus;
+  categoryId: string | null;
+  categoryName: string | null;
+  transferKind: TransferKind | null;
+  matchStatus: StatementMatchStatus | null;
+  matchEntryType: string | null;
+  matchEntryId: string | null;
+  matchEntryName: string | null;
+  matchEntryDate: string | null;
+  matchEntryAmount: number | null;
+  matchReason: string | null;
+  decision: StatementLineDecision | null;
+}
+
+export interface StatementBatchEntry {
+  id: string;
+  type: string;
+  typeLabel: string;
+  name: string;
+  amount: number;
+  date: string;
+  dayUnknown: boolean;
+  accountId: string;
+  accountName: string;
+  direction: 'in' | 'out';
+}
+
+export interface StatementBatchSummary {
+  matched: number;
+  toDecide: number;
+  undecided: number;
+  toCreate: number;
+  toLink: number;
+  toIgnore: number;
+  duplicates: number;
+  outside: number;
+}
+
+export interface StatementBatchFile {
+  id: string;
+  fileName: string;
+  bankAccountId: string | null;
+  bankAccountName: string | null;
+  bankLabel: string | null;
+  totalLines: number;
+  duplicateLines: number;
+}
+
+export interface StatementBatch {
+  id: string;
+  status: StatementImportStatus;
+  periodStart: string | null;
+  periodEnd: string | null;
+  createdAt: string;
+  committedAt: string | null;
+  files: StatementBatchFile[];
+  summary: StatementBatchSummary;
+  matched: StatementBatchLine[];
+  toDecide: StatementBatchLine[];
+  outside: StatementBatchEntry[];
+  openEntries: StatementBatchEntry[];
+}
+
+export interface StatementBatchListItem {
+  id: string;
+  status: StatementImportStatus;
+  periodStart: string | null;
+  periodEnd: string | null;
+  createdAt: string;
+  committedAt: string | null;
+  fileCount: number;
+  fileNames: string[];
+  totalLines: number;
+  undecided: number;
+}
+
+export interface StatementBatchCommitResult {
+  expenses: number;
+  incomes: number;
+  transfers: number;
+  linked: number;
+  ignored: number;
+  monthsCreated: string[];
+  batch: StatementBatch;
+}
+
 export interface CategorizationRule {
   id: string;
   spaceId: string | null;

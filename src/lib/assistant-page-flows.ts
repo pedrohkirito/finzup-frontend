@@ -296,9 +296,15 @@ export function getPageFlow(
     case 'importar':
       return {
         ...base,
-        openingMessage: 'Posso revisar o extrato com você: o que ficou sem categoria, o que parece duplicado e o que vale virar regra.',
+        openingMessage: 'Posso revisar um extrato ou a conferência de vários: o que já está lançado e o que ainda falta decidir.',
         openingActions: [
           yesSuggest('Sim, revisar comigo', 'Revise a importação de extrato em andamento: o que pede atenção e o que você sugere ajustar ou virar regra?'),
+          {
+            label: 'O que falta lançar?',
+            message: 'Olhe a conferência de extratos em andamento e diga o que ainda não está lançado na Finzup.',
+            intent: 'suggest',
+            variant: 'outline',
+          },
           noThanks(),
         ],
         suggestionAction: {

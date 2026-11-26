@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { FileUp, History, Loader2, Trash2, Undo2, Upload, Wand2 } from 'lucide-react';
+import { FileUp, GitCompare, History, Loader2, Trash2, Undo2, Upload, Wand2, X } from 'lucide-react';
 import { ApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useBankAccounts } from '@/hooks/use-bank-accounts';
@@ -10,10 +10,14 @@ import { useHasFeature } from '@/hooks/use-plan';
 import {
   useCategorizationRules,
   useDeleteRule,
+  useStatementBatch,
+  useStatementBatches,
   useStatementImport,
   useStatementImports,
+  useUndoBatch,
   useUndoImport,
   useUploadStatement,
+  useCreateBatch,
 } from '@/hooks/use-statement-imports';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -21,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UpgradePrompt } from '@/components/billing/upgrade-prompt';
 import { ReviewPanel } from '@/components/imports/review-panel';
+import { ReconciliationPanel } from '@/components/imports/reconciliation-panel';
 import { LINE_KIND_LABEL, formatShortDate } from '@/components/imports/import-labels';
 import type { StatementImportListItem } from '@/types';
 
@@ -148,6 +153,181 @@ function UploadCard({ onUploaded }: { onUploaded: (id: string) => void }) {
   );
 }
 
+function ConferenceCard({ onCreated }: { onCreated: (id: string) => void }) {
+  const { data: accounts } = useBankAccounts();
+  const create = useCreateBatch();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<Array<{ key: string; file: File; accountId: string }>>([]);
+  const [dragging, setDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const ready = files.length > 0 && files.every((item) => item.accountId);
+
+  const addFiles = (list: FileList | File[] | null | undefined) => {
+    if (!list) return;
+    const next = [...files];
+    for (const file of Array.from(list)) {
+      if (next.length >= 8) break;
+      if (file.size > 4 * 1024 * 1024) {
+        setError(`"${file.name}" passa de 4 MB. Exporte um período menor.`);
+        continue;
+      }
+      const key = `${file.name}:${file.size}:${file.lastModified}`;
+      if (next.some((item) => item.key === key)) continue;
+      next.push({ key, file, accountId: accounts?.length === 1 ? accounts[0].id : '' });
+    }
+    setFiles(next);
+  };
+
+  const send = async () => {
+    if (!ready) return;
+    setError(null);
+    try {
+      const data = await create.mutateAsync(files.map((item) => ({ file: item.file, bankAccountId: item.accountId })));
+      setFiles([]);
+      onCreated(data.id);
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2.5 text-base">
+          <div className="icon-chip bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300">
+            <GitCompare className="h-4 w-4" aria-hidden />
+          </div>
+          Conferir extratos
+        </CardTitle>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Envie vários OFX ou CSV, cada um na sua conta. A Finzup compara com o que já está lançado e você decide o que fazer com cada falta.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {!accounts?.length && accounts && <p className="text-sm text-slate-500 dark:text-slate-400">Cadastre uma conta antes de conferir. O casamento é por conta.</p>}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            addFiles(e.dataTransfer.files);
+          }}
+          disabled={create.isPending || !accounts?.length}
+          className={cn(
+            'flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors',
+            dragging
+              ? 'border-sky-500 bg-sky-50/60 dark:bg-sky-500/10'
+              : 'border-slate-200 hover:border-sky-400 hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/[0.03]',
+          )}
+        >
+          <Upload className="h-7 w-7 text-sky-500" />
+          <span className="text-sm font-medium text-slate-800 dark:text-slate-100">Adicionar extratos</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">.ofx ou .csv · até 8 arquivos · 4 MB cada</span>
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".ofx,.csv,.txt,text/csv,application/x-ofx"
+          multiple
+          className="hidden"
+          aria-label="Arquivos dos extratos"
+          onChange={(e) => {
+            addFiles(e.target.files);
+            e.target.value = '';
+          }}
+        />
+        {files.length > 0 && (
+          <ul className="space-y-2">
+            {files.map((item) => (
+              <li key={item.key} className="flex flex-col gap-2 rounded-xl border border-slate-200 p-3 sm:flex-row sm:items-center dark:border-white/10">
+                <p className="min-w-0 flex-1 truncate text-sm font-medium text-slate-900 dark:text-white">{item.file.name}</p>
+                <Select value={item.accountId || undefined} onValueChange={(accountId) => setFiles((prev) => prev.map((row) => (row.key === item.key ? { ...row, accountId } : row)))}>
+                  <SelectTrigger aria-label={`Conta de ${item.file.name}`} className="sm:w-56">
+                    <SelectValue placeholder="Conta do extrato" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(accounts ?? []).map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="icon" variant="ghost" aria-label={`Tirar ${item.file.name}`} onClick={() => setFiles((prev) => prev.filter((row) => row.key !== item.key))}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {error && <p className="text-sm text-red-500">{error}</p>}
+        <Button disabled={!ready || create.isPending} onClick={() => void send()}>
+          {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <GitCompare className="h-4 w-4" />}
+          Comparar com a Finzup
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecentBatches({ onOpen }: { onOpen: (id: string) => void }) {
+  const { data } = useStatementBatches();
+  const undo = useUndoBatch();
+  const visible = data?.filter((batch) => batch.status !== 'discarded') ?? [];
+  if (!visible.length) return null;
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <GitCompare className="h-4 w-4 text-slate-400" /> Conferências
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+          {visible.map((batch) => (
+            <li key={batch.id} className="flex items-center gap-3 py-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-slate-900 dark:text-white">{batch.fileNames.join(', ')}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {batch.fileCount} arquivo{batch.fileCount === 1 ? '' : 's'}
+                  {batch.periodStart && batch.periodEnd ? ` · ${formatShortDate(batch.periodStart)}–${formatShortDate(batch.periodEnd)}` : ''}
+                  {' · '}
+                  {batch.status === 'review' ? 'Em revisão' : 'Confirmada'}
+                  {batch.status === 'review' && batch.undecided ? ` · ${batch.undecided} sem decisão` : ''}
+                </p>
+              </div>
+              {batch.status === 'review' && (
+                <Button size="sm" onClick={() => onOpen(batch.id)}>
+                  Continuar
+                </Button>
+              )}
+              {batch.status === 'committed' && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={undo.isPending}
+                  onClick={async () => {
+                    if (!window.confirm('Desfazer esta conferência? Só os lançamentos criados por ela serão apagados. O que já existia e foi só vinculado permanece.')) return;
+                    await undo.mutateAsync(batch.id);
+                  }}
+                >
+                  <Undo2 className="h-4 w-4" /> Desfazer
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
 function RecentImports({ onOpen }: { onOpen: (id: string) => void }) {
   const { data } = useStatementImports();
   const undo = useUndoImport();
@@ -239,21 +419,30 @@ function RulesCard() {
 export default function ImportarPage() {
   const canImport = useHasFeature('statement_import');
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [batchId, setBatchId] = useState<string | null>(null);
   const { data: active } = useStatementImport(activeId);
+  const { data: batch } = useStatementBatch(batchId);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-white">
-          <FileUp className="h-6 w-6 text-brand-500" aria-hidden /> Importar extrato
+          <FileUp className="h-6 w-6 text-brand-500" aria-hidden /> Extratos
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Envie o extrato. A IA sugere a categoria de cada lançamento, sem gastar créditos, e você troca o que não estiver certo. Duplicadas ficam de fora; pagamento de fatura e aplicações não contam como gasto.
+          Importe um extrato para lançar, ou confira vários de uma vez para ver o que ainda falta na Finzup. A comparação usa regras e a IA, sem gastar créditos.
         </p>
       </div>
 
       {!canImport ? (
-        <UpgradePrompt title="Importação de extrato faz parte do Dono App" description="Importe extratos OFX/CSV com categorização automática e regras suas." />
+        <UpgradePrompt title="Importação de extrato faz parte do Dono App" description="Importe extratos OFX/CSV com categorização automática e confira vários arquivos contra o que já está lançado." />
+      ) : batchId && batch ? (
+        <>
+          <Button variant="ghost" size="sm" onClick={() => setBatchId(null)}>
+            ← Voltar
+          </Button>
+          <ReconciliationPanel key={batch.id} data={batch} onClose={() => setBatchId(null)} />
+        </>
       ) : activeId && active ? (
         <>
           <Button variant="ghost" size="sm" onClick={() => setActiveId(null)}>
@@ -263,7 +452,9 @@ export default function ImportarPage() {
         </>
       ) : (
         <>
+          <ConferenceCard onCreated={setBatchId} />
           <UploadCard onUploaded={setActiveId} />
+          <RecentBatches onOpen={setBatchId} />
           <RecentImports onOpen={setActiveId} />
           <RulesCard />
         </>
