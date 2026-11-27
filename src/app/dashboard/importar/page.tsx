@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { FileUp, GitCompare, History, Loader2, Trash2, Undo2, Upload, Wand2, X } from 'lucide-react';
 import { ApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -418,7 +420,8 @@ function RulesCard() {
 
 export default function ImportarPage() {
   const canImport = useHasFeature('statement_import');
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [activeId, setActiveId] = useState<string | null>(searchParams.get('import'));
   const [batchId, setBatchId] = useState<string | null>(null);
   const { data: active } = useStatementImport(activeId);
   const { data: batch } = useStatementBatch(batchId);
@@ -430,7 +433,11 @@ export default function ImportarPage() {
           <FileUp className="h-6 w-6 text-brand-500" aria-hidden /> Extratos
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Importe um extrato para lançar, ou confira vários de uma vez para ver o que ainda falta na Finzup. A comparação usa regras e a IA, sem gastar créditos.
+          Importe um extrato para lançar, ou confira vários de uma vez para ver o que ainda falta na Finzup. A comparação usa regras e a IA, sem gastar créditos. Movimentos do{' '}
+          <Link href="/dashboard/open-finance" className="text-brand-600 underline dark:text-brand-400">
+            Open Finance
+          </Link>{' '}
+          também aparecem aqui.
         </p>
       </div>
 

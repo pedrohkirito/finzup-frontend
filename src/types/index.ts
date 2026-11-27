@@ -128,6 +128,9 @@ export interface BankAccount {
   updatedAt: string;
   /** Quantos lançamentos estão ligados à conta. */
   linkedCount: number;
+  /** Saldo informado pelo banco via Open Finance. Não entra no cálculo do caixa. */
+  institutionBalance?: number | null;
+  institutionBalanceAt?: string | null;
 }
 
 export interface IncomeEntry extends EntryExtras {

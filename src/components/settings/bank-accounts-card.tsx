@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { Banknote, CreditCard, Landmark, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
@@ -163,7 +164,11 @@ export function BankAccountsCard() {
           Contas e carteiras
         </CardTitle>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Informe o saldo inicial e ligue receitas e despesas a uma conta: o saldo atual é calculado sozinho.
+          Informe o saldo inicial e ligue receitas e despesas a uma conta: o saldo atual é calculado sozinho. Para ler o banco pelo Open Finance,{' '}
+          <Link href="/dashboard/open-finance" className="text-brand-600 underline dark:text-brand-400">
+            conecte a conta
+          </Link>
+          .
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -223,6 +228,9 @@ export function BankAccountsCard() {
                             previsto {formatCurrency(account.projectedBalance)} em{' '}
                             {SHORT_MONTHS[account.projectedUntil.month - 1]}/{String(account.projectedUntil.year).slice(2)}
                           </p>
+                        )}
+                        {account.institutionBalance != null && (
+                          <p className="text-[11px] tabular-nums text-slate-400">no banco {formatCurrency(account.institutionBalance)}</p>
                         )}
                       </div>
                     </div>

@@ -110,6 +110,13 @@ const PAGE_CONTEXTS: Record<string, AssistantPageContext> = {
     guidance:
       'Use o fluxo de caixa (get_cash_flow) para dizer o saldo em um dia, o menor saldo e quando fica negativo. Sugira mudar datas de entradas/saídas para evitar aperto. Lançamentos sem data contam no início do mês.',
   },
+  '/dashboard/open-finance': {
+    key: 'importar',
+    label: 'Open Finance',
+    description: 'Conexão de bancos e cartões pelo Open Finance. As transações confirmadas caem na conferência de extrato.',
+    guidance:
+      'A conexão só lê dados. Compras no cartão entram na conferência de Extratos depois que o banco confirma. Ajude a revisar com get_statement_import. Não confirme sem o "Confirmo".',
+  },
   '/dashboard/importar': {
     key: 'importar',
     label: 'Importar extrato',

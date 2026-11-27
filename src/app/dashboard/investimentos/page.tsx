@@ -36,6 +36,7 @@ import { EmergencyFundCard } from '@/components/baby-steps/emergency-fund-card';
 import { HouseDownPaymentCard } from '@/components/baby-steps/house-down-payment-card';
 import { useBabySteps } from '@/hooks/use-baby-steps';
 import { BABY_STEPS_ENABLED } from '@/lib/feature-flags';
+import { ConnectedHoldingsCard } from '@/components/open-finance/connected-holdings';
 
 const goalSchema = z.object({ targetAmount: z.coerce.number().nonnegative() });
 const entrySchema = z.object({
@@ -372,6 +373,8 @@ export default function InvestimentosPage() {
         </div>
 
         <BabyStepPageHint pageKey="investimentos" />
+
+        <ConnectedHoldingsCard />
 
         <Tabs
           value={activeTab}
