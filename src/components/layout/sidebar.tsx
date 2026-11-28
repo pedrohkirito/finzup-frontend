@@ -63,7 +63,10 @@ const ADMIN_LINK = { href: '/dashboard/interno', label: 'Painel interno', icon: 
 export function Sidebar() {
   const pathname = usePathname();
   const { data: user } = useAuth({ refetchOnWindowFocus: false });
-  const visibleLinks = user?.isAdmin ? [...links, ADMIN_LINK] : links;
+  const visibleLinks = [
+    ...links.filter((link) => link.href !== '/dashboard/open-finance' || user?.openFinance),
+    ...(user?.isAdmin ? [ADMIN_LINK] : []),
+  ];
   const navLabel = useNavLabel();
   const logout = useLogout();
   const { theme, toggle } = useTheme();

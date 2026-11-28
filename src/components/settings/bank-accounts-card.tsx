@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { Banknote, CreditCard, Landmark, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
+import { useOpenFinance } from '@/hooks/use-auth';
 import { cn, formatCurrency } from '@/lib/utils';
 import { BANK_ACCOUNTS_QUERY_KEY, useBankAccounts } from '@/hooks/use-bank-accounts';
 import { useActiveSpaces } from '@/hooks/use-spaces';
@@ -70,6 +71,7 @@ function toForm(account: BankAccount): FormState {
 /** Contas e carteiras: tipo, espaço, saldo inicial e saldo atual calculado pelos lançamentos ligados. */
 export function BankAccountsCard() {
   const queryClient = useQueryClient();
+  const openFinance = useOpenFinance();
   const { data: accounts, isLoading } = useBankAccounts({ fresh: true });
   const { spaces, businesses } = useActiveSpaces();
   const showSpaces = businesses.length > 0;
@@ -164,11 +166,17 @@ export function BankAccountsCard() {
           Contas e carteiras
         </CardTitle>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Informe o saldo inicial e ligue receitas e despesas a uma conta: o saldo atual é calculado sozinho. Para ler o banco pelo Open Finance,{' '}
-          <Link href="/dashboard/open-finance" className="text-brand-600 underline dark:text-brand-400">
-            conecte a conta
-          </Link>
-          .
+          Informe o saldo inicial e ligue receitas e despesas a uma conta: o saldo atual é calculado sozinho.
+          {openFinance ? (
+            <>
+              {' '}
+              Para ler o banco pelo Open Finance,{' '}
+              <Link href="/dashboard/open-finance" className="text-brand-600 underline dark:text-brand-400">
+                conecte a conta
+              </Link>
+              .
+            </>
+          ) : null}
         </p>
       </CardHeader>
       <CardContent className="space-y-3">

@@ -77,9 +77,10 @@ export function MobileNav() {
   const [moreOpen, setMoreOpen] = useState(false);
   const { data: user } = useAuth({ refetchOnWindowFocus: false });
   const navLabel = useNavLabel();
-  const visibleMoreLinks = (
-    user?.isAdmin ? [...moreLinks, { href: '/dashboard/interno', icon: Gauge, label: 'Painel interno', isNew: false }] : moreLinks
-  ).map((link) => ({ ...link, label: navLabel(link.href, link.label) }));
+  const visibleMoreLinks = [
+    ...moreLinks.filter((link) => link.href !== '/dashboard/open-finance' || user?.openFinance),
+    ...(user?.isAdmin ? [{ href: '/dashboard/interno', icon: Gauge, label: 'Painel interno', isNew: false }] : []),
+  ].map((link) => ({ ...link, label: navLabel(link.href, link.label) }));
   const [supportOpen, setSupportOpen] = useState(false);
 
   const isMoreActive = moreLinks.some(({ href }) => isNavLinkActive(pathname, href));

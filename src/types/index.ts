@@ -28,6 +28,8 @@ export interface User {
   plan?: PlanEntitlements & { name: string };
   /** Equipe Finzup: vê o painel interno. */
   isAdmin?: boolean;
+  /** Em produção, só a conta liberada vê o Open Finance. */
+  openFinance?: boolean;
   aiCredits?: {
     balance: number;
     included: number;

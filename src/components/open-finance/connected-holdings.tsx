@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Landmark } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
-import { useHasFeature } from '@/hooks/use-plan';
+import { useOpenFinance } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export type OpenFinanceHolding = {
@@ -26,7 +26,7 @@ function formatUpdated(value: string) {
 
 /** Carteira lida do banco. Não entra nos aportes do mês. */
 export function ConnectedHoldingsCard() {
-  const canUse = useHasFeature('statement_import');
+  const canUse = useOpenFinance();
   const { data, error, isLoading } = useQuery({
     queryKey: ['open-finance-holdings'],
     queryFn: () => api.get<OpenFinanceHolding[]>('/open-finance/holdings'),
@@ -35,7 +35,7 @@ export function ConnectedHoldingsCard() {
   });
 
   if (!canUse) return null;
-  if (error instanceof ApiError && (error.code === 'PLUGGY_NOT_CONFIGURED' || error.status === 402)) return null;
+  if (error instanceof ApiError && (error.code === 'PLUGGY_NOT_CONFIGURED' || error.code === 'NOT_FOUND' || error.status === 402 || error.status === 404)) return null;
   if (isLoading || !data) return null;
   if (!data.length) {
     return (

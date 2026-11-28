@@ -16,6 +16,12 @@ export function useAuth(options?: { refetchOnWindowFocus?: boolean }) {
   });
 }
 
+/** A conta atual pode ver o Open Finance. Em produção o backend só marca o e-mail liberado. */
+export function useOpenFinance() {
+  const { data: user } = useAuth();
+  return user?.openFinance === true;
+}
+
 export function useLogout() {
   const router = useRouter();
   const queryClient = useQueryClient();

@@ -1,20 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Landmark, Loader2, RefreshCw, Unplug } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
-import { useHasFeature } from '@/hooks/use-plan';
+import { useAuth, useOpenFinance } from '@/hooks/use-auth';
 import { useActiveSpaces } from '@/hooks/use-spaces';
 import { useBankAccounts } from '@/hooks/use-bank-accounts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UpgradePrompt } from '@/components/billing/upgrade-prompt';
 import type { PaymentMethod } from '@/types';
 import type { PluggyConnectProps } from 'react-pluggy-connect';
 
@@ -76,19 +76,21 @@ function formatWhen(value: string | null) {
 }
 
 export default function OpenFinancePage() {
-  const canUse = useHasFeature('statement_import');
+  const router = useRouter();
+  const { isFetched } = useAuth();
+  const openFinance = useOpenFinance();
   const queryClient = useQueryClient();
   const { spaces } = useActiveSpaces();
   const { data: bankAccounts } = useBankAccounts();
   const { data: paymentMethods } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: () => api.get<PaymentMethod[]>('/payment-methods'),
-    enabled: canUse,
+    enabled: openFinance,
   });
   const items = useQuery({
     queryKey: ['open-finance-items'],
     queryFn: () => api.get<Item[]>('/open-finance/items'),
-    enabled: canUse,
+    enabled: openFinance,
     retry: false,
   });
   const [session, setSession] = useState<ConnectSession | null>(null);
@@ -145,6 +147,10 @@ export default function OpenFinancePage() {
 
   const configuredError = items.error instanceof ApiError && items.error.code === 'PLUGGY_NOT_CONFIGURED';
 
+  useEffect(() => {
+    if (isFetched && !openFinance) router.replace('/dashboard');
+  }, [isFetched, openFinance, router]);
+
   const submitLink = (item: Item) => {
     const pending = item.accounts.filter((account) => !account.linked);
     const accounts = pending.map((account) => {
@@ -168,6 +174,8 @@ export default function OpenFinancePage() {
     link.mutate({ itemId: item.id, accounts });
   };
 
+  if (!openFinance) return null;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
@@ -183,12 +191,7 @@ export default function OpenFinancePage() {
         </p>
       </div>
 
-      {!canUse ? (
-        <UpgradePrompt
-          title="Open Finance faz parte do Dono App"
-          description="Conecte seus bancos e cartões. As transações entram na conferência de extrato para você confirmar antes de virar lançamento."
-        />
-      ) : configuredError ? (
+      {configuredError ? (
         <Card>
           <CardContent className="py-6 text-sm text-slate-500">O Open Finance ainda não está ligado neste ambiente.</CardContent>
         </Card>
